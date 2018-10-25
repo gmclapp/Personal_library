@@ -136,24 +136,23 @@ def t_test2(rfile, var, c1, c2, treat, alpha=0.05, twotail=True, lower=True):
     # Look up the appropriate t statistic - a 2 parameter interpolation function
     # would be nice here for an arbitrary value of alpha.
     if twotail:
-        headers = list_headers("twotail tstat.csv",'r')
-        print(headers)
-        for i, h in enumerate(headers):
-            try:
-                if float(h) == float(alpha):
-                    break
-                else:
-                    pass
-            except ValueError:
-                continue
-        print("h,i = ", h,',',i)   
-        x1,y1,x2,y2 = vlookup("twotail tstat.csv", n, 0, i)
-        ts = interpolate(x1,y1,x2,y2,n)
+        lookupfile = "twotail tstat.csv"
+        
     else:
-        if lower:
-            pass
-        else:
-            pass
+        lookupfile = "onetail tstat.csv"
+    headers = list_headers(lookupfile,'r')
+    print(headers)
+    for i, h in enumerate(headers):
+        try:
+            if float(h) == float(alpha):
+                break
+            else:
+                pass
+        except ValueError:
+            continue
+    print("h,i = ", h,',',i)   
+    x1,y1,x2,y2 = vlookup(lookupfile, n, 0, i)
+    ts = interpolate(x1,y1,x2,y2,n)
 
     std_err = sp/n**0.5
 
@@ -169,7 +168,11 @@ def t_test2(rfile, var, c1, c2, treat, alpha=0.05, twotail=True, lower=True):
           "\nstd_err = ",std_err,sep='')
           
     # calculate p-value
-
+    if not twotail:
+        if lower:
+            pass
+        else:
+            pass
     # formulate conclusion
     
     
