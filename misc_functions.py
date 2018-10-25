@@ -1,7 +1,95 @@
-'''It is recommended to use this package with the sanitize_inputs package as the
-functions contained herein do not check for erroneous inputs.'''
+'''It is recommended to use this package with the sanitize_inputs package.\n
+The functions contained herein do not check for erroneous inputs.'''
 
 import math
+import csv
+import pandas as pd
+import pdb
+
+def interpolate(x1,y1,x2,y2,x):
+    '''This function returns a value, y, linearly interpolated using two x,y
+    pairs of data.'''
+    
+    try:
+        y = ((y2-y1)/(x2-x1))*(x-x1) + y1
+    except TypeError:
+        y = y1
+        
+    return(y)
+
+def list_headers(rfile, r_c):
+    '''rfile is the csv file in which the data are stored. pass 'r' or 'c' for
+    the second argument to indicate whether the headers are in the first row or
+    the first column.'''
+
+    headers = []
+    RDR = csv.reader(rfile, dialect = 'excel')
+    if r_c.lower() == 'r':
+        for row in RDR:
+            print(row[0])
+            headers.append(row[0])
+                  
+    elif r_c.lower() == 'c':
+        for element in RDR[0]:
+            print(element)
+            headers.append(row[0])
+
+    return(headers)
+
+def vlookup(rfile, index, search_col, result_col):
+    '''rfile is the name of file in which data are stored. index is the value
+    to search database rows for. search_col is the column in which the
+    index can be found. result_col should be the column from which the result
+    should be extracted. This function is made to work smoothly with
+    interpolate()'''
+
+    index = float(index)
+    search_col = int(search_col)
+    result_col = int(result_col)
+    
+    RDR = csv.reader(rfile, dialect = 'excel')
+    pos_diff = math.inf 
+    neg_diff = math.inf*-1
+
+    x1 = None
+    y1 = None
+    x2 = None
+    y2 = None
+
+    for row in RDR:
+        # Search for the rows just smaller and just larger than the search
+        # term. Calculate the difference between the x value in a given row
+        # and the search term. Keep the rows that result in the smallest
+        # positive difference and the smallest negative difference.
+        try:
+            diff = index - float(row[search_col])
+            
+        except ValueError:
+            if row[search_col] == "Inf":
+                diff = math.inf
+                
+            #print("Header?")
+            continue
+
+        if diff < pos_diff and diff > 0:
+            x1 = float(row[search_col])
+            y1 = float(row[result_col])
+            pos_diff = diff
+
+        elif diff > neg_diff and diff < 0:
+            x2 = float(row[search_col])
+            y2 = float(row[result_col])
+            neg_diff = diff
+            
+        elif diff == 0:
+            x1 = float(row[search_col])
+            y1 = float(row[result_col])
+            x2 = None
+            y2 = None
+
+    return (x1, y1, x2, y2)
+    # Return the x,y pairs of the search column and result column just
+    # above and below the desired x value.
 
 def bernoulli_trial(n, k, p):
     '''Returns the probability between 0 and 1 of exactly k successes given
@@ -13,6 +101,70 @@ def bernoulli_trial(n, k, p):
     P = binomial_coeff*(p**k)*(q**(n-k))
     return(P)
 
+def t_test2(rfile, var, c1, c2, treat, alpha=0.05, twotail=True, lower=True):
+    '''Two sample t-test. Arguments are the csv file in which the data are
+    located and the two columns to be compared along with an alpha value.
+    var is the column name in which the categories are stored, c1 and c2 are
+    the two labels in that column to be compared. treat is the treatment
+    varible. ie the variable that will be used to compare the groups. twotail
+    tells the function whether it should do a two tail test as opposed to a one
+    tail test. lower is ignored for two tail, but determines which tail is
+    considered in the one tail variant.'''
+
+    df = pd.read_csv(rfile)
+    groups = dict((x,y) for x,y in df.groupby(var))
+
+    # This line pulls data out of the data frame creating two new data frames
+    # one for each label.
+
+    # The resulting data structure is a tuple where element 0 is the group name
+    # and element 1 is the actual sub-dataframe.
+    xbar1 = groups[c1][treat].mean()
+    xbar2 = groups[c2][treat].mean()
+
+    # Pandas standard deviation function uses Bessel's correction by default.
+    s1 = groups[c1][treat].std()
+    s2 = groups[c2][treat].std()
+
+    n1 = len(groups[c1][treat])
+    n2 = len(groups[c2][treat])
+    n = min(n1,n2)
+    # n will be used to calculate the standard error. Choosing the smaller of
+    # the two sample sizes yields a conservative estimate.
+    
+    # Calculate the pooled standard deviation
+    sp = (((n1-1)*s1**2+(n2-1)*s2**2)/(n1+n2-2))**0.5
+    
+    # Look up the appropriate t statistic - a 2 parameter interpolation function
+    # would be nice here for an arbitrary value of alpha.
+    if twotail:
+        pass
+    else:
+        if lower:
+            pass
+        else:
+            pass
+
+    std_err = sp/n**0.5
+
+    print("xbar1 = ",xbar1,
+          "\nxbar2 = ",xbar2,
+          "\ns1 = ",s1,
+          "\ns2 = ",s2,
+          "\nn1 = ",n1,
+          "\nn2 = ",n2,
+          "\nn = ",n,
+          "\nsp = ",sp,
+          "\nstd_err = ",std_err,sep='')
+          
+    # calculate p-value
+
+    # formulate conclusion
+    
+    
+    return(df)
+
+    
 def r_ch_arc(Arc, Chord, dr):
     '''Find the radius of a circle given a chord length and an arc length. This
     is a numerical solution. The argument dr is the desired level of
