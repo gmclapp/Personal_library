@@ -152,9 +152,33 @@ def t_test2(rfile, var, c1, c2, treat, alpha=0.05, twotail=True, lower=True):
             continue
     print("h,i = ", h,',',i)   
     x1,y1,x2,y2 = vlookup(lookupfile, n, 0, i)
-    ts = interpolate(x1,y1,x2,y2,n)
+    tsalpha = interpolate(x1,y1,x2,y2,n)
 
     std_err = sp/n**0.5
+
+    # calculate the confidence interval
+    diff = (xbar1 - xbar2)
+    upper = (diff) + tsalpha*std_err
+    lower = (diff) - tsalpha*std_err
+    
+    # calculate p-value
+    ts = diff/(sp/n)**0.5
+    if twotail:
+        with open("twotail tstat.csv") as f:
+            lis = [x.split() for x in f]
+            lookupfileT = zip(*lis)
+            headersT = list_headers(lookupfileT,'r')
+            print("***NEW***",headersT)
+            
+        
+        #find p for given ts in twotail tstat.csv
+    else:
+        #find p for given ts in onetail tstat.csv
+        if lower:
+            pass
+        else:
+            pass
+    # formulate conclusion
 
     print("xbar1 = ",xbar1,
           "\nxbar2 = ",xbar2,
@@ -164,17 +188,12 @@ def t_test2(rfile, var, c1, c2, treat, alpha=0.05, twotail=True, lower=True):
           "\nn2 = ",n2,
           "\nn = ",n,
           "\nsp = ",sp,
+          "\ntsalpha = ",tsalpha,
           "\nts = ",ts,
+          "\ndiff = ",diff,
+          "\nupper = ",upper,
+          "\nlower = ",lower,
           "\nstd_err = ",std_err,sep='')
-          
-    # calculate p-value
-    if not twotail:
-        if lower:
-            pass
-        else:
-            pass
-    # formulate conclusion
-    
     
     return(df)
 
