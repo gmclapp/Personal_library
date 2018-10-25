@@ -17,7 +17,7 @@ def interpolate(x1,y1,x2,y2,x):
         
     return(y)
 
-def list_headers(rfile, r_c):
+def list_headers(rfile, r_c='r'):
     '''rfile is the csv file in which the data are stored. pass 'r' or 'c' for
     the second argument to indicate whether the headers are in the first row or
     the first column.'''
@@ -138,7 +138,14 @@ def t_test2(rfile, var, c1, c2, treat, alpha=0.05, twotail=True, lower=True):
     # Look up the appropriate t statistic - a 2 parameter interpolation function
     # would be nice here for an arbitrary value of alpha.
     if twotail:
-        pass
+        headers = list_headers("twotail tstat.csv")
+        for i, h in enumerate(headers):
+            if h == alpha:
+                break
+            else:
+                pass
+            
+        ts = vlookup("twotail tstat.csv", n, 0, i)
     else:
         if lower:
             pass
@@ -155,6 +162,7 @@ def t_test2(rfile, var, c1, c2, treat, alpha=0.05, twotail=True, lower=True):
           "\nn2 = ",n2,
           "\nn = ",n,
           "\nsp = ",sp,
+          "\nts = ",ts,
           "\nstd_err = ",std_err,sep='')
           
     # calculate p-value
