@@ -143,7 +143,6 @@ def t_test2(rfile, var, c1, c2, treat, alpha=0.05, twotail=True, lower=True):
     else:
         lookupfile = "onetail tstat.csv"
     headers = list_headers(lookupfile,'r')
-    print(headers)
     for i, h in enumerate(headers):
         try:
             if float(h) == float(alpha):
@@ -151,8 +150,7 @@ def t_test2(rfile, var, c1, c2, treat, alpha=0.05, twotail=True, lower=True):
             else:
                 pass
         except ValueError:
-            continue
-    print("h,i = ", h,',',i)   
+            continue   
     x1,y1,x2,y2 = vlookup(lookupfile, n, 0, i)
     tsalpha = interpolate(x1,y1,x2,y2,n)
 
@@ -164,22 +162,30 @@ def t_test2(rfile, var, c1, c2, treat, alpha=0.05, twotail=True, lower=True):
     lower = (diff) - tsalpha*std_err
     
     # calculate p-value
-    ts = diff/(sp/n)**0.5
+    ts = abs(diff/std_err)
     if twotail:
-        with open("twotail tstat.csv") as f:
-            lis = [x.split() for x in f]
-            lookupfileT = zip(*lis)
-            headersT = list_headers(lookupfileT,'r')
-            print("***NEW***",headersT)
-            
-        
         #find p for given ts in twotail tstat.csv
+        lookupfileT = ("twotail tstat Transpose.csv")
+          
     else:
         #find p for given ts in onetail tstat.csv
+        lookupfileT = ("twotail tstat Transpose.csv")
         if lower:
             pass
         else:
             pass
+    headersT = list_headers(lookupfileT,'r')
+    for i, h in enumerate(headersT):
+        try:
+            if float(h) == float(n):
+                break
+            else:
+                pass
+        except ValueError:
+            continue   
+    x1,y1,x2,y2 = vlookup(lookupfileT, ts, 0, i)
+    print("x1,y1,x2,y2",x1,y1,x2,y2)
+    p = interpolate(x1,y1,x2,y2,ts)
     # formulate conclusion
 
     print("xbar1 = ",xbar1,
@@ -195,7 +201,8 @@ def t_test2(rfile, var, c1, c2, treat, alpha=0.05, twotail=True, lower=True):
           "\ndiff = ",diff,
           "\nupper = ",upper,
           "\nlower = ",lower,
-          "\nstd_err = ",std_err,sep='')
+          "\nstd_err = ",std_err,
+          "\np = ",p,sep='')
     
     return(df)
 
