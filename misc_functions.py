@@ -1,6 +1,8 @@
 '''It is recommended to use this package with the sanitize_inputs package.\n
 The functions contained herein do not check for erroneous inputs.'''
 
+__version__ = "0.1.0"
+
 import math
 import csv
 import pandas as pd
