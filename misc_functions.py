@@ -23,16 +23,14 @@ def list_headers(rfile, r_c='r'):
     the first column.'''
 
     headers = []
-    RDR = csv.reader(rfile, dialect = 'excel')
-    if r_c.lower() == 'r':
+    RDR = csv.reader(open(rfile))
+    if r_c.lower() == 'c':
         for row in RDR:
             print(row[0])
             headers.append(row[0])
                   
-    elif r_c.lower() == 'c':
-        for element in RDR[0]:
-            print(element)
-            headers.append(row[0])
+    elif r_c.lower() == 'r':
+        headers = next(RDR)
 
     return(headers)
 
@@ -47,7 +45,7 @@ def vlookup(rfile, index, search_col, result_col):
     search_col = int(search_col)
     result_col = int(result_col)
     
-    RDR = csv.reader(rfile, dialect = 'excel')
+    RDR = csv.reader(open(rfile,'r'), dialect = 'excel')
     pos_diff = math.inf 
     neg_diff = math.inf*-1
 
@@ -138,14 +136,19 @@ def t_test2(rfile, var, c1, c2, treat, alpha=0.05, twotail=True, lower=True):
     # Look up the appropriate t statistic - a 2 parameter interpolation function
     # would be nice here for an arbitrary value of alpha.
     if twotail:
-        headers = list_headers("twotail tstat.csv")
+        headers = list_headers("twotail tstat.csv",'r')
+        print(headers)
         for i, h in enumerate(headers):
-            if h == alpha:
-                break
-            else:
-                pass
-            
-        ts = vlookup("twotail tstat.csv", n, 0, i)
+            try:
+                if float(h) == float(alpha):
+                    break
+                else:
+                    pass
+            except ValueError:
+                continue
+        print("h,i = ", h,',',i)   
+        x1,y1,x2,y2 = vlookup("twotail tstat.csv", n, 0, i)
+        ts = interpolate(x1,y1,x2,y2,n)
     else:
         if lower:
             pass
