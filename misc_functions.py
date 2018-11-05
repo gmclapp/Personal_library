@@ -101,6 +101,22 @@ def bernoulli_trial(n, k, p):
     P = binomial_coeff*(p**k)*(q**(n-k))
     return(P)
 
+def favstats(rfile, column):
+    df = pd.read_csv(rfile)
+    xbar = df[column].mean()
+    sd = df[column].std()
+    first = df[column].quantile(0.25) # first quartile
+    median = df[column].median()
+    third = df[column].quantile(0.75) # third quartile
+    IQR = third - first
+
+    print("First quartile: ", first,
+          "\nMedian: ", median,
+          "\nMean: ", xbar,
+          "\nThird quartile: ",third,
+          "\nStandard deviation: ",sd,
+          "\nInter-quartile range: ",IQR,sep='')
+    
 def t_test2(rfile, var, c1, c2, treat, alpha=0.05, twotail=True, lower=True):
     '''Two sample t-test. Arguments are the csv file in which the data are
     located and the two columns to be compared along with an alpha value.
