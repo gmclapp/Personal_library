@@ -105,15 +105,19 @@ def favstats(rfile, column):
     df = pd.read_csv(rfile)
     xbar = df[column].mean()
     sd = df[column].std()
+    minimum = df[column].min()
     first = df[column].quantile(0.25) # first quartile
     median = df[column].median()
     third = df[column].quantile(0.75) # third quartile
+    maximum = df[column].max()
     IQR = third - first
 
-    print("First quartile: ", first,
+    print("Minimum: ", minimum,
+          "\nFirst quartile: ", first,
           "\nMedian: ", median,
           "\nMean: ", xbar,
           "\nThird quartile: ",third,
+          "\nMaximum: ", maximum,
           "\nStandard deviation: ",sd,
           "\nInter-quartile range: ",IQR,sep='')
     
