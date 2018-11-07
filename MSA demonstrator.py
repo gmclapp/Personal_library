@@ -1,5 +1,6 @@
 import random
 import pandas as pd
+import matplotlib.pyplot as plt
 
 random.seed(6168850734)
 n = 50
@@ -38,7 +39,7 @@ for m in true_meas:
 ##    print(d)
 headers = data.pop(0)
 df = pd.DataFrame(data,columns=headers)
-print(df)
+#print(df)
 
 '''Now run the Gage R&R'''
 xbar_grand = df["Observation"].mean()
@@ -47,6 +48,7 @@ ops = dict((x,y) for x,y in df.groupby("Operator"))
 # each unique operator found, and the value is a panda dataframe containing
 # observations made by that operator.
 n_ops = len(ops)
+DOF_ops = n_ops-1
 # Calculate the number of unique operators.
 
 # Similarly, the data is split by run number. The number of runs was defined
@@ -54,10 +56,12 @@ n_ops = len(ops)
 # be used to perform this test on arbitrary data from a CSV database.
 reps = dict((x,y) for x,y in df.groupby("Run"))
 n_reps = len(reps)
+DOF_total = 
 # Calculate the number of repetitions per part.
 
 parts = dict((x,y) for x,y in df.groupby("Part"))
 n_parts = len(parts)
+DOF_parts = n_parts-1
 
 # The following finds the sum of squares for the difference between the mean
 # observation of a given part and the mean of the observations across the
@@ -67,14 +71,12 @@ for part in parts.keys():
     SSpart += (parts[part]["Observation"].mean() - xbar_grand)**2
 
 SSpart = SSpart * n_ops * n_reps
-print(SSpart)
 
 SSop = 0
 for op in ops.keys():
     SSop += (ops[op]["Observation"].mean() - xbar_grand)**2
 
 SSop = SSop * n_parts * n_reps
-print(SSop)
 
 # For the operator * part interaction, a sub-dataframe is defined.
 subdf = dict((x,y) for x,y in df.groupby(["Operator","Part"]))
@@ -85,8 +87,8 @@ for key in subdf.keys():
     temp = subdf[key]["Observation"].mean()
     interaction_xbar[key] = temp
 
-for key, value in interaction_xbar.items():
-    print(key,value)
+##for key, value in interaction_xbar.items():
+##    print(key,value)
 
 # The repeatability sum of squares and the total sum of squares can be computed
 # in the same loop as they both require us to iterate over the entire dataset.
@@ -98,3 +100,8 @@ for index, x in df.iterrows():
     SStot += (x["Observation"]-xbar_grand)**2
 
 SSpartxop = SStot - SSpart-SSop-SSrep
+print("SSpart = ",SSpart,
+      "\nSSop = ",SSop,
+      "\nSSrep = ",SSrep,
+      "\nSStot = ",SStot,
+      "\nSSpartxop = ",SSpartxop,sep='')
