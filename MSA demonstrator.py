@@ -27,7 +27,7 @@ for i in range(n):
                       random.normalvariate(true_mean,true_variability**0.5)])
 
 data = [["Part","Operator","Run","Observation"]]
-# Run the MSA procedure
+# Run the MSA procedure (crossed ANOVA with interaction)
 for m in true_meas:
     for op in operators:
         for k in range(no_repetitions):
@@ -56,7 +56,7 @@ DOF_ops = n_ops-1
 # be used to perform this test on arbitrary data from a CSV database.
 reps = dict((x,y) for x,y in df.groupby("Run"))
 n_reps = len(reps)
-DOF_total = 
+
 # Calculate the number of repetitions per part.
 
 parts = dict((x,y) for x,y in df.groupby("Part"))
@@ -87,8 +87,8 @@ for key in subdf.keys():
     temp = subdf[key]["Observation"].mean()
     interaction_xbar[key] = temp
 
-##for key, value in interaction_xbar.items():
-##    print(key,value)
+n_total = n_ops*n_parts*n_reps
+DOF_total = n_total - 1
 
 # The repeatability sum of squares and the total sum of squares can be computed
 # in the same loop as they both require us to iterate over the entire dataset.
@@ -98,6 +98,9 @@ for index, x in df.iterrows():
     key = (x["Operator"],x["Part"])
     SSrep += (x["Observation"] - interaction_xbar[key])**2
     SStot += (x["Observation"]-xbar_grand)**2
+
+DOF_partxop = DOF_parts*DOF_ops
+DOF_rep = n_parts*n_ops*(n_reps-1)
 
 SSpartxop = SStot - SSpart-SSop-SSrep
 print("SSpart = ",SSpart,
