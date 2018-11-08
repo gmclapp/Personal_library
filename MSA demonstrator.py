@@ -43,25 +43,32 @@ df = pd.DataFrame(data,columns=headers)
 
 '''Now run the Gage R&R'''
 xbar_grand = df["Observation"].mean()
+
 ops = dict((x,y) for x,y in df.groupby("Operator"))
 # The line above splits the data into dictionaries where the key is the name of
 # each unique operator found, and the value is a panda dataframe containing
 # observations made by that operator.
-n_ops = len(ops)
-DOF_ops = n_ops-1
-# Calculate the number of unique operators.
 
-# Similarly, the data is split by run number. The number of runs was defined
-# above in the sample data, but it is calculated here so that this code can
-# be used to perform this test on arbitrary data from a CSV database.
 reps = dict((x,y) for x,y in df.groupby("Run"))
-n_reps = len(reps)
-
-# Calculate the number of repetitions per part.
-
 parts = dict((x,y) for x,y in df.groupby("Part"))
+# Similarly, the data is split by run number and part number.
+# These numbers were defined above in the sample data, but it is calculated here
+# so that this code can be used to perform this test on arbitrary data from
+# a CSV database.
+
+# Determine the number of levels for each factor
+n_ops = len(ops)
+n_reps = len(reps)
 n_parts = len(parts)
+n_total = n_ops*n_parts*n_reps
+
+# Next the degrees of freedom for each factor are calculated following the
+# procedure for a crossed ANOVA with interaction.
+DOF_total = n_total - 1
+DOF_ops = n_ops-1
 DOF_parts = n_parts-1
+DOF_partxop = DOF_parts*DOF_ops
+DOF_rep = n_parts*n_ops*(n_reps-1)
 
 # The following finds the sum of squares for the difference between the mean
 # observation of a given part and the mean of the observations across the
@@ -87,9 +94,6 @@ for key in subdf.keys():
     temp = subdf[key]["Observation"].mean()
     interaction_xbar[key] = temp
 
-n_total = n_ops*n_parts*n_reps
-DOF_total = n_total - 1
-
 # The repeatability sum of squares and the total sum of squares can be computed
 # in the same loop as they both require us to iterate over the entire dataset.
 SSrep = 0
@@ -99,12 +103,16 @@ for index, x in df.iterrows():
     SSrep += (x["Observation"] - interaction_xbar[key])**2
     SStot += (x["Observation"]-xbar_grand)**2
 
-DOF_partxop = DOF_parts*DOF_ops
-DOF_rep = n_parts*n_ops*(n_reps-1)
-
 SSpartxop = SStot - SSpart-SSop-SSrep
-print("SSpart = ",SSpart,
-      "\nSSop = ",SSop,
-      "\nSSrep = ",SSrep,
-      "\nSStot = ",SStot,
-      "\nSSpartxop = ",SSpartxop,sep='')
+
+# The following section calculates the mean squares for various sources
+MSpart = SSpart/DOF_parts
+MSop = SSop/DOF_ops
+MSpartxop = SSpartxop/DOF_partxop
+MSrep = SSrep/DOF_rep
+
+print("SSpart      = {0:>4.3f} DFpart      = {1:>4.3f} MSpart      = {2:>4.3f}".format(SSpart, DOF_parts, MSpart))
+print("SSop        = {0:>4.3f} DFop        = {1:>4.3f} MSop        = {2:>4.3f}".format(SSop, DOF_ops, MSop))
+print("SSrep       = {0:>4.3f} DFrep       = {1:>4.3f} MSrep       = {2:>4.3f}".format(SSrep, DOF_rep, MSrep))
+print("SSpartxop   = {0:>4.3f} DFpartxop   = {1:>4.3f} MSpartxop   = {2:>4.3f}".format(SSpartxop, DOF_partxop, MSpartxop))
+print("SStotal     = {0:>4.3f} DFtotal     = {1:>4.3f}".format(SStot, DOF_total))
