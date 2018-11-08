@@ -105,14 +105,19 @@ for index, x in df.iterrows():
 
 SSpartxop = SStot - SSpart-SSop-SSrep
 
-# The following section calculates the mean squares for various sources
+# The following section calculates the mean squares for various factors
 MSpart = SSpart/DOF_parts
 MSop = SSop/DOF_ops
 MSpartxop = SSpartxop/DOF_partxop
 MSrep = SSrep/DOF_rep
 
-print("SSpart      = {0:>4.3f} DFpart      = {1:>4.3f} MSpart      = {2:>4.3f}".format(SSpart, DOF_parts, MSpart))
-print("SSop        = {0:>4.3f} DFop        = {1:>4.3f} MSop        = {2:>4.3f}".format(SSop, DOF_ops, MSop))
+# The following section calculates the F statistic for the various factors.
+Fpart = MSpart/MSpartxop
+Fop = MSop/MSpartxop
+Fpartxop = MSpartxop/MSrep
+
+print("SSpart      = {0:>4.3f} DFpart      = {1:>4.3f} MSpart      = {2:>4.3f} Fpart    = {3:4.3f}".format(SSpart, DOF_parts, MSpart,Fpart))
+print("SSop        = {0:>4.3f} DFop        = {1:>4.3f} MSop        = {2:>4.3f} Fop      = {3:4.3f}".format(SSop, DOF_ops, MSop,Fop))
 print("SSrep       = {0:>4.3f} DFrep       = {1:>4.3f} MSrep       = {2:>4.3f}".format(SSrep, DOF_rep, MSrep))
-print("SSpartxop   = {0:>4.3f} DFpartxop   = {1:>4.3f} MSpartxop   = {2:>4.3f}".format(SSpartxop, DOF_partxop, MSpartxop))
+print("SSpartxop   = {0:>4.3f} DFpartxop   = {1:>4.3f} MSpartxop   = {2:>4.3f} Fpartxop = {3:4.3f}".format(SSpartxop, DOF_partxop,MSpartxop,Fpartxop))
 print("SStotal     = {0:>4.3f} DFtotal     = {1:>4.3f}".format(SStot, DOF_total))
