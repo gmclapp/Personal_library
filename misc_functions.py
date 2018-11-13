@@ -120,6 +120,81 @@ def favstats(rfile, column):
           "\nMaximum: ", maximum,
           "\nStandard deviation: ",sd,
           "\nInter-quartile range: ",IQR,sep='')
+
+def t_test(rfile, var, col, xbar, alpha=0.05, twotail=True, lower=True):
+    '''One sample t-test. Arguments are the csv file in which the data are
+    located and the column in which the data are found along with an alpha
+    value. var is the column name in which the category of interest is stored.
+    col is the column in which the response variable is stored. xbar is the
+    variable to which the mean will be compared. twotail tells the function
+    whether it should do a two tail test as opposed to a one tail test. lower
+    is ignored for two tail, but determines which tail is considered in the one
+    tail variant.'''
+    
+    df = pd.read_csv(rfile)
+    groups = dict((x,y) for x,y in df.groupby(var))
+
+    # This line pulls data out of the data frame creating two new data frames
+    # one for each label.
+
+    # The resulting data structure is a tuple where element 0 is the group name
+    # and element 1 is the actual sub-dataframe.
+    xbar_test = groups[c1].mean()
+    sd = groups[c1].std()
+    n = len(groups[c1])
+
+    # Look up the appropriate t statistic - a 2 parameter interpolation function
+    # would be nice here for an arbitrary value of alpha.
+    if twotail:
+        lookupfile = "twotail tstat.csv"
+        
+    else:
+        lookupfile = "onetail tstat.csv"
+    headers = list_headers(lookupfile,'r')
+    for i, h in enumerate(headers):
+        try:
+            if float(h) == float(alpha):
+                break
+            else:
+                pass
+        except ValueError:
+            continue   
+    x1,y1,x2,y2 = vlookup(lookupfile, n, 0, i)
+    tsalpha = interpolate(x1,y1,x2,y2,n)
+
+    std_err = sd/n**0.5
+
+    # calculate the confidence interval
+    diff = (xbar_test - xbar)
+    upper = (diff) + tsalpha*std_err
+    lower = (diff) - tsalpha*std_err
+    
+    # calculate p-value
+    ts = abs(diff/std_err)
+    if twotail:
+        #find p for given ts in twotail tstat.csv
+        lookupfileT = ("twotail tstat Transpose.csv")
+          
+    else:
+        #find p for given ts in onetail tstat.csv
+        lookupfileT = ("twotail tstat Transpose.csv")
+        if lower:
+            pass
+        else:
+            pass
+    headersT = list_headers(lookupfileT,'r')
+    for i, h in enumerate(headersT):
+        try:
+            if float(h) == float(n):
+                break
+            else:
+                pass
+        except ValueError:
+            continue   
+    x1,y1,x2,y2 = vlookup(lookupfileT, ts, 0, i)
+    print("x1,y1,x2,y2",x1,y1,x2,y2)
+    p = interpolate(x1,y1,x2,y2,ts)
+    # formulate conclusion
     
 def t_test2(rfile, var, c1, c2, treat, alpha=0.05, twotail=True, lower=True):
     '''Two sample t-test. Arguments are the csv file in which the data are
