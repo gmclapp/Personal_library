@@ -10,7 +10,7 @@ import pdb
 
 def interpolate(x1,y1,x2,y2,x):
     '''This function returns a value, y, linearly interpolated using two x,y
-    pairs of data.'''
+    pairs of data and a given x between those pairs.'''
     
     try:
         y = ((y2-y1)/(x2-x1))*(x-x1) + y1
@@ -19,6 +19,17 @@ def interpolate(x1,y1,x2,y2,x):
         
     return(y)
 
+def interpolate_y(x1,y1,x2,y2,y):
+    '''This function returns a value x, linearly interpolated using two x,y
+    pairs of data and a given y between those pairs.'''
+
+    try:
+        m = (y2-y1)/(x2-x1)
+        b = y1
+        x = (y+b)/m
+    except TypeError:
+        x = x1
+    
 def list_headers(rfile, r_c='r'):
     '''rfile is the csv file in which the data are stored. pass 'r' or 'c' for
     the second argument to indicate whether the headers are in the first row or
@@ -121,7 +132,7 @@ def favstats(rfile, column):
           "\nStandard deviation: ",sd,
           "\nInter-quartile range: ",IQR,sep='')
 
-def t_test(rfile, var, col, xbar, alpha=0.05, twotail=True, lower=True):
+def t_test(rfile, col, xbar, alpha=0.05, twotail=True, lower=True):
     '''One sample t-test. Arguments are the csv file in which the data are
     located and the column in which the data are found along with an alpha
     value. var is the column name in which the category of interest is stored.
@@ -132,16 +143,15 @@ def t_test(rfile, var, col, xbar, alpha=0.05, twotail=True, lower=True):
     tail variant.'''
     
     df = pd.read_csv(rfile)
-    groups = dict((x,y) for x,y in df.groupby(var))
 
     # This line pulls data out of the data frame creating two new data frames
     # one for each label.
 
     # The resulting data structure is a tuple where element 0 is the group name
     # and element 1 is the actual sub-dataframe.
-    xbar_test = groups[c1].mean()
-    sd = groups[c1].std()
-    n = len(groups[c1])
+    xbar_test = df[col].mean()
+    sd = df[col].std()
+    n = len(df[col])
 
     # Look up the appropriate t statistic - a 2 parameter interpolation function
     # would be nice here for an arbitrary value of alpha.
@@ -192,8 +202,9 @@ def t_test(rfile, var, col, xbar, alpha=0.05, twotail=True, lower=True):
         except ValueError:
             continue   
     x1,y1,x2,y2 = vlookup(lookupfileT, ts, 0, i)
-    print("x1,y1,x2,y2",x1,y1,x2,y2)
-    p = interpolate(x1,y1,x2,y2,ts)
+    print("({0},{1}) - ({2},{3})".format(x1,y1,x2,y2))
+    p = interpolate_y(x1,y1,x2,y2,ts)
+    print("p = ",p)
     # formulate conclusion
     
 def t_test2(rfile, var, c1, c2, treat, alpha=0.05, twotail=True, lower=True):
