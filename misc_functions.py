@@ -31,6 +31,37 @@ def interpolate_y(x1,y1,x2,y2,y):
         x = x1
 
     return(x)
+
+def Mikes(testPlan):
+    '''Takes the test plan number as an argument and returns links to warrants.
+    '''
+    testDict = tab_dict(r'\\jsjcorp.com\data\GHSP\GH\webdata\DVPR\\' + testPlan + r'\Update\2590 JL PV Update 11-14-18.xlsx')
+    warrants = get_warrant_nums(testDict[testPlan])
+    for w in warrants:
+        print(w)
+    
+def tab_dict(rfile):
+    '''This is a function that opens an excel file and returns a dictionary
+    where the keys of the dataframe are the sheet names and the values are
+    the data tab. rfile must include the path if the file is not in the
+    current working directory.'''
+
+    xlsx = pd.ExcelFile(rfile)
+    Sheet_frames = {sh:xlsx.parse(sh) for sh in xlsx.sheet_names}
+    # This line creates a dictionary where the keys are the tab names, and the
+    # values are the data from that tab.
+    return(Sheet_frames)
+
+def get_warrant_nums(xlsxTab):
+    '''This function takes a pandas dataframe, probably a tab from tab_dict,
+    and extracts a list of warrants from the "Warrant Number" column.'''
+    series = xlsxTab["Unnamed: 14"]
+    warrants = []
+    for i in series:
+        if isinstance(i,(int, float)) and not math.isnan(i) and len(str(i)) == 8:
+            warrants.append(i)
+    return(warrants)
+    
     
 def list_headers(rfile, r_c='r'):
     '''rfile is the csv file in which the data are stored. pass 'r' or 'c' for
