@@ -26,9 +26,11 @@ def interpolate_y(x1,y1,x2,y2,y):
     try:
         m = (y2-y1)/(x2-x1)
         b = y1
-        x = (y+b)/m
+        x = (y-b)/m
     except TypeError:
         x = x1
+
+    return(x)
     
 def list_headers(rfile, r_c='r'):
     '''rfile is the csv file in which the data are stored. pass 'r' or 'c' for
@@ -203,6 +205,8 @@ def t_test(rfile, col, xbar, alpha=0.05, twotail=True, lower=True):
             continue   
     x1,y1,x2,y2 = vlookup(lookupfileT, ts, 0, i)
     print("({0},{1}) - ({2},{3})".format(x1,y1,x2,y2))
+    print("avg: {0}\nsd: {1}\nn: {2}\ndiff: {3}\nstd_err: {4}".format(xbar_test,sd,n,diff,std_err))
+    print("ts = {0}".format(ts))
     p = interpolate_y(x1,y1,x2,y2,ts)
     print("p = ",p)
     # formulate conclusion
