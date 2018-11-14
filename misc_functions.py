@@ -43,9 +43,9 @@ def Mikes(testPlan):
     
 def tab_dict(rfile):
     '''This is a function that opens an excel file and returns a dictionary
-    where the keys of the dataframe are the sheet names and the values are
-    the data tab. rfile must include the path if the file is not in the
-    current working directory.'''
+    where the keys of the dictionary are the sheet names and the values are
+    dataframes containing the data from the sheet. rfile must include the path
+    if the file is not in the current working directory.'''
 
     try:
         xlsx = pd.ExcelFile(rfile)
