@@ -1,7 +1,7 @@
 '''It is recommended to use this package with the sanitize_inputs package.\n
 The functions contained herein do not check for erroneous inputs.'''
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 
 import math
 import csv
@@ -174,7 +174,7 @@ def favstats(rfile, column):
           "\nStandard deviation: ",sd,
           "\nInter-quartile range: ",IQR,sep='')
 
-def t_test(rfile, col, xbar, alpha=0.05, twotail=True, lower=True):
+def t_test(rfile, col, xbar=0, alpha=0.05, twotail=True, lower=True):
     '''One sample t-test. Arguments are the csv file in which the data are
     located and the column in which the data are found along with an alpha
     value. var is the column name in which the category of interest is stored.
