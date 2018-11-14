@@ -36,9 +36,10 @@ def Mikes(testPlan):
     '''Takes the test plan number as an argument and returns links to warrants.
     '''
     testDict = tab_dict(r'\\jsjcorp.com\data\GHSP\GH\webdata\DVPR\\' + testPlan + r'\Update\2590 JL PV Update 11-14-18.xlsx')
-    warrants = get_warrant_nums(testDict[testPlan])
-    for w in warrants:
-        print(w)
+    if not testDict is None:
+        warrants = get_warrant_nums(testDict[testPlan])
+        for w in warrants:
+            print(w)
     
 def tab_dict(rfile):
     '''This is a function that opens an excel file and returns a dictionary
@@ -46,11 +47,19 @@ def tab_dict(rfile):
     the data tab. rfile must include the path if the file is not in the
     current working directory.'''
 
-    xlsx = pd.ExcelFile(rfile)
-    Sheet_frames = {sh:xlsx.parse(sh) for sh in xlsx.sheet_names}
-    # This line creates a dictionary where the keys are the tab names, and the
-    # values are the data from that tab.
-    return(Sheet_frames)
+    try:
+        xlsx = pd.ExcelFile(rfile)
+        Sheet_frames = {sh:xlsx.parse(sh) for sh in xlsx.sheet_names}
+        # This line creates a dictionary where the keys are the tab names,
+        # and the values are the data from that tab.
+        return(Sheet_frames)
+    
+    except FileNotFoundError:
+        print(rfile,"Does not exist.")
+        return(None)
+        
+
+    
 
 def get_warrant_nums(xlsxTab):
     '''This function takes a pandas dataframe, probably a tab from tab_dict,
