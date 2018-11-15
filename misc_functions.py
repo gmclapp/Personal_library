@@ -7,6 +7,7 @@ import math
 import csv
 import pandas as pd
 import pdb
+import cutie
 
 def interpolate(x1,y1,x2,y2,x):
     '''This function returns a value, y, linearly interpolated using two x,y
@@ -38,6 +39,7 @@ def Mikes(testPlan):
     testDict = tab_dict(r'\\jsjcorp.com\data\GHSP\GH\webdata\DVPR\\' + testPlan + r'\Update\2590 JL PV Update 11-14-18.xlsx')
     if not testDict is None:
         warrants = get_warrant_nums(testDict[testPlan])
+        warrants = gen_warrant_links(warrants)
         for w in warrants:
             print(w)
     
@@ -58,9 +60,6 @@ def tab_dict(rfile):
         print(rfile,"Does not exist.")
         return(None)
         
-
-    
-
 def get_warrant_nums(xlsxTab):
     '''This function takes a pandas dataframe, probably a tab from tab_dict,
     and extracts a list of warrants from the "Warrant Number" column.'''
@@ -70,8 +69,17 @@ def get_warrant_nums(xlsxTab):
         if isinstance(i,(int, float)) and not math.isnan(i) and len(str(i)) == 8:
             warrants.append(i)
     return(warrants)
+
+def gen_warrant_links(warrants):
+    '''This function takes a list of warrants and builds network links to those
+    warrants.'''
     
-    
+    links = []
+    for w in warrants:
+        links.append('\\\\jsjcorp.com\\data\\GHSP\\GH\\webdata\\Testing\\' +str(w))
+
+    return(links)
+
 def list_headers(rfile, r_c='r'):
     '''rfile is the csv file in which the data are stored. pass 'r' or 'c' for
     the second argument to indicate whether the headers are in the first row or
