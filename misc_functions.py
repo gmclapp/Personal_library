@@ -94,11 +94,28 @@ def gen_warrant_links(warrants):
 
     return(links, broken_links)
 
+def parametric_eval(warrant_link):
+    '''This function takes a link to a warrant folder, and evaluates the
+    parametric stand data contained therein.'''
+    meas_val_header = "Unnamed: 6"
+    lower_spec_header = "Unnamed: 5"
+    upper_spec_header = "Unnamed: 7"
+    attribute_label_header = "Unnamed: 9"
+    
+    folder = warrant_link + r'\Parametric Data'
+    for filename in os.listdir(folder):
+        if filename.endswith(".xlsx"):
+            xlsx = pd.ExcelFile(folder+'\\'+filename)
+            Sheet_frames = {sh:xlsx.parse(sh) for sh in xlsx.sheet_names}
+            print(Sheet_frames["EVAL_PARAM_SUM"]["Unnamed: 3"])
+        else:
+            continue
+        
 def list_headers(rfile, r_c='r'):
     '''rfile is the csv file in which the data are stored. pass 'r' or 'c' for
     the second argument to indicate whether the headers are in the first row or
     the first column.'''
-
+    
     headers = []
     RDR = csv.reader(open(rfile))
     if r_c.lower() == 'c':
