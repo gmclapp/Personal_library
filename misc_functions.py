@@ -107,7 +107,11 @@ def parametric_eval(warrant_link):
         if filename.endswith(".xlsx"):
             xlsx = pd.ExcelFile(folder+'\\'+filename)
             Sheet_frames = {sh:xlsx.parse(sh) for sh in xlsx.sheet_names}
-            print(Sheet_frames["EVAL_PARAM_SUM"]["Unnamed: 3"])
+            for i, element in enumerate(Sheet_frames["EVAL_PARAM_SUM"][meas_val_header]):
+                if Sheet_frames["EVAL_PARAM_SUM"][lower_spec_header][i] <= element <= Sheet_frames["EVAL_PARAM_SUM"][upper_spec_header][i]:
+                    print(Sheet_frames["EVAL_PARAM_SUM"][attribute_label_header][i]," = Pass")
+                else:
+                    print(Sheet_frames["EVAL_PARAM_SUM"][attribute_label_header][i]," = Fail")
         else:
             continue
         
