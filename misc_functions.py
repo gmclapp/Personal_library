@@ -8,6 +8,7 @@ import csv
 import pandas as pd
 import pdb
 import cutie
+import os
 
 def interpolate(x1,y1,x2,y2,x):
     '''This function returns a value, y, linearly interpolated using two x,y
@@ -36,12 +37,20 @@ def interpolate_y(x1,y1,x2,y2,y):
 def Mikes(testPlan):
     '''Takes the test plan number as an argument and returns links to warrants.
     '''
+
+    print("Looking for DVPR sheet")
     testDict = tab_dict(r'\\jsjcorp.com\data\GHSP\GH\webdata\DVPR\\' + testPlan + r'\Update\2590 JL PV Update 11-14-18.xlsx')
     if not testDict is None:
+        print("Collecting warrants.")
         warrants = get_warrant_nums(testDict[testPlan])
-        warrants = gen_warrant_links(warrants)
-        for w in warrants:
-            print(w)
+        print("Testing warrant links.")
+        warrants, broken_links = gen_warrant_links(warrants)
+        print("Found {} warrants.".format(len(warrants)))
+        print("{} broken links".format(len(broken_links)))
+        for b in broken_links:
+            print(b)
+    else:
+        print("DVPR not found.")
     
 def tab_dict(rfile):
     '''This is a function that opens an excel file and returns a dictionary
@@ -75,10 +84,15 @@ def gen_warrant_links(warrants):
     warrants.'''
     
     links = []
+    broken_links = []
     for w in warrants:
-        links.append('\\\\jsjcorp.com\\data\\GHSP\\GH\\webdata\\Testing\\' +str(w))
+        path = '\\\\jsjcorp.com\\data\\GHSP\\GH\\webdata\\Testing\\' +str(w)
+        if os.path.exists(path):
+            links.append(path)
+        else:
+            broken_links.append(path)
 
-    return(links)
+    return(links, broken_links)
 
 def list_headers(rfile, r_c='r'):
     '''rfile is the csv file in which the data are stored. pass 'r' or 'c' for
