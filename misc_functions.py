@@ -108,10 +108,27 @@ def parametric_eval(warrant_link):
             xlsx = pd.ExcelFile(folder+'\\'+filename)
             Sheet_frames = {sh:xlsx.parse(sh) for sh in xlsx.sheet_names}
             for i, element in enumerate(Sheet_frames["EVAL_PARAM_SUM"][meas_val_header]):
-                if Sheet_frames["EVAL_PARAM_SUM"][lower_spec_header][i] <= element <= Sheet_frames["EVAL_PARAM_SUM"][upper_spec_header][i]:
-                    print(Sheet_frames["EVAL_PARAM_SUM"][attribute_label_header][i]," = Pass")
-                else:
-                    print(Sheet_frames["EVAL_PARAM_SUM"][attribute_label_header][i]," = Fail")
+                lower = Sheet_frames["EVAL_PARAM_SUM"][lower_spec_header][i]
+                upper = Sheet_frames["EVAL_PARAM_SUM"][upper_spec_header][i]
+                try:
+                    if (lower <= element <= upper and
+                        str(element) != ""):
+                        print(Sheet_frames["EVAL_PARAM_SUM"][attribute_label_header][i]," = Pass")
+                    else:
+                        print(Sheet_frames["EVAL_PARAM_SUM"][attribute_label_header][i]," = Fail")
+                except TypeError:
+                    if str(element) == "0x00":
+                        pass
+                    elif str(element) == "0x40":
+                        print(Sheet_frames["EVAL_PARAM_SUM"][attribute_label_header][i],
+                              ":",element,"Test not complete this cycle",sep='')
+                    elif str(element) == "0x50":
+                        print(Sheet_frames["EVAL_PARAM_SUM"][attribute_label_header][i],
+                              ":",element,
+                              "Test not complete this cycle, Test not complete since last clear.",
+                              sep='')
+                    else:
+                        pass
         else:
             continue
         
