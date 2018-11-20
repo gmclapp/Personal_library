@@ -39,7 +39,8 @@ def Mikes(testPlan):
     '''
 
     print("Looking for DVPR sheet")
-    testDict = tab_dict(r'\\jsjcorp.com\data\GHSP\GH\webdata\DVPR\\' + testPlan + r'\Update\2590 JL PV Update 11-14-18.xlsx')
+    testDict = tab_dict(r'\\jsjcorp.com\data\GHSP\GH\webdata\DVPR\\'\
+                        +testPlan+ r'\Update\2590 JL PV Update 11-14-18.xlsx')
     if not testDict is None:
         print("Collecting warrants.")
         warrants = get_warrant_nums(testDict[testPlan])
@@ -113,9 +114,11 @@ def parametric_eval(warrant_link):
                 try:
                     if (lower <= element <= upper and
                         str(element) != ""):
-                        print(Sheet_frames["EVAL_PARAM_SUM"][attribute_label_header][i]," = Pass")
+                        print(Sheet_frames["EVAL_PARAM_SUM"][attribute_label_header][i],
+                              " = Pass")
                     else:
-                        print(Sheet_frames["EVAL_PARAM_SUM"][attribute_label_header][i]," = Fail")
+                        print(Sheet_frames["EVAL_PARAM_SUM"][attribute_label_header][i],
+                              " = Fail")
                 except TypeError:
                     if str(element) == "0x00":
                         pass
@@ -125,7 +128,8 @@ def parametric_eval(warrant_link):
                     elif str(element) == "0x50":
                         print(Sheet_frames["EVAL_PARAM_SUM"][attribute_label_header][i],
                               ":",element,
-                              "Test not complete this cycle, Test not complete since last clear.",
+                              "Test not complete this cycle\n",
+                              "Test not complete since last clear.",
                               sep='')
                     else:
                         pass
@@ -305,7 +309,8 @@ def t_test(rfile, col, xbar=0, alpha=0.05, twotail=True, lower=True):
             continue   
     x1,y1,x2,y2 = vlookup(lookupfileT, ts, 0, i)
     print("({0},{1}) - ({2},{3})".format(x1,y1,x2,y2))
-    print("avg: {0}\nsd: {1}\nn: {2}\ndiff: {3}\nstd_err: {4}".format(xbar_test,sd,n,diff,std_err))
+    print("avg: {0}\nsd: {1}\nn: {2}\ndiff: {3}\nstd_err: {4}"\
+          .format(xbar_test,sd,n,diff,std_err))
     print("ts = {0}".format(ts))
     p = interpolate_y(x1,y1,x2,y2,ts)
     print("p = ",p)
