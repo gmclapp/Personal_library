@@ -219,6 +219,8 @@ def bernoulli_trial(n, k, p):
     return(P)
 
 def favstats(rfile, column):
+    '''This function calculates common statistical values for a given column
+    of data found in the specified file.'''
     df = pd.read_csv(rfile)
     xbar = df[column].mean()
     sd = df[column].std()
@@ -433,6 +435,8 @@ def r_ch_arc(Arc, Chord, dr):
     
     radius = 0
     error = 100
+    # numberical solution for radius. Iterates until error is less than
+    # specified dr.
     while (error > dr):
         radius += dr
         
