@@ -1,7 +1,7 @@
 '''It is recommended to use this package with the sanitize_inputs package.\n
 The functions contained herein do not check for erroneous inputs.'''
 
-__version__ = "0.1.1"
+__version__ = "0.1.2"
 
 import math
 import csv
@@ -276,7 +276,7 @@ def t_test(rfile, col, xbar=0, alpha=0.05, twotail=True, lower=True):
         except ValueError:
             continue   
     x1,y1,x2,y2 = vlookup(lookupfile, n, 0, i)
-    tsalpha = interpolate(x1,y1,x2,y2,n)
+    tsalpha = interpolate(x1,y1,x2,y2,n-1)
 
     std_err = sd/n**0.5
 
@@ -367,7 +367,7 @@ def t_test2(rfile, var, c1, c2, treat, alpha=0.05, twotail=True, lower=True):
         except ValueError:
             continue   
     x1,y1,x2,y2 = vlookup(lookupfile, n, 0, i)
-    tsalpha = interpolate(x1,y1,x2,y2,n)
+    tsalpha = interpolate(x1,y1,x2,y2,n-1)
 
     std_err = sp/n**0.5
 
@@ -400,7 +400,7 @@ def t_test2(rfile, var, c1, c2, treat, alpha=0.05, twotail=True, lower=True):
             continue   
     x1,y1,x2,y2 = vlookup(lookupfileT, ts, 0, i)
     print("x1,y1,x2,y2",x1,y1,x2,y2)
-    p = interpolate(x1,y1,x2,y2,ts)
+    p = interpolate_y(x1,y1,x2,y2,ts)
     # formulate conclusion
 
     print("xbar1 = ",xbar1,
