@@ -377,6 +377,8 @@ def t_test2(rfile, var, c1, c2, treat, alpha=0.05, twotail=True, lower=True):
     x1,y1,x2,y2 = vlookup(lookupfile, DOF, 0, i,skip_headers=True)
     print("DOF: {}\ni: {}".format(DOF,i))
     tsalpha = interpolate(x1,y1,x2,y2,DOF)
+    # There is an issue here where if a sample size n=2, DOF=1 and the lookup
+    # table returns a nonetype
 
     std_err = sp/n**0.5
 
