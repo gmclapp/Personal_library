@@ -153,12 +153,13 @@ def list_headers(rfile, r_c='r'):
 
     return(headers)
 
-def vlookup(rfile, index, search_col, result_col):
+def vlookup(rfile, index, search_col, result_col,skip_headers=False):
     '''rfile is the name of file in which data are stored. index is the value
     to search database rows for. search_col is the column in which the
     index can be found. result_col should be the column from which the result
     should be extracted. This function is made to work smoothly with
-    interpolate()'''
+    interpolate() Skip headers allows the user to skip searching the first row
+    which will not happen automatically if the column labels are numbers.'''
 
     index = float(index)
     search_col = int(search_col)
@@ -173,19 +174,21 @@ def vlookup(rfile, index, search_col, result_col):
     x2 = None
     y2 = None
 
-    for row in RDR:
+    for i, row in enumerate(RDR):
         # Search for the rows just smaller and just larger than the search
         # term. Calculate the difference between the x value in a given row
         # and the search term. Keep the rows that result in the smallest
         # positive difference and the smallest negative difference.
+        if i == 0 and skip_headers:
+            #next(RDR)
+            print("Advanced a row")
+            continue
         try:
             diff = index - float(row[search_col])
             
         except ValueError:
             if row[search_col] == "Inf":
                 diff = math.inf
-                
-            #print("Header?")
             continue
 
         if diff < pos_diff and diff > 0:
@@ -260,6 +263,7 @@ def t_test(rfile, col, xbar=0, alpha=0.05, twotail=True, lower=True):
     xbar_test = df[col].mean()
     sd = df[col].std()
     n = len(df[col])
+    DOF = n-1
 
     # Look up the appropriate t statistic - a 2 parameter interpolation function
     # would be nice here for an arbitrary value of alpha.
@@ -272,13 +276,13 @@ def t_test(rfile, col, xbar=0, alpha=0.05, twotail=True, lower=True):
     for i, h in enumerate(headers):
         try:
             if float(h) == float(alpha):
-                break
+                print("Alpha level is: ",float(alpha))
             else:
                 pass
         except ValueError:
-            continue   
-    x1,y1,x2,y2 = vlookup(lookupfile, n, 0, i)
-    tsalpha = interpolate(x1,y1,x2,y2,n-1)
+            continue
+    x1,y1,x2,y2 = vlookup(lookupfile, DOF, 0, i,skip_headers=False)
+    tsalpha = interpolate(x1,y1,x2,y2,DOF)
 
     std_err = sd/n**0.5
 
@@ -286,6 +290,7 @@ def t_test(rfile, col, xbar=0, alpha=0.05, twotail=True, lower=True):
     diff = (xbar_test - xbar)
     upper = (diff) + tsalpha*std_err
     lower = (diff) - tsalpha*std_err
+    print((1-float(alpha))*100,"% Confidence interval: ",lower," - ",upper,sep='')
     
     # calculate p-value
     ts = abs(diff/std_err)
@@ -303,18 +308,18 @@ def t_test(rfile, col, xbar=0, alpha=0.05, twotail=True, lower=True):
     headersT = list_headers(lookupfileT,'r')
     for i, h in enumerate(headersT):
         try:
-            if float(h) == float(n):
+            if float(h) == float(DOF):
                 break
             else:
                 pass
         except ValueError:
             continue   
-    x1,y1,x2,y2 = vlookup(lookupfileT, ts, 0, i)
+    x1,y1,x2,y2 = vlookup(lookupfileT, ts, i, 0,skip_headers=True)
     print("({0},{1}) - ({2},{3})".format(x1,y1,x2,y2))
     print("avg: {0}\nsd: {1}\nn: {2}\ndiff: {3}\nstd_err: {4}"\
           .format(xbar_test,sd,n,diff,std_err))
     print("ts = {0}".format(ts))
-    p = interpolate_y(x1,y1,x2,y2,ts)
+    p = interpolate(x1,y1,x2,y2,ts)
     print("p = ",p)
     # formulate conclusion
     
