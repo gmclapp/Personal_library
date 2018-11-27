@@ -351,6 +351,7 @@ def t_test2(rfile, var, c1, c2, treat, alpha=0.05, twotail=True, lower=True):
     n1 = len(groups[c1][treat])
     n2 = len(groups[c2][treat])
     n = min(n1,n2)
+    DOF = n-1
     # n will be used to calculate the standard error. Choosing the smaller of
     # the two sample sizes yields a conservative estimate.
     
@@ -373,8 +374,9 @@ def t_test2(rfile, var, c1, c2, treat, alpha=0.05, twotail=True, lower=True):
                 pass
         except ValueError:
             continue   
-    x1,y1,x2,y2 = vlookup(lookupfile, n, 0, i)
-    tsalpha = interpolate(x1,y1,x2,y2,n-1)
+    x1,y1,x2,y2 = vlookup(lookupfile, DOF, 0, i,skip_headers=True)
+    print("DOF: {}\ni: {}".format(DOF,i))
+    tsalpha = interpolate(x1,y1,x2,y2,DOF)
 
     std_err = sp/n**0.5
 
@@ -399,15 +401,15 @@ def t_test2(rfile, var, c1, c2, treat, alpha=0.05, twotail=True, lower=True):
     headersT = list_headers(lookupfileT,'r')
     for i, h in enumerate(headersT):
         try:
-            if float(h) == float(n):
+            if float(h) == float(DOF):
                 break
             else:
                 pass
         except ValueError:
             continue   
-    x1,y1,x2,y2 = vlookup(lookupfileT, ts, 0, i)
+    x1,y1,x2,y2 = vlookup(lookupfileT, ts, i, 0,skip_headers=True)
     print("x1,y1,x2,y2",x1,y1,x2,y2)
-    p = interpolate_y(x1,y1,x2,y2,ts)
+    p = interpolate(x1,y1,x2,y2,ts)
     # formulate conclusion
 
     print("xbar1 = ",xbar1,
