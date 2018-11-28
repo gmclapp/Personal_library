@@ -1,16 +1,18 @@
 '''It is recommended to use this package with the sanitize_inputs package.\n
 The functions contained herein do not check for erroneous inputs.'''
 
-__version__ = "0.1.0"
+__version__ = "0.1.2"
 
 import math
 import csv
 import pandas as pd
 import pdb
+import cutie
+import os
 
 def interpolate(x1,y1,x2,y2,x):
     '''This function returns a value, y, linearly interpolated using two x,y
-    pairs of data.'''
+    pairs of data and a given x between those pairs.'''
     
     try:
         y = ((y2-y1)/(x2-x1))*(x-x1) + y1
@@ -19,11 +21,126 @@ def interpolate(x1,y1,x2,y2,x):
         
     return(y)
 
+def interpolate_y(x1,y1,x2,y2,y):
+    '''This function returns a value x, linearly interpolated using two x,y
+    pairs of data and a given y between those pairs.'''
+
+    try:
+        m = (y2-y1)/(x2-x1)
+        b = y1
+        x = (y-b)/m
+    except TypeError:
+        x = x1
+
+    return(x)
+
+def Mikes(testPlan):
+    '''Takes the test plan number as an argument and returns links to warrants.
+    '''
+
+    print("Looking for DVPR sheet")
+    testDict = tab_dict(r'\\jsjcorp.com\data\GHSP\GH\webdata\DVPR\\'\
+                        +testPlan+ r'\Update\2590 JL PV Update 11-14-18.xlsx')
+    if not testDict is None:
+        print("Collecting warrants.")
+        warrants = get_warrant_nums(testDict[testPlan])
+        print("Testing warrant links.")
+        warrants, broken_links = gen_warrant_links(warrants)
+        print("Found {} warrants.".format(len(warrants)))
+        print("{} broken links".format(len(broken_links)))
+        for b in broken_links:
+            print(b)
+    else:
+        print("DVPR not found.")
+    
+def tab_dict(rfile):
+    '''This is a function that opens an excel file and returns a dictionary
+    where the keys of the dictionary are the sheet names and the values are
+    dataframes containing the data from the sheet. rfile must include the path
+    if the file is not in the current working directory.'''
+
+    try:
+        xlsx = pd.ExcelFile(rfile)
+        Sheet_frames = {sh:xlsx.parse(sh) for sh in xlsx.sheet_names}
+        # This line creates a dictionary where the keys are the tab names,
+        # and the values are the data from that tab.
+        return(Sheet_frames)
+    
+    except FileNotFoundError:
+        print(rfile,"Does not exist.")
+        return(None)
+        
+def get_warrant_nums(xlsxTab):
+    '''This function takes a pandas dataframe, probably a tab from tab_dict,
+    and extracts a list of warrants from the "Warrant Number" column.'''
+    series = xlsxTab["Unnamed: 14"]
+    warrants = []
+    for i in series:
+        if isinstance(i,(int, float)) and not math.isnan(i) and len(str(i)) == 8:
+            warrants.append(i)
+    return(warrants)
+
+def gen_warrant_links(warrants):
+    '''This function takes a list of warrants and builds network links to those
+    warrants.'''
+    
+    links = []
+    broken_links = []
+    for w in warrants:
+        path = '\\\\jsjcorp.com\\data\\GHSP\\GH\\webdata\\Testing\\' +str(w)
+        if os.path.exists(path):
+            links.append(path)
+        else:
+            broken_links.append(path)
+
+    return(links, broken_links)
+
+def parametric_eval(warrant_link):
+    '''This function takes a link to a warrant folder, and evaluates the
+    parametric stand data contained therein.'''
+    meas_val_header = "Unnamed: 6"
+    lower_spec_header = "Unnamed: 5"
+    upper_spec_header = "Unnamed: 7"
+    attribute_label_header = "Unnamed: 9"
+    
+    folder = warrant_link + r'\Parametric Data'
+    for filename in os.listdir(folder):
+        if filename.endswith(".xlsx"):
+            xlsx = pd.ExcelFile(folder+'\\'+filename)
+            Sheet_frames = {sh:xlsx.parse(sh) for sh in xlsx.sheet_names}
+            for i, element in enumerate(Sheet_frames["EVAL_PARAM_SUM"][meas_val_header]):
+                lower = Sheet_frames["EVAL_PARAM_SUM"][lower_spec_header][i]
+                upper = Sheet_frames["EVAL_PARAM_SUM"][upper_spec_header][i]
+                try:
+                    if (lower <= element <= upper and
+                        str(element) != ""):
+                        print(Sheet_frames["EVAL_PARAM_SUM"][attribute_label_header][i],
+                              " = Pass")
+                    else:
+                        print(Sheet_frames["EVAL_PARAM_SUM"][attribute_label_header][i],
+                              " = Fail")
+                except TypeError:
+                    if str(element) == "0x00":
+                        pass
+                    elif str(element) == "0x40":
+                        print(Sheet_frames["EVAL_PARAM_SUM"][attribute_label_header][i],
+                              ":",element,"Test not complete this cycle",sep='')
+                    elif str(element) == "0x50":
+                        print(Sheet_frames["EVAL_PARAM_SUM"][attribute_label_header][i],
+                              ":",element,
+                              "Test not complete this cycle\n",
+                              "Test not complete since last clear.",
+                              sep='')
+                    else:
+                        pass
+        else:
+            continue
+        
 def list_headers(rfile, r_c='r'):
     '''rfile is the csv file in which the data are stored. pass 'r' or 'c' for
     the second argument to indicate whether the headers are in the first row or
     the first column.'''
-
+    
     headers = []
     RDR = csv.reader(open(rfile))
     if r_c.lower() == 'c':
@@ -36,12 +153,13 @@ def list_headers(rfile, r_c='r'):
 
     return(headers)
 
-def vlookup(rfile, index, search_col, result_col):
+def vlookup(rfile, index, search_col, result_col,skip_headers=False):
     '''rfile is the name of file in which data are stored. index is the value
     to search database rows for. search_col is the column in which the
     index can be found. result_col should be the column from which the result
     should be extracted. This function is made to work smoothly with
-    interpolate()'''
+    interpolate() Skip headers allows the user to skip searching the first row
+    which will not happen automatically if the column labels are numbers.'''
 
     index = float(index)
     search_col = int(search_col)
@@ -56,19 +174,21 @@ def vlookup(rfile, index, search_col, result_col):
     x2 = None
     y2 = None
 
-    for row in RDR:
+    for i, row in enumerate(RDR):
         # Search for the rows just smaller and just larger than the search
         # term. Calculate the difference between the x value in a given row
         # and the search term. Keep the rows that result in the smallest
         # positive difference and the smallest negative difference.
+        if i == 0 and skip_headers:
+            #next(RDR)
+            print("Advanced a row")
+            continue
         try:
             diff = index - float(row[search_col])
             
         except ValueError:
             if row[search_col] == "Inf":
                 diff = math.inf
-                
-            #print("Header?")
             continue
 
         if diff < pos_diff and diff > 0:
@@ -102,6 +222,8 @@ def bernoulli_trial(n, k, p):
     return(P)
 
 def favstats(rfile, column):
+    '''This function calculates common statistical values for a given column
+    of data found in the specified file.'''
     df = pd.read_csv(rfile)
     xbar = df[column].mean()
     sd = df[column].std()
@@ -120,6 +242,86 @@ def favstats(rfile, column):
           "\nMaximum: ", maximum,
           "\nStandard deviation: ",sd,
           "\nInter-quartile range: ",IQR,sep='')
+
+def t_test(rfile, col, xbar=0, alpha=0.05, twotail=True, lower=True):
+    '''One sample t-test. Arguments are the csv file in which the data are
+    located and the column in which the data are found along with an alpha
+    value. var is the column name in which the category of interest is stored.
+    col is the column in which the response variable is stored. xbar is the
+    variable to which the mean will be compared. twotail tells the function
+    whether it should do a two tail test as opposed to a one tail test. lower
+    is ignored for two tail, but determines which tail is considered in the one
+    tail variant.'''
+    
+    df = pd.read_csv(rfile)
+
+    # This line pulls data out of the data frame creating two new data frames
+    # one for each label.
+
+    # The resulting data structure is a tuple where element 0 is the group name
+    # and element 1 is the actual sub-dataframe.
+    xbar_test = df[col].mean()
+    sd = df[col].std()
+    n = len(df[col])
+    DOF = n-1
+
+    # Look up the appropriate t statistic - a 2 parameter interpolation function
+    # would be nice here for an arbitrary value of alpha.
+    if twotail:
+        lookupfile = "twotail tstat.csv"
+        
+    else:
+        lookupfile = "onetail tstat.csv"
+    headers = list_headers(lookupfile,'r')
+    for i, h in enumerate(headers):
+        try:
+            if float(h) == float(alpha):
+                print("Alpha level is: ",float(alpha))
+            else:
+                pass
+        except ValueError:
+            continue
+    x1,y1,x2,y2 = vlookup(lookupfile, DOF, 0, i,skip_headers=False)
+    tsalpha = interpolate(x1,y1,x2,y2,DOF)
+
+    std_err = sd/n**0.5
+
+    # calculate the confidence interval
+    diff = (xbar_test - xbar)
+    upper = (diff) + tsalpha*std_err
+    lower = (diff) - tsalpha*std_err
+    print((1-float(alpha))*100,"% Confidence interval: ",lower," - ",upper,sep='')
+    
+    # calculate p-value
+    ts = abs(diff/std_err)
+    if twotail:
+        #find p for given ts in twotail tstat.csv
+        lookupfileT = ("twotail tstat Transpose.csv")
+          
+    else:
+        #find p for given ts in onetail tstat.csv
+        lookupfileT = ("twotail tstat Transpose.csv")
+        if lower:
+            pass
+        else:
+            pass
+    headersT = list_headers(lookupfileT,'r')
+    for i, h in enumerate(headersT):
+        try:
+            if float(h) == float(DOF):
+                break
+            else:
+                pass
+        except ValueError:
+            continue   
+    x1,y1,x2,y2 = vlookup(lookupfileT, ts, i, 0,skip_headers=True)
+    print("({0},{1}) - ({2},{3})".format(x1,y1,x2,y2))
+    print("avg: {0}\nsd: {1}\nn: {2}\ndiff: {3}\nstd_err: {4}"\
+          .format(xbar_test,sd,n,diff,std_err))
+    print("ts = {0}".format(ts))
+    p = interpolate(x1,y1,x2,y2,ts)
+    print("p = ",p)
+    # formulate conclusion
     
 def t_test2(rfile, var, c1, c2, treat, alpha=0.05, twotail=True, lower=True):
     '''Two sample t-test. Arguments are the csv file in which the data are
@@ -149,6 +351,7 @@ def t_test2(rfile, var, c1, c2, treat, alpha=0.05, twotail=True, lower=True):
     n1 = len(groups[c1][treat])
     n2 = len(groups[c2][treat])
     n = min(n1,n2)
+    DOF = n-1
     # n will be used to calculate the standard error. Choosing the smaller of
     # the two sample sizes yields a conservative estimate.
     
@@ -171,8 +374,11 @@ def t_test2(rfile, var, c1, c2, treat, alpha=0.05, twotail=True, lower=True):
                 pass
         except ValueError:
             continue   
-    x1,y1,x2,y2 = vlookup(lookupfile, n, 0, i)
-    tsalpha = interpolate(x1,y1,x2,y2,n)
+    x1,y1,x2,y2 = vlookup(lookupfile, DOF, 0, i,skip_headers=True)
+    print("DOF: {}\ni: {}".format(DOF,i))
+    tsalpha = interpolate(x1,y1,x2,y2,DOF)
+    # There is an issue here where if a sample size n=2, DOF=1 and the lookup
+    # table returns a nonetype
 
     std_err = sp/n**0.5
 
@@ -197,13 +403,13 @@ def t_test2(rfile, var, c1, c2, treat, alpha=0.05, twotail=True, lower=True):
     headersT = list_headers(lookupfileT,'r')
     for i, h in enumerate(headersT):
         try:
-            if float(h) == float(n):
+            if float(h) == float(DOF):
                 break
             else:
                 pass
         except ValueError:
             continue   
-    x1,y1,x2,y2 = vlookup(lookupfileT, ts, 0, i)
+    x1,y1,x2,y2 = vlookup(lookupfileT, ts, i, 0,skip_headers=True)
     print("x1,y1,x2,y2",x1,y1,x2,y2)
     p = interpolate(x1,y1,x2,y2,ts)
     # formulate conclusion
@@ -238,6 +444,8 @@ def r_ch_arc(Arc, Chord, dr):
     
     radius = 0
     error = 100
+    # numberical solution for radius. Iterates until error is less than
+    # specified dr.
     while (error > dr):
         radius += dr
         
