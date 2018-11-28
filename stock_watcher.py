@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from matplotlib import style
 import pandas as pd
 import pandas_datareader.data as web
-import csv
+import json
 
 class positions():
     def __init__(self):
@@ -35,20 +35,33 @@ class positions():
                                    'cost basis':0,
                                    'current shares':0})
     def calc_cost_basis(self):
-        self.calc_num_shares()
+        
         for pos in self.position_list:
             accum = 0
+            shares = 0
             for transaction in pos['transactions']:
                 if transaction['b/s'] == 'b':
-                    accum -= transaction['price']*transaction['shares'] - transaction['commission'] - transaction['fees']
+                    shares += transaction['shares']
+                    accum += transaction['price']*transaction['shares'] + transaction['commission'] + transaction['fees']
                 elif transaction['b/s'] == 's':
-                    accum += (transaction['price']*transaction['shares'] - transaction['commission'] - transaction['fees'])
-                    
-            pos['cost basis'] = accum
-    def calc_num_shares(self):
-        pass
+                    shares -= transaction['shares']
+                    accum -= transaction['price']*transaction['shares'] + transaction['commission'] + transaction['fees']
+
+            try:        
+                pos['cost basis'] = accum/shares
+            except ZeroDivisionError:
+                print("Currently holding zero shares.")
+                pos['cost basis'] = 'N/A'
+            pos['current shares'] = shares
+
+    def save_positions(self):
+        with open("watchlist.stk",'w') as f:
+            json.dump(self.position_list, f)
+
+    def load_positions(self):
+        with open("watchlist.stk","r") as f:
+            self.position_list = json.load(f)
         
-watchlist_file = csv.reader(open("watchlist.csv",'r'),dialect='excel')
 watch_list = positions()
 
 quotes = []
