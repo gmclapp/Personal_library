@@ -232,7 +232,7 @@ def bernoulli_trial_n(k, p, P=0.95):
         for test_k in range(k, n-1):
             test_P += bernoulli_trial(n, test_k, p)
         n+= 1
-        #print("n: {}: P = {4.2f}".format(n, test_P))
+        print("One can be {0:4.2f} confident that at least {1} successes will occur if {2} parts are tested.".format(test_P, k, n))
     return(n)
             
 def favstats(rfile, column):
