@@ -1,7 +1,7 @@
 '''It is recommended to use this package with the sanitize_inputs package.\n
 The functions contained herein do not check for erroneous inputs.'''
 
-__version__ = "0.1.2"
+__version__ = "0.2.0"
 
 import math
 import csv
