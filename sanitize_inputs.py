@@ -1,7 +1,7 @@
 '''This package allows the user to request input from the user and handles
 most error checking and input rules.'''
 
-__version__ = "0.1.2"
+__version__ = "0.1.3"
 
 import numpy as np
 
@@ -30,7 +30,7 @@ def get_real_number(prompt=None, upper=float('Inf'), lower=float('-Inf')):
             
             
         except ValueError:
-            print("Enter a real number.")
+            print("\033[1A\033[K\033[1A\033[K\r", end='')
             num_flag = False
             
     return(number)
@@ -53,7 +53,10 @@ def get_integer(prompt=None, upper=float('Inf'), lower=float('-Inf')):
             
             
         except ValueError:
-            print("Enter an integer.")
+            print("\033[1A\033[K\033[1A\033[K\r", end='')
+            # \033[K = Erase to the end of line
+            # \033[1A = moves the cursor up 1 line.
+            # \r = return
             num_flag = False
             
     return(number)

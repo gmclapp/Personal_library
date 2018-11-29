@@ -5,8 +5,10 @@ import pandas as pd
 import pandas_datareader.data as web
 import json
 import cutie
+import sys
+import sanitize_inputs as si
 
-__version__ = 0.1.1
+__version__ = '0.1.2'
 
 class positions():
     def __init__(self):
@@ -66,10 +68,25 @@ class positions():
             self.position_list = json.load(f)
 
 def order():
-    print("What kind of order?")
     orders = ['Buy',
               'Sell']
+    date_options = ['Today',
+                    'Enter date']
+    print("What kind of order?")
+
     order = orders[cutie.select(orders)]
+    if order == 'Buy':
+        print("When was this order?")
+        date_selection = date_options[cutie.select(date_options)]
+        if date_selection == 'Today':
+            date = dt.date.today()
+        elif date_selection == 'Enter date':
+            year = si.get_integer("Enter year.\n>>>")
+            month = si.get_integer("Enter month.\n>>>")
+            day = si.get_integer("Enter day.\n>>>")
+            date = dt.date(year, month, day)
+            
+        ticker = input("Enter stock ticker.\n>>>").upper()
                    
 watch_list = positions()
 
@@ -79,16 +96,24 @@ style.use("fivethirtyeight")
 start = dt.datetime(2017,4,1)
 today = dt.datetime(2018,10,28)
 
-
 df = web.DataReader("TSLA","yahoo",start,today)
 
+
 while(True):
-    selections = ['Order','Quit']
-    selection = selections[cutie.select(selections)]
-    if selection == 'Quit':
-        break
-    elif selection == 'Order':
-        order()
+    try:
+        selections = ['Order','Clear console','Quit']
+        selection = selections[cutie.select(selections)]
+        if selection == 'Quit':
+            break
+        elif selection == 'Order':
+            order()
+        elif selection == 'Clear console':
+            print('\033[2J')
+            # console command to clear console and return to (0,0)
+    except:
+        print("Unexpected error:",sys.exc_info())
+        continue
+    
 ##-example data structure-##
 ##positions = 
 ##[{'ticker':'GM',
