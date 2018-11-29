@@ -61,7 +61,7 @@ class positions():
                 pos['cost basis'] = accum/shares
             except ZeroDivisionError:
                 print("Currently holding zero shares.")
-                pos['cost basis'] = 'N/A'
+                pos['cost basis'] = 0
             pos['current shares'] = shares
 
     def save_positions(self):
