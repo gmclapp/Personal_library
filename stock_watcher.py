@@ -9,7 +9,7 @@ class positions():
     def __init__(self):
         self.position_list = []
         
-    def enter_order(self, buysell, date, ticker, shares, price, commission, fees=0):
+    def enter_order(self, buysell, date, ticker, shares, price, commission=4.95, fees=0):
         '''buysell = 'buy' or 'sell', date of order, stock ticker (not case
         sensitive), price of order, number of shares transacted,
         commission, and fees if applicable.'''
