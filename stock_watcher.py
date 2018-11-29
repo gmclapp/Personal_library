@@ -4,12 +4,21 @@ from matplotlib import style
 import pandas as pd
 import pandas_datareader.data as web
 import json
-import cutie
+import sys
+import sanitize_inputs as si
+
+__version__ = '0.2.0'
 
 class positions():
     def __init__(self):
         self.position_list = []
-        
+
+    def list_positions(self):
+        plist = []
+        for pos in self.position_list:
+            plist.append(pos['ticker'])
+        return(plist)
+    
     def enter_order(self, buysell, date, ticker, shares, price, commission=4.95, fees=0):
         '''buysell = 'buy' or 'sell', date of order, stock ticker (not case
         sensitive), price of order, number of shares transacted,
@@ -36,7 +45,7 @@ class positions():
                                    'cost basis':0,
                                    'current shares':0})
     def calc_cost_basis(self):
-        
+        print("Calculating cost basis...")
         for pos in self.position_list:
             accum = 0
             shares = 0
@@ -60,15 +69,48 @@ class positions():
             json.dump(self.position_list, f)
 
     def load_positions(self):
+        print("Loading trading data...")
         with open("watchlist.stk","r") as f:
             self.position_list = json.load(f)
 
-def order():
-    print("What kind of order?")
+def order(watch_list):
+    today = dt.date.today()
     orders = ['Buy',
               'Sell']
-    order = orders[cutie.select(orders)]
-                   
+    date_options = ['Today',
+                    'Enter date']
+    print("What kind of order?")
+
+    order = orders[si.select(orders)]
+    print("When was this order?")
+    date_selection = date_options[si.select(date_options)]
+    if date_selection == 'Today':
+        date = today
+    elif date_selection == 'Enter date':
+        year = si.get_integer("Enter year.\n>>>",upper=today.year+1,lower=1970)
+        month = si.get_integer("Enter month.\n>>>",upper=13,lower=0)
+        day = si.get_integer("Enter day.\n>>>",upper=32,lower=0)
+        date_str = str(year)+'-'+str(month)+'-'+str(day)
+        
+    tick = input("Enter stock ticker.\n>>>").upper()
+    shares = si.get_integer("Enter number of shares.\n>>>",lower=0)
+    price = si.get_real_number("Enter share price.\n>>>",lower=0)
+    comm = si.get_real_number("Enter commission.\n>>>",lower=-0.0001)
+    fee = si.get_real_number("Enter fees.\n>>>",lower=-0.0001)
+    
+    if order == 'Buy':
+        watch_list.enter_order('b', date_str, tick, shares, price, comm, fee)
+    elif order == 'Sell':
+        watch_list.enter_order('s', date_str, tick, shares, price, comm, fee)
+
+def view(pos):
+    print("Ticker: {}".format(pos["ticker"]))
+    print("Shares: {}".format(pos["current shares"]))
+    print("Current cost basis: {:7.2f}\n".format(pos["cost basis"]))
+    for t in pos["transactions"]:
+        print("{}: {} {} @ ${:7.4f}".format(t['date'],t['b/s'].upper(),t['shares'],t['price']))
+    print("\n",end='')
+    
 watch_list = positions()
 
 quotes = []
@@ -77,11 +119,43 @@ style.use("fivethirtyeight")
 start = dt.datetime(2017,4,1)
 today = dt.datetime(2018,10,28)
 
-
 df = web.DataReader("TSLA","yahoo",start,today)
-##print(df.head(10)) # The argument is the number of rows head returns
-##print(df.tail(10)) # This does the same as head but returns rows from the end of the dataframe
 
+print('\033[2J')
+watch_list.load_positions()
+watch_list.calc_cost_basis()
+
+while(True):
+    try:
+        selections = ['Order','View','Clear console','Quit']
+        selection = selections[si.select(selections)]
+        if selection == 'Order':
+            order(watch_list)
+        elif selection == 'View':
+            print("\n",end='')# Add whitespace between this and previous menu.
+            viewlist = watch_list.list_positions()
+            view_pos = viewlist[si.select(viewlist)]
+            for pos in watch_list.position_list:
+                if pos["ticker"] == view_pos:
+                    view(pos)
+                else:
+                    pass
+        elif selection == 'Clear console':
+            print('\033[2J')
+            # console command to clear console and return to (0,0)
+        elif selection == 'Quit':
+            print("Save changes?")
+            yn = ['Yes','No']
+            sav = yn[si.select(yn)]
+            if sav == 'Yes':
+                watch_list.save_positions()
+            else:
+                pass
+            break
+    except:
+        print("Unexpected error:",sys.exc_info())
+        continue
+    
 ##-example data structure-##
 ##positions = 
 ##[{'ticker':'GM',

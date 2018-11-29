@@ -1,9 +1,44 @@
 '''This package allows the user to request input from the user and handles
 most error checking and input rules.'''
 
-__version__ = "0.1.2"
+__version__ = "0.2.0"
 
 import numpy as np
+import readchar
+from colorama import init
+
+init()
+
+# select function built by Kamik423 in cutie library
+def select(
+        options,
+        deselected_prefix: str = '\033[1m[ ]\033[0m ',
+        selected_prefix: str = '\033[1m[\033[32;1mx\033[0;1m]\033[0m ',
+        selected_index: int = 0) -> int:
+    """Select an option from a list.
+    Args:
+        options (List[str]): The options to select from.
+        deselected_prefix (str, optional): Prefix for deselected option ([ ]).
+        selected_prefix (str, optional): Prefix for selected option ([x]).
+        selected_index (int, optional): The index to be selected at first.
+    Returns:
+        int: The index that has been selected.
+    """
+    print('\n' * (len(options) - 1))
+    while 1:
+        print(f'\033[{len(options) + 1}A')
+        for i, option in enumerate(options):
+            print('\033[K{}{}'.format(
+                selected_prefix if i == selected_index else deselected_prefix,
+                option))
+        keypress = readchar.readkey()
+        if keypress == readchar.key.UP:
+            selected_index = max(selected_index - 1, 0)
+        elif keypress == readchar.key.DOWN:
+            selected_index = min(selected_index + 1, len(options) - 1)
+        else:
+            break
+    return selected_index
 
 class col_vec():
     '''Retrieves a list of real number for x, y, and z from the user,
@@ -26,13 +61,13 @@ def get_real_number(prompt=None, upper=float('Inf'), lower=float('-Inf')):
             if lower < number < upper:
                 num_flag = True
             else:
-                print("Enter a real number between",lower,"and",upper)
-            
+                print("value must be between {} and {} exclusive.".format(lower, upper))
+                print("\033[2A\033[K\033[1A\033[K\r", end='')
             
         except ValueError:
-            print("Enter a real number.")
+            print("\033[1A\033[K\033[1A\033[K\r", end='')
             num_flag = False
-            
+    print("\033[K", end='')        
     return(number)
 
 def get_integer(prompt=None, upper=float('Inf'), lower=float('-Inf')):
@@ -46,16 +81,20 @@ def get_integer(prompt=None, upper=float('Inf'), lower=float('-Inf')):
             number += 0
             # This will throw an exception if number is not an integer.
             
-            if lower < number < upper:
+            if lower < number < upper: # excludes endpoints
                 num_flag = True
             else:
-                print(prompt,lower,"and",upper)
+                print("value must be between {} and {} exclusive.".format(lower, upper))
+                print("\033[2A\033[K\033[1A\033[K\r", end='')
             
             
         except ValueError:
-            print("Enter an integer.")
+            print("\033[1A\033[K\033[1A\033[K\r", end='')
+            # \033[K = Erase to the end of line
+            # \033[1A = moves the cursor up 1 line.
+            # \r = return
             num_flag = False
-            
+    print("\033[K", end='')        
     return(number)
 
 def get_letter(prompt=None, accept=None):
