@@ -99,11 +99,20 @@ today = dt.datetime(2018,10,28)
 df = web.DataReader("TSLA","yahoo",start,today)
 
 print('\033[2J')
+watch_list.load_positions()
+
 while(True):
     try:
         selections = ['Order','Clear console','Quit']
         selection = selections[si.select(selections)]
         if selection == 'Quit':
+            print("Save changes?")
+            yn = ['Yes','No']
+            sav = yn[si.select(yn)]
+            if sav == 'Yes':
+                watch_list.save_positions()
+            else:
+                pass
             break
         elif selection == 'Order':
             order()
