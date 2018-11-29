@@ -4,7 +4,6 @@ from matplotlib import style
 import pandas as pd
 import pandas_datareader.data as web
 import json
-import cutie
 import sys
 import sanitize_inputs as si
 
@@ -74,7 +73,7 @@ def order():
                     'Enter date']
     print("What kind of order?")
 
-    order = orders[cutie.select(orders)]
+    order = orders[si.select(orders)]
     if order == 'Buy':
         print("When was this order?")
         date_selection = date_options[si.select(date_options)]
@@ -98,11 +97,11 @@ today = dt.datetime(2018,10,28)
 
 df = web.DataReader("TSLA","yahoo",start,today)
 
-
+print('\033[2J')
 while(True):
     try:
         selections = ['Order','Clear console','Quit']
-        selection = selections[cutie.select(selections)]
+        selection = selections[si.select(selections)]
         if selection == 'Quit':
             break
         elif selection == 'Order':

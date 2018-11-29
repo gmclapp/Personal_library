@@ -5,6 +5,9 @@ __version__ = "0.1.3"
 
 import numpy as np
 import readchar
+from colorama import init
+
+init()
 
 # select function built by Kamik423 in cutie library
 def select(
