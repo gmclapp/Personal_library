@@ -4,6 +4,38 @@ most error checking and input rules.'''
 __version__ = "0.1.3"
 
 import numpy as np
+import readchar
+
+# select function built by Kamik423 in cutie library
+def select(
+        options,
+        deselected_prefix: str = '\033[1m[ ]\033[0m ',
+        selected_prefix: str = '\033[1m[\033[32;1mx\033[0;1m]\033[0m ',
+        selected_index: int = 0) -> int:
+    """Select an option from a list.
+    Args:
+        options (List[str]): The options to select from.
+        deselected_prefix (str, optional): Prefix for deselected option ([ ]).
+        selected_prefix (str, optional): Prefix for selected option ([x]).
+        selected_index (int, optional): The index to be selected at first.
+    Returns:
+        int: The index that has been selected.
+    """
+    print('\n' * (len(options) - 1))
+    while 1:
+        print(f'\033[{len(options) + 1}A')
+        for i, option in enumerate(options):
+            print('\033[K{}{}'.format(
+                selected_prefix if i == selected_index else deselected_prefix,
+                option))
+        keypress = readchar.readkey()
+        if keypress == readchar.key.UP:
+            selected_index = max(selected_index - 1, 0)
+        elif keypress == readchar.key.DOWN:
+            selected_index = min(selected_index + 1, len(options) - 1)
+        else:
+            break
+    return selected_index
 
 class col_vec():
     '''Retrieves a list of real number for x, y, and z from the user,

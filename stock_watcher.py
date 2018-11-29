@@ -77,7 +77,7 @@ def order():
     order = orders[cutie.select(orders)]
     if order == 'Buy':
         print("When was this order?")
-        date_selection = date_options[cutie.select(date_options)]
+        date_selection = date_options[si.select(date_options)]
         if date_selection == 'Today':
             date = dt.date.today()
         elif date_selection == 'Enter date':
