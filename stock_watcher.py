@@ -106,20 +106,18 @@ def order(watch_list):
 def view(pos):
     print("Ticker: {}".format(pos["ticker"]))
     print("Shares: {}".format(pos["current shares"]))
-    print("Current cost basis: {:7.2f}\n".format(pos["cost basis"]))
+    print("Current cost basis: ${:<7.2f}".format(pos["cost basis"]))
+    today = dt.date.today()
+    df = web.DataReader(pos["ticker"],"yahoo",today)
+    last_close = df["Close"][0]
+    print("Current price: ${:<7.2f}\n".format(last_close))
     for t in pos["transactions"]:
-        print("{}: {} {} @ ${:7.4f}".format(t['date'],t['b/s'].upper(),t['shares'],t['price']))
+        print("{}: {} {} @ ${:<7.4f}".format(t['date'],t['b/s'].upper(),t['shares'],t['price']))
     print("\n",end='')
     
 watch_list = positions()
 
-quotes = []
-
 style.use("fivethirtyeight")
-start = dt.datetime(2017,4,1)
-today = dt.datetime(2018,10,28)
-
-df = web.DataReader("TSLA","yahoo",start,today)
 
 print('\033[2J')
 watch_list.load_positions()
