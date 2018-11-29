@@ -126,7 +126,12 @@ def edit(watch_list):
         print("For which position would you like to edit a transaction?")
         viewlist = watch_list.list_positions()
         edit_pos = viewlist[si.select(viewlist)]
-        print("Editing",edit_pos)
+        print("\nEditing",edit_pos,"\n")
+        for pos in watch_list.position_list:
+            if pos["ticker"] == edit_pos:
+                print("Which transaction would you like to edit?")
+                for t in pos["transactions"]:
+                    print("{}: {} {} @ ${:<7.4f}".format(t['date'],t['b/s'].upper(),t['shares'],t['price']))
         
 watch_list = positions()
 
