@@ -4,6 +4,7 @@ from matplotlib import style
 import pandas as pd
 import pandas_datareader.data as web
 import json
+import cutie
 
 class positions():
     def __init__(self):
@@ -61,7 +62,13 @@ class positions():
     def load_positions(self):
         with open("watchlist.stk","r") as f:
             self.position_list = json.load(f)
-        
+
+def order():
+    print("What kind of order?")
+    orders = ['Buy',
+              'Sell']
+    order = orders[cutie.select(orders)]
+                   
 watch_list = positions()
 
 quotes = []
