@@ -6,6 +6,8 @@ import pandas_datareader.data as web
 import json
 import cutie
 
+__version__ = 0.1.1
+
 class positions():
     def __init__(self):
         self.position_list = []
@@ -79,9 +81,14 @@ today = dt.datetime(2018,10,28)
 
 
 df = web.DataReader("TSLA","yahoo",start,today)
-##print(df.head(10)) # The argument is the number of rows head returns
-##print(df.tail(10)) # This does the same as head but returns rows from the end of the dataframe
 
+while(True):
+    selections = ['Order','Quit']
+    selection = selections[cutie.select(selections)]
+    if selection == 'Quit':
+        break
+    elif selection == 'Order':
+        order()
 ##-example data structure-##
 ##positions = 
 ##[{'ticker':'GM',
