@@ -67,6 +67,7 @@ class positions():
             self.position_list = json.load(f)
 
 def order():
+    today = dt.date.today()
     orders = ['Buy',
               'Sell']
     date_options = ['Today',
@@ -78,11 +79,11 @@ def order():
         print("When was this order?")
         date_selection = date_options[si.select(date_options)]
         if date_selection == 'Today':
-            date = dt.date.today()
+            date = today
         elif date_selection == 'Enter date':
-            year = si.get_integer("Enter year.\n>>>")
-            month = si.get_integer("Enter month.\n>>>")
-            day = si.get_integer("Enter day.\n>>>")
+            year = si.get_integer("Enter year.\n>>>",upper=today.year+1,lower=1970)
+            month = si.get_integer("Enter month.\n>>>",upper=13,lower=0)
+            day = si.get_integer("Enter day.\n>>>",upper=32,lower=0)
             date = dt.date(year, month, day)
             
         ticker = input("Enter stock ticker.\n>>>").upper()

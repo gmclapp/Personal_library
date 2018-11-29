@@ -1,7 +1,7 @@
 '''This package allows the user to request input from the user and handles
 most error checking and input rules.'''
 
-__version__ = "0.1.3"
+__version__ = "0.2.0"
 
 import numpy as np
 import readchar
@@ -61,13 +61,13 @@ def get_real_number(prompt=None, upper=float('Inf'), lower=float('-Inf')):
             if lower < number < upper:
                 num_flag = True
             else:
-                print("Enter a real number between",lower,"and",upper)
-            
+                print("value must be between {} and {} exclusive.".format(lower, upper))
+                print("\033[2A\033[K\033[1A\033[K\r", end='')
             
         except ValueError:
             print("\033[1A\033[K\033[1A\033[K\r", end='')
             num_flag = False
-            
+    print("\033[K", end='')        
     return(number)
 
 def get_integer(prompt=None, upper=float('Inf'), lower=float('-Inf')):
@@ -81,10 +81,11 @@ def get_integer(prompt=None, upper=float('Inf'), lower=float('-Inf')):
             number += 0
             # This will throw an exception if number is not an integer.
             
-            if lower < number < upper:
+            if lower < number < upper: # excludes endpoints
                 num_flag = True
             else:
-                print(prompt,lower,"and",upper)
+                print("value must be between {} and {} exclusive.".format(lower, upper))
+                print("\033[2A\033[K\033[1A\033[K\r", end='')
             
             
         except ValueError:
@@ -93,7 +94,7 @@ def get_integer(prompt=None, upper=float('Inf'), lower=float('-Inf')):
             # \033[1A = moves the cursor up 1 line.
             # \r = return
             num_flag = False
-            
+    print("\033[K", end='')        
     return(number)
 
 def get_letter(prompt=None, accept=None):
