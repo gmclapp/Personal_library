@@ -1,7 +1,7 @@
 '''It is recommended to use this package with the sanitize_inputs package.\n
 The functions contained herein do not check for erroneous inputs.'''
 
-__version__ = "0.1.2"
+__version__ = "0.2.0"
 
 import math
 import csv
@@ -221,6 +221,20 @@ def bernoulli_trial(n, k, p):
     P = binomial_coeff*(p**k)*(q**(n-k))
     return(P)
 
+def bernoulli_trial_n(k, p, P=0.95):
+    '''Returns the sample size required to observe at least k successes if
+    the probability of success in each trial is p to a confidence level of P.'''
+
+    n = k # Sample size must be at least k in order to observe k successes.
+    test_P = 0
+    while test_P < P:
+        test_P = 0
+        for test_k in range(k, n-1):
+            test_P += bernoulli_trial(n, test_k, p)
+        n+= 1
+        print("One can be {0:4.2f} confident that at least {1} successes will occur if {2} parts are tested.".format(test_P, k, n))
+    return(n)
+            
 def favstats(rfile, column):
     '''This function calculates common statistical values for a given column
     of data found in the specified file.'''

@@ -3,13 +3,14 @@ import matplotlib.pyplot as plt
 from matplotlib import style
 import pandas as pd
 import pandas_datareader.data as web
-import csv
+import json
+import cutie
 
 class positions():
     def __init__(self):
         self.position_list = []
         
-    def enter_order(self, buysell, date, ticker, shares, price, commission, fees=0):
+    def enter_order(self, buysell, date, ticker, shares, price, commission=4.95, fees=0):
         '''buysell = 'buy' or 'sell', date of order, stock ticker (not case
         sensitive), price of order, number of shares transacted,
         commission, and fees if applicable.'''
@@ -35,20 +36,39 @@ class positions():
                                    'cost basis':0,
                                    'current shares':0})
     def calc_cost_basis(self):
-        self.calc_num_shares()
+        
         for pos in self.position_list:
             accum = 0
+            shares = 0
             for transaction in pos['transactions']:
                 if transaction['b/s'] == 'b':
-                    accum -= transaction['price']*transaction['shares'] - transaction['commission'] - transaction['fees']
+                    shares += transaction['shares']
+                    accum += transaction['price']*transaction['shares'] + transaction['commission'] + transaction['fees']
                 elif transaction['b/s'] == 's':
-                    accum += (transaction['price']*transaction['shares'] - transaction['commission'] - transaction['fees'])
-                    
-            pos['cost basis'] = accum
-    def calc_num_shares(self):
-        pass
-        
-watchlist_file = csv.reader(open("watchlist.csv",'r'),dialect='excel')
+                    shares -= transaction['shares']
+                    accum -= transaction['price']*transaction['shares'] + transaction['commission'] + transaction['fees']
+
+            try:        
+                pos['cost basis'] = accum/shares
+            except ZeroDivisionError:
+                print("Currently holding zero shares.")
+                pos['cost basis'] = 'N/A'
+            pos['current shares'] = shares
+
+    def save_positions(self):
+        with open("watchlist.stk",'w') as f:
+            json.dump(self.position_list, f)
+
+    def load_positions(self):
+        with open("watchlist.stk","r") as f:
+            self.position_list = json.load(f)
+
+def order():
+    print("What kind of order?")
+    orders = ['Buy',
+              'Sell']
+    order = orders[cutie.select(orders)]
+                   
 watch_list = positions()
 
 quotes = []
