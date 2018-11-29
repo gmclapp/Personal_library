@@ -7,7 +7,7 @@ import json
 import sys
 import sanitize_inputs as si
 
-__version__ = '0.2.0'
+__version__ = '0.2.1'
 
 class positions():
     def __init__(self):
@@ -114,7 +114,20 @@ def view(pos):
     for t in pos["transactions"]:
         print("{}: {} {} @ ${:<7.4f}".format(t['date'],t['b/s'].upper(),t['shares'],t['price']))
     print("\n",end='')
-    
+
+def edit(watch_list):
+    print("\n",end='')
+    edit_list = ['Transactions',
+                 'Dividends',
+                 'Tickers']
+    edit_sel = edit_list[si.select(edit_list)]
+    if edit_sel == 'Transactions':
+        print("\n",end='')
+        print("For which position would you like to edit a transaction?")
+        viewlist = watch_list.list_positions()
+        edit_pos = viewlist[si.select(viewlist)]
+        print("Editing",edit_pos)
+        
 watch_list = positions()
 
 style.use("fivethirtyeight")
@@ -125,10 +138,11 @@ watch_list.calc_cost_basis()
 
 while(True):
     try:
-        selections = ['Order','View','Clear console','Quit']
+        selections = ['Order','View','Edit','Clear console','Quit']
         selection = selections[si.select(selections)]
         if selection == 'Order':
             order(watch_list)
+            
         elif selection == 'View':
             print("\n",end='')# Add whitespace between this and previous menu.
             viewlist = watch_list.list_positions()
@@ -138,6 +152,9 @@ while(True):
                     view(pos)
                 else:
                     pass
+        elif selection == 'Edit':
+            edit(watch_list)
+            
         elif selection == 'Clear console':
             print('\033[2J')
             # console command to clear console and return to (0,0)
