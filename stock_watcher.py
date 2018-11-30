@@ -7,7 +7,7 @@ import json
 import sys
 import sanitize_inputs as si
 
-__version__ = '0.2.1'
+__version__ = '0.3.1'
 
 class positions():
     def __init__(self):
@@ -123,11 +123,12 @@ def edit(watch_list):
     edit_list = ['Transactions',
                  'Dividends',
                  'Tickers']
+    viewlist = watch_list.list_positions() # used in several options
     edit_sel = edit_list[si.select(edit_list)]
     if edit_sel == 'Transactions':
         print("\n",end='')
         print("For which position would you like to edit a transaction?")
-        viewlist = watch_list.list_positions()
+        
         edit_pos = viewlist[si.select(viewlist)]
         print("\nEditing",edit_pos,"\n")
         for pos in watch_list.position_list:
@@ -175,8 +176,26 @@ def edit(watch_list):
                     price = si.get_real_number("Enter share price.\n>>>",lower=0)
 
                     pos["transactions"][i]['price'] = price
-                
-                
+    elif edit_sel == 'Dividends':
+        pass
+    elif edit_sel == 'Tickers':
+        tick_options = ['Edit symbol',
+                        'Delete symbol']
+        
+        print("Which ticker would you like to edit?")
+        edit_pos = viewlist[si.select(viewlist)]
+        print("What would you like to do with this position?")
+        edit_sel = tick_options[si.select(tick_options)]
+        for pos in watch_list.position_list:
+            if pos["ticker"] == edit_pos:
+                if edit_sel == 'Edit symbol':
+                    tick = input("Enter stock ticker.\n>>>").upper()
+                    pos["ticker"] = tick
+                    # There will need to be logic here to merge two identical
+                    # symbols.
+                    
+                elif edit_sel == 'Delete symbol':
+                    pass
                                 
         
 watch_list = positions()
