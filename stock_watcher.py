@@ -7,7 +7,7 @@ import json
 import sys
 import sanitize_inputs as si
 
-__version__ = '0.2.0'
+__version__ = '0.2.1'
 
 class positions():
     def __init__(self):
@@ -61,7 +61,7 @@ class positions():
                 pos['cost basis'] = accum/shares
             except ZeroDivisionError:
                 print("Currently holding zero shares.")
-                pos['cost basis'] = 'N/A'
+                pos['cost basis'] = 0
             pos['current shares'] = shares
 
     def save_positions(self):
@@ -86,11 +86,14 @@ def order(watch_list):
     date_selection = date_options[si.select(date_options)]
     if date_selection == 'Today':
         date = today
+        year = today.year
+        month = today.month
+        day = today.day
     elif date_selection == 'Enter date':
         year = si.get_integer("Enter year.\n>>>",upper=today.year+1,lower=1970)
         month = si.get_integer("Enter month.\n>>>",upper=13,lower=0)
         day = si.get_integer("Enter day.\n>>>",upper=32,lower=0)
-        date_str = str(year)+'-'+str(month)+'-'+str(day)
+    date_str = str(year)+'-'+str(month)+'-'+str(day)
         
     tick = input("Enter stock ticker.\n>>>").upper()
     shares = si.get_integer("Enter number of shares.\n>>>",lower=0)
@@ -106,20 +109,79 @@ def order(watch_list):
 def view(pos):
     print("Ticker: {}".format(pos["ticker"]))
     print("Shares: {}".format(pos["current shares"]))
-    print("Current cost basis: {:7.2f}\n".format(pos["cost basis"]))
+    print("Current cost basis: ${:<7.2f}".format(pos["cost basis"]))
+    today = dt.date.today()
+    df = web.DataReader(pos["ticker"],"yahoo",today)
+    last_close = df["Close"][0]
+    print("Current price: ${:<7.2f}\n".format(last_close))
     for t in pos["transactions"]:
-        print("{}: {} {} @ ${:7.4f}".format(t['date'],t['b/s'].upper(),t['shares'],t['price']))
+        print("{}: {} {} @ ${:<7.4f}".format(t['date'],t['b/s'].upper(),t['shares'],t['price']))
     print("\n",end='')
-    
+
+def edit(watch_list):
+    print("\n",end='')
+    edit_list = ['Transactions',
+                 'Dividends',
+                 'Tickers']
+    edit_sel = edit_list[si.select(edit_list)]
+    if edit_sel == 'Transactions':
+        print("\n",end='')
+        print("For which position would you like to edit a transaction?")
+        viewlist = watch_list.list_positions()
+        edit_pos = viewlist[si.select(viewlist)]
+        print("\nEditing",edit_pos,"\n")
+        for pos in watch_list.position_list:
+            if pos["ticker"] == edit_pos:
+                print("Which transaction would you like to edit?")
+                tran_list = []
+                for t in pos["transactions"]:
+                    trans_str = "{}: {} {} @ ${:<7.4f}".format(t['date'],t['b/s'].upper(),t['shares'],t['price'])
+                    tran_list.append(trans_str)
+                t_sel = tran_list[si.select(tran_list)]
+                for i,t in enumerate(tran_list): # get index of transaction
+                    if t_sel == t:
+                        break
+                    
+                print("What would you like to edit?")
+                edit_choices = ['Date',
+                                'Buy/Sell',
+                                'Shares',
+                                'Price']
+                e_choice = edit_choices[si.select(edit_choices)]
+                
+                if e_choice == 'Date':
+                    today = dt.date.today()
+                    year = si.get_integer("Enter year.\n>>>",upper=today.year+1,lower=1970)
+                    month = si.get_integer("Enter month.\n>>>",upper=13,lower=0)
+                    day = si.get_integer("Enter day.\n>>>",upper=32,lower=0)
+                    date_str = str(year)+'-'+str(month)+'-'+str(day)
+                    
+                    pos["transactions"][i]['date'] = date_str
+                    
+                elif e_choice == 'Buy/Sell':
+                    orders = ['Buy',
+                              'Sell']
+                    print("What kind of order?")
+                    order = orders[si.select(orders)]
+                    
+                    pos["transactions"][i]['b/s'] = order[0].lower()
+                    
+                elif e_choice == 'Shares':
+                    shares = si.get_integer("Enter number of shares.\n>>>",lower=0)
+                    
+                    pos["transactions"][i]['shares'] = shares
+                    
+                elif e_choice == 'Price':
+                    price = si.get_real_number("Enter share price.\n>>>",lower=0)
+
+                    pos["transactions"][i]['price'] = price
+                
+                
+                                
+        
 watch_list = positions()
 
-quotes = []
-
 style.use("fivethirtyeight")
-start = dt.datetime(2017,4,1)
-today = dt.datetime(2018,10,28)
-
-df = web.DataReader("TSLA","yahoo",start,today)
 
 print('\033[2J')
 watch_list.load_positions()
@@ -127,10 +189,11 @@ watch_list.calc_cost_basis()
 
 while(True):
     try:
-        selections = ['Order','View','Clear console','Quit']
+        selections = ['Order','View','Edit','Clear console','Quit']
         selection = selections[si.select(selections)]
         if selection == 'Order':
             order(watch_list)
+            
         elif selection == 'View':
             print("\n",end='')# Add whitespace between this and previous menu.
             viewlist = watch_list.list_positions()
@@ -140,6 +203,9 @@ while(True):
                     view(pos)
                 else:
                     pass
+        elif selection == 'Edit':
+            edit(watch_list)
+            
         elif selection == 'Clear console':
             print('\033[2J')
             # console command to clear console and return to (0,0)
