@@ -9,6 +9,7 @@ import sanitize_inputs as si
 
 __version__ = '0.3.3'
 
+
 class positions():
     def __init__(self):
         self.position_list = []
