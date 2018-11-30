@@ -86,11 +86,14 @@ def order(watch_list):
     date_selection = date_options[si.select(date_options)]
     if date_selection == 'Today':
         date = today
+        year = today.year
+        month = today.month
+        day = today.day
     elif date_selection == 'Enter date':
         year = si.get_integer("Enter year.\n>>>",upper=today.year+1,lower=1970)
         month = si.get_integer("Enter month.\n>>>",upper=13,lower=0)
         day = si.get_integer("Enter day.\n>>>",upper=32,lower=0)
-        date_str = str(year)+'-'+str(month)+'-'+str(day)
+    date_str = str(year)+'-'+str(month)+'-'+str(day)
         
     tick = input("Enter stock ticker.\n>>>").upper()
     shares = si.get_integer("Enter number of shares.\n>>>",lower=0)
@@ -147,6 +150,7 @@ def edit(watch_list):
                 e_choice = edit_choices[si.select(edit_choices)]
                 
                 if e_choice == 'Date':
+                    today = dt.date.today()
                     year = si.get_integer("Enter year.\n>>>",upper=today.year+1,lower=1970)
                     month = si.get_integer("Enter month.\n>>>",upper=13,lower=0)
                     day = si.get_integer("Enter day.\n>>>",upper=32,lower=0)
