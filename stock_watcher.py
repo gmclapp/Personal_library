@@ -130,8 +130,50 @@ def edit(watch_list):
         for pos in watch_list.position_list:
             if pos["ticker"] == edit_pos:
                 print("Which transaction would you like to edit?")
+                tran_list = []
                 for t in pos["transactions"]:
-                    print("{}: {} {} @ ${:<7.4f}".format(t['date'],t['b/s'].upper(),t['shares'],t['price']))
+                    trans_str = "{}: {} {} @ ${:<7.4f}".format(t['date'],t['b/s'].upper(),t['shares'],t['price'])
+                    tran_list.append(trans_str)
+                t_sel = tran_list[si.select(tran_list)]
+                for i,t in enumerate(tran_list): # get index of transaction
+                    if t_sel == t:
+                        break
+                    
+                print("What would you like to edit?")
+                edit_choices = ['Date',
+                                'Buy/Sell',
+                                'Shares',
+                                'Price']
+                e_choice = edit_choices[si.select(edit_choices)]
+                
+                if e_choice == 'Date':
+                    year = si.get_integer("Enter year.\n>>>",upper=today.year+1,lower=1970)
+                    month = si.get_integer("Enter month.\n>>>",upper=13,lower=0)
+                    day = si.get_integer("Enter day.\n>>>",upper=32,lower=0)
+                    date_str = str(year)+'-'+str(month)+'-'+str(day)
+                    
+                    pos["transactions"][i]['date'] = date_str
+                    
+                elif e_choice == 'Buy/Sell':
+                    orders = ['Buy',
+                              'Sell']
+                    print("What kind of order?")
+                    order = orders[si.select(orders)]
+                    
+                    pos["transactions"][i]['b/s'] = order[0].lower()
+                    
+                elif e_choice == 'Shares':
+                    shares = si.get_integer("Enter number of shares.\n>>>",lower=0)
+                    
+                    pos["transactions"][i]['shares'] = shares
+                    
+                elif e_choice == 'Price':
+                    price = si.get_real_number("Enter share price.\n>>>",lower=0)
+
+                    pos["transactions"][i]['price'] = price
+                
+                
+                                
         
 watch_list = positions()
 
