@@ -7,7 +7,7 @@ import json
 import sys
 import sanitize_inputs as si
 
-__version__ = '0.3.2'
+__version__ = '0.3.3'
 
 class positions():
     def __init__(self):
@@ -150,7 +150,8 @@ def edit(watch_list):
                 edit_choices = ['Date',
                                 'Buy/Sell',
                                 'Shares',
-                                'Price']
+                                'Price',
+                                'Delete transaction']
                 e_choice = edit_choices[si.select(edit_choices)]
                 
                 if e_choice == 'Date':
@@ -180,6 +181,8 @@ def edit(watch_list):
 
                     pos["transactions"][i]['price'] = price
 
+                elif e_choice == 'Delete transaction':
+                    pos["transactions"].pop(i)
                 watch_list.calc_cost_basis()
                 
     elif edit_sel == 'Dividends':
