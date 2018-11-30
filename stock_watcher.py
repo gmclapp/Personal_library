@@ -7,7 +7,7 @@ import json
 import sys
 import sanitize_inputs as si
 
-__version__ = '0.3.1'
+__version__ = '0.3.2'
 
 class positions():
     def __init__(self):
@@ -100,11 +100,14 @@ def order(watch_list):
     price = si.get_real_number("Enter share price.\n>>>",lower=0)
     comm = si.get_real_number("Enter commission.\n>>>",lower=-0.0001)
     fee = si.get_real_number("Enter fees.\n>>>",lower=-0.0001)
-    
-    if order == 'Buy':
-        watch_list.enter_order('b', date_str, tick, shares, price, comm, fee)
-    elif order == 'Sell':
-        watch_list.enter_order('s', date_str, tick, shares, price, comm, fee)
+
+    watch_list.enter_order(order[0].lower(),
+                           date_str, tick,
+                           shares,
+                           price,
+                           comm,
+                           fee)
+    watch_list.calc_cost_basis()
 
 def view(pos):
     print("Ticker: {}".format(pos["ticker"]))
@@ -176,6 +179,9 @@ def edit(watch_list):
                     price = si.get_real_number("Enter share price.\n>>>",lower=0)
 
                     pos["transactions"][i]['price'] = price
+
+                watch_list.calc_cost_basis()
+                
     elif edit_sel == 'Dividends':
         pass
     elif edit_sel == 'Tickers':
