@@ -246,7 +246,7 @@ while(True):
 
         elif selection == 'Save':
             watch_list.save_positions()
-            print("Saving...\n"
+            print("Saving...\n")
             
         elif selection == 'Quit':
             print("Save changes?")
