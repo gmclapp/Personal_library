@@ -7,7 +7,7 @@ import json
 import sys
 import sanitize_inputs as si
 
-__version__ = '0.4.1'
+__version__ = '0.5.0'
 
 
 class positions():
