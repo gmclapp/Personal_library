@@ -288,20 +288,24 @@ def get_dividends(watch_list):
             print("Latest recorded dividend was {}".format(pos['dividends'][-1]['date']))
             date = parse_date(pos['dividends'][-1]['date'])
 
-        div_df = web.DataReader(pos['ticker'],'yahoo-dividends',date)
-        for stamp in div_df.index:
-            year = stamp.year
-            month = stamp.month
-            day = stamp.day
-            date_str = str(year)+'-'+str(month)+'-'+str(day)
-            d = dt.date(year,month,day)
-            delta = int((date - d).days)
-            if delta > 0 or not div_exists:
-                n+=1
-                shares = watch_list.shares_at_date(pos['ticker'],d)
-                dividend = float(div_df.loc[stamp]['value'])
-                
-                watch_list.enter_dividend(pos['ticker'], date_str, dividend, shares)
+        if pos['current shares'] > 0:
+            div_df = web.DataReader(pos['ticker'],'yahoo-dividends',date)
+            for stamp in div_df.index:
+                year = stamp.year
+                month = stamp.month
+                day = stamp.day
+                date_str = str(year)+'-'+str(month)+'-'+str(day)
+                d = dt.date(year,month,day)
+                delta = int((date - d).days)
+                if delta > 0 or not div_exists:
+                    n+=1
+                    shares = watch_list.shares_at_date(pos['ticker'],d)
+                    dividend = float(div_df.loc[stamp]['value'])
+                    
+                    watch_list.enter_dividend(pos['ticker'],
+                                              date_str, dividend, shares)
+        else:
+            print("Didn't fetch dividends. Not holding any shares.")
         print("processed {} dividends.".format(n))
         
         
