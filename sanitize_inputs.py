@@ -1,7 +1,7 @@
 '''This package allows the user to request input from the user and handles
 most error checking and input rules.'''
 
-__version__ = "0.2.0"
+__version__ = "0.3.0"
 
 import numpy as np
 import readchar
@@ -33,9 +33,15 @@ def select(
                 option))
         keypress = readchar.readkey()
         if keypress == readchar.key.UP:
-            selected_index = max(selected_index - 1, 0)
+            if selected_index == 0:
+                selected_index = len(options) - 1
+            else:
+                selected_index -= 1
         elif keypress == readchar.key.DOWN:
-            selected_index = min(selected_index + 1, len(options) - 1)
+            if selected_index == len(options) - 1:
+                selected_index = 0
+            else:
+                selected_index += 1
         else:
             break
     return selected_index
