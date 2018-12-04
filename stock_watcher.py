@@ -207,7 +207,36 @@ def edit(watch_list):
                 elif edit_sel == 'Delete symbol':
                     pass
                                 
+
+def last_transaction_indicator(position):
+    indicator = False
+    # today's date
+    today = dt.date.today()
+
+    df = web.DataReader(position["ticker"],"yahoo",today)
+    last_close = df["Close"][0]
+
+    # Get last transaction
+    last_t = position["transactions"][-1]
+
+    # test for indicator
+    if last_t['b/s'].lower() == 'b':
+        if float(last_t['price']) < float(last_close):
+            indicator = True
+            
+    elif last_t['b/s'].lower() == 's':
+        if float(last_t['price']) > float(last_close):
+            indicator = True
+            
+    #print comparison
+    if indicator:
+        print("{}\nCurrent: ${:<7.4f}\nLast {} ${:<7.4f}\n"\
+          .format(pos['ticker'],
+                  last_close,last_t['b/s'].upper(),
+                  last_t['price']))
+    return(indicator)
         
+    
 watch_list = positions()
 
 style.use("fivethirtyeight")
@@ -220,6 +249,7 @@ while(True):
     try:
         selections = ['Order',
                       'View',
+                      'Indicators',
                       'Edit',
                       'Clear console',
                       'Save',
@@ -237,6 +267,11 @@ while(True):
                     view(pos)
                 else:
                     pass
+                
+        elif selection == 'Indicators':
+            for pos in watch_list.position_list:
+                last_transaction_indicator(pos)
+                
         elif selection == 'Edit':
             edit(watch_list)
             
