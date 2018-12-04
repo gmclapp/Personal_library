@@ -272,6 +272,7 @@ def get_dividends(watch_list):
     dividend transaction for each one to the position data. This function
     need only be run for dates after the most recent dividend transaction.'''
     for pos in watch_list.position_list:
+        div_exists = False
         n = 0
         if len(pos['dividends']) == 0:
             print("No dividends have been recorded for {}.".format(pos['ticker']))
@@ -279,6 +280,7 @@ def get_dividends(watch_list):
             # transaction.
             date = parse_date(pos['transactions'][0]['date'])
         else:
+            div_exists = True
             print("Latest recorded dividend was {}".format(pos['dividends'][-1]['date']))
             date = parse_date(pos['dividends'][-1]['date'])
 
@@ -290,7 +292,7 @@ def get_dividends(watch_list):
             date_str = str(year)+'-'+str(month)+'-'+str(day)
             d = dt.date(year,month,day)
             delta = int((date - d).days)
-            if delta > 0:
+            if delta > 0 or not div_exists:
                 n+=1
                 shares = watch_list.shares_at_date(pos['ticker'],d)
                 dividend = float(div_df.loc[stamp]['value'])
@@ -369,8 +371,8 @@ while(True):
         
     except:
         print("Unexpected error:",sys.exc_info())
-        #continue
-        raise
+        continue
+        #raise
     
 ##-example data structure-##
 ##positions = 
