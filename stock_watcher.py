@@ -21,7 +21,7 @@ class positions():
         return(plist)
     
     def enter_order(self, buysell, date, ticker, shares, price, commission=4.95, fees=0):
-        '''buysell = 'buy' or 'sell', date of order, stock ticker (not case
+        '''buysell = 'buy' or 'sell', date of order(str), stock ticker (not case
         sensitive), price of order, number of shares transacted,
         commission, and fees if applicable.'''
         exists_flag = False
@@ -39,6 +39,17 @@ class positions():
                                        'dividends':[],
                                        'cost basis':shares*price + commission + fees,
                                        'current shares':shares})
+
+    def enter_dividend(self, ticker, date, amount, shares):
+        exists_flag = False
+        ticker = ticker.upper()
+        for pos in self.position_list:
+            if ticker == pos['ticker']:
+                exists_flag = True
+                total = amount*shares
+                print("Shares: {}; Dividend: ${:<7.2f}; Total: ${:<7.2f}".format(shares,amount,total))
+                pos['dividends'].append({'date': date,'amount':amount,'shares':shares,'total':total})
+
     def enter_ticker(self, ticker):
         self.position_list.append({'ticker':ticker,
                                    'transactions':[],
@@ -261,6 +272,7 @@ def get_dividends(watch_list):
     dividend transaction for each one to the position data. This function
     need only be run for dates after the most recent dividend transaction.'''
     for pos in watch_list.position_list:
+        n = 0
         if len(pos['dividends']) == 0:
             # if no dividends have been recorded, find the earliest dated
             # transaction.
@@ -273,14 +285,18 @@ def get_dividends(watch_list):
             year = stamp.year
             month = stamp.month
             day = stamp.day
+            date_str = str(year)+'-'+str(month)+'-'+str(day)
             d = dt.date(year,month,day)
             delta = int((date - d).days)
             if delta < 0:
+                n+=1
                 shares = watch_list.shares_at_date(pos['ticker'],d)
-                print("shares: ",shares)
-                print("Process dividend:",div_df.loc[stamp])
+                dividend = float(div_df.loc[stamp]['value'])
+                
+                watch_list.enter_dividend(pos['ticker'], date_str, dividend, shares)
+        print("processed {} dividends.".format(n))
         
-        print(pos['ticker'],div_df.head(10))
+        
                 
     # Find the most recent dividend transaction posted in a position
     # Find the shares held at each dividend ex-date after the last one processed.
@@ -293,7 +309,7 @@ style.use("fivethirtyeight")
 print('\033[2J')
 watch_list.load_positions()
 watch_list.calc_cost_basis()
-#get_dividends(watch_list)
+get_dividends(watch_list)
 while(True):
     try:
         selections = ['Order',
