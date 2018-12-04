@@ -274,10 +274,12 @@ def get_dividends(watch_list):
     for pos in watch_list.position_list:
         n = 0
         if len(pos['dividends']) == 0:
+            print("No dividends have been recorded for {}.".format(pos['ticker']))
             # if no dividends have been recorded, find the earliest dated
             # transaction.
             date = parse_date(pos['transactions'][0]['date'])
         else:
+            print("Latest recorded dividend was {}".format(pos['dividends'][-1]['date']))
             date = parse_date(pos['dividends'][-1]['date'])
 
         div_df = web.DataReader(pos['ticker'],'yahoo-dividends',date)
@@ -288,7 +290,7 @@ def get_dividends(watch_list):
             date_str = str(year)+'-'+str(month)+'-'+str(day)
             d = dt.date(year,month,day)
             delta = int((date - d).days)
-            if delta < 0:
+            if delta > 0:
                 n+=1
                 shares = watch_list.shares_at_date(pos['ticker'],d)
                 dividend = float(div_df.loc[stamp]['value'])
