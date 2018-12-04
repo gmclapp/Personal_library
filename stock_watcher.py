@@ -210,6 +210,7 @@ def edit(watch_list):
 
 def last_transaction_indicator(position):
     indicator = False
+    score = 0
     # today's date
     today = dt.date.today()
 
@@ -223,18 +224,14 @@ def last_transaction_indicator(position):
     if last_t['b/s'].lower() == 'b':
         if float(last_t['price']) < float(last_close):
             indicator = True
+            score = (last_close - last_t['price']) * last_t['shares']
             
     elif last_t['b/s'].lower() == 's':
         if float(last_t['price']) > float(last_close):
             indicator = True
-            
-    #print comparison
-    if indicator:
-        print("{}\nCurrent: ${:<7.4f}\nLast {} ${:<7.4f}\n"\
-          .format(pos['ticker'],
-                  last_close,last_t['b/s'].upper(),
-                  last_t['price']))
-    return(indicator)
+            score = (last_t['price'] - last_close) * last_t['shares']
+                
+    return(indicator, score)
         
     
 watch_list = positions()
@@ -270,7 +267,14 @@ while(True):
                 
         elif selection == 'Indicators':
             for pos in watch_list.position_list:
-                last_transaction_indicator(pos)
+                ind,score = last_transaction_indicator(pos)
+                #print comparison
+                if ind:
+                    print("{} Score: ${:<7.2f}\n"\
+                      .format(pos['ticker'],score))
+                else:
+                    print("{} Bad indicator.".format(pos['ticker']))
+            print("Done checking.")
                 
         elif selection == 'Edit':
             edit(watch_list)
