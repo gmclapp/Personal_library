@@ -147,8 +147,12 @@ def view(pos):
     last_close = df["Close"][0]
     print("Current price: ${:<7.2f}\n".format(last_close))
     for t in pos["transactions"]:
-        print("{}: {} {} @ ${:<7.4f}".format(t['date'],t['b/s'].upper(),t['shares'],t['price']))
+        print("{}: {} {} @ ${:<7.4f}".format(t['date'],t['b/s'].upper(),
+                                             t['shares'],t['price']))
     print("\n",end='')
+    for d in pos['dividends']:
+        print("Shares: {}; Dividend: ${:<7.2f}; Total: ${:<7.2f}"\
+              .format(d['shares'],d['amount'],d['total']))
 
 def edit(watch_list):
     print("\n",end='')
