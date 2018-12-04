@@ -48,7 +48,10 @@ class positions():
                 exists_flag = True
                 total = amount*shares
                 print("Shares: {}; Dividend: ${:<7.2f}; Total: ${:<7.2f}".format(shares,amount,total))
-                pos['dividends'].append({'date': date,'amount':amount,'shares':shares,'total':total})
+                pos['dividends'].append({'date': date,
+                                         'amount':amount,
+                                         'shares':shares,
+                                         'total':total})
 
     def enter_ticker(self, ticker):
         self.position_list.append({'ticker':ticker,
@@ -64,10 +67,15 @@ class positions():
             for transaction in pos['transactions']:
                 if transaction['b/s'] == 'b':
                     shares += transaction['shares']
-                    accum += transaction['price']*transaction['shares'] + transaction['commission'] + transaction['fees']
+                    accum += transaction['price']*transaction['shares']\
+                             + transaction['commission'] + transaction['fees']
                 elif transaction['b/s'] == 's':
                     shares -= transaction['shares']
-                    accum -= transaction['price']*transaction['shares'] + transaction['commission'] + transaction['fees']
+                    accum -= transaction['price']*transaction['shares']\
+                             + transaction['commission'] + transaction['fees']
+            for d in pos['dividends']:
+                accum -= d['total']
+                    
 
             try:        
                 pos['cost basis'] = accum/shares
