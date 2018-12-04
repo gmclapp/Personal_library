@@ -65,6 +65,23 @@ class positions():
                 pos['cost basis'] = 0
             pos['current shares'] = shares
 
+    def shares_at_date(self, ticker, date):
+        '''takes a ticker symbol, and a datetime.date() and returns the number
+        of shares of that symbol held at the given date.'''
+        shares = 0
+        for pos in self.position_list:
+            if pos['ticker'] == ticker:
+                for transaction in pos['transactions']:
+                    if int((date - parse_date(transaction['date'])).days) >= 0:
+                        if transaction['b/s'] == 'b':
+                            shares += transaction['shares']
+                           
+                        elif transaction['b/s'] == 's':
+                            shares -= transaction['shares']
+        return(shares)
+                           
+            
+
     def save_positions(self):
         with open("watchlist.stk",'w') as f:
             json.dump(self.position_list, f)
@@ -232,8 +249,43 @@ def last_transaction_indicator(position):
             score = (last_t['price'] - last_close) * last_t['shares']
                 
     return(indicator, score)
+
+def parse_date(date):
+    year,month,day = [int(x) for x in date.split('-')]
+    d = dt.date(year,month,day)
+    return(d)
+
+def get_dividends(watch_list):
+    '''This function gets a list of historical dividends for the given symbol,
+    determines how many shares were held at each dividend date and adds a
+    dividend transaction for each one to the position data. This function
+    need only be run for dates after the most recent dividend transaction.'''
+    for pos in watch_list.position_list:
+        if len(pos['dividends']) == 0:
+            # if no dividends have been recorded, find the earliest dated
+            # transaction.
+            date = parse_date(pos['transactions'][0]['date'])
+        else:
+            date = parse_date(pos['dividends'][-1]['date'])
+
+        div_df = web.DataReader(pos['ticker'],'yahoo-dividends',date)
+        for stamp in div_df.index:
+            year = stamp.year
+            month = stamp.month
+            day = stamp.day
+            d = dt.date(year,month,day)
+            delta = int((date - d).days)
+            if delta < 0:
+                shares = watch_list.shares_at_date(pos['ticker'],d)
+                print("shares: ",shares)
+                print("Process dividend:",div_df.loc[stamp])
         
-    
+        print(pos['ticker'],div_df.head(10))
+                
+    # Find the most recent dividend transaction posted in a position
+    # Find the shares held at each dividend ex-date after the last one processed.
+    # Add new dividend transactions
+
 watch_list = positions()
 
 style.use("fivethirtyeight")
@@ -241,7 +293,7 @@ style.use("fivethirtyeight")
 print('\033[2J')
 watch_list.load_positions()
 watch_list.calc_cost_basis()
-
+#get_dividends(watch_list)
 while(True):
     try:
         selections = ['Order',
@@ -299,23 +351,24 @@ while(True):
         
     except:
         print("Unexpected error:",sys.exc_info())
-        continue
+        #continue
+        raise
     
 ##-example data structure-##
 ##positions = 
-##[{'ticker':'GM',
-## 'transactions':[{'b/s':'buy','date':'01-Nov-2018','price':35.50,'commission':4.95,'fees':0.00,'shares':15},
-##                 {'b/s':'sell','date':'05-Nov-2018','price':36.25,'commission':4.95,'fees':0.00,'shares':15},
-##                 {'b/s':'buy','date':'06-Nov-2018','price':32.25,'commission':4.95,'fees':0.00,'shares':15}],
-## 'dividends':[{'date':'02-Nov-2018','amount':0.15,'shares':15},
-##              {'date':'25-Nov-2018','amount':0.12,'shares':15}],
+##[{'ticker':'TEST',
+## 'transactions':[{'b/s':'buy','date':'2018-11-1','price':35.50,'commission':4.95,'fees':0.00,'shares':15},
+##                 {'b/s':'sell','date':'2018-11-05','price':36.25,'commission':4.95,'fees':0.00,'shares':15},
+##                 {'b/s':'buy','date':'2018-11-06','price':32.25,'commission':4.95,'fees':0.00,'shares':15}],
+## 'dividends':[{'date':'2018-11-02','amount':0.15,'shares':15},
+##              {'date':'2018-11-25','amount':0.12,'shares':15}],
 ## 'cost basis':32.22,
 ##  'current shares':15},
-## {'ticker':'F',
-## 'transactions':[{'b/s':'buy','date':'01-Oct-2018','price':12.40,'commission':4.95,'fees':0.00,'shares':100},
-##                 {'b/s':'sell','date':'05-Oct-2018','price':13.10,'commission':4.95,'fees':0.00,'shares':70},
-##                 {'b/s':'buy','date':'06-Nov-2018','price':9.15,'commission':4.95,'fees':0.00,'shares':200}],
-## 'dividends':[{'date':'02-Oct-2018','amount':0.07,'shares':100},
-##              {'date':'25-Nov-2018','amount':0.11,'shares':230}],
+## {'ticker':'TEST2',
+## 'transactions':[{'b/s':'buy','date':'2018-10-01','price':12.40,'commission':4.95,'fees':0.00,'shares':100},
+##                 {'b/s':'sell','date':'2018-10-05','price':13.10,'commission':4.95,'fees':0.00,'shares':70},
+##                 {'b/s':'buy','date':'2018-11-06','price':9.15,'commission':4.95,'fees':0.00,'shares':200}],
+## 'dividends':[{'date':'2018-10-02','amount':0.07,'shares':100},
+##              {'date':'2018-11-25','amount':0.11,'shares':230}],
 ## 'cost basis':9.285,
 ##  'current shares':230}]
