@@ -7,7 +7,7 @@ import json
 import sys
 import sanitize_inputs as si
 
-__version__ = '0.4.0'
+__version__ = '0.5.0'
 
 
 class positions():
@@ -218,7 +218,12 @@ watch_list.calc_cost_basis()
 
 while(True):
     try:
-        selections = ['Order','View','Edit','Clear console','Quit']
+        selections = ['Order',
+                      'View',
+                      'Edit',
+                      'Clear console',
+                      'Save',
+                      'Quit']
         selection = selections[si.select(selections)]
         if selection == 'Order':
             order(watch_list)
@@ -238,6 +243,11 @@ while(True):
         elif selection == 'Clear console':
             print('\033[2J')
             # console command to clear console and return to (0,0)
+
+        elif selection == 'Save':
+            watch_list.save_positions()
+            print("Saving...\n")
+            
         elif selection == 'Quit':
             print("Save changes?")
             yn = ['Yes','No']
@@ -247,6 +257,7 @@ while(True):
             else:
                 pass
             break
+        
     except:
         print("Unexpected error:",sys.exc_info())
         continue
