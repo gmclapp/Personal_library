@@ -151,9 +151,14 @@ def view(pos):
     print("Shares: {}".format(pos["current shares"]))
     print("Current cost basis: ${:<7.2f}".format(pos["cost basis"]))
     today = dt.date.today()
-    df = web.DataReader(pos["ticker"],"yahoo",today)
-    last_close = df["Close"][0]
-    print("Current price: ${:<7.2f}\n".format(last_close))
+    try:
+        df = web.DataReader(pos["ticker"],"yahoo",today)
+        last_close = df["Close"][0]
+        print("Current price: ${:<7.2f}\n".format(last_close))
+    except:
+        print("Current price data unavailable.")
+        
+    
     for t in pos["transactions"]:
         print("{}: {} {} @ ${:<7.4f}".format(t['date'],t['b/s'].upper(),
                                              t['shares'],t['price']))
@@ -254,22 +259,26 @@ def last_transaction_indicator(position):
     # today's date
     today = dt.date.today()
 
-    df = web.DataReader(position["ticker"],"yahoo",today)
-    last_close = df["Close"][0]
+    try:
+        df = web.DataReader(position["ticker"],"yahoo",today)
+        last_close = df["Close"][0]
 
-    # Get last transaction
-    last_t = position["transactions"][-1]
+        # Get last transaction
+        last_t = position["transactions"][-1]
 
-    # test for indicator
-    if last_t['b/s'].lower() == 'b':
-        if float(last_t['price']) < float(last_close):
-            indicator = True
-            score = (last_close - last_t['price']) * last_t['shares']
-            
-    elif last_t['b/s'].lower() == 's':
-        if float(last_t['price']) > float(last_close):
-            indicator = True
-            score = (last_t['price'] - last_close) * last_t['shares']
+        # test for indicator
+        if last_t['b/s'].lower() == 'b':
+            if float(last_t['price']) < float(last_close):
+                indicator = True
+                score = (last_close - last_t['price']) * last_t['shares']
+                
+        elif last_t['b/s'].lower() == 's':
+            if float(last_t['price']) > float(last_close):
+                indicator = True
+                score = (last_t['price'] - last_close) * last_t['shares']
+
+    except:
+        print("Indicator failed.")
                 
     return(indicator, score)
 
