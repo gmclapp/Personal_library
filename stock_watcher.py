@@ -322,7 +322,8 @@ def get_dividends(watch_list):
                     watch_list.enter_dividend(pos['ticker'],
                                               date_str, dividend, shares)
         else:
-            print("Didn't fetch dividends. Not holding any shares.")
+            pass
+            #print("Didn't fetch dividends. Not holding any shares.")
         print("processed {} dividends.".format(n))
         
         
@@ -363,15 +364,18 @@ while(True):
                     pass
                 
         elif selection == 'Indicators':
+            ind_dict = {}
+            
             for pos in watch_list.position_list:
                 ind,score = last_transaction_indicator(pos)
                 #print comparison
                 if ind:
-                    print("{} Score: ${:<7.2f}\n"\
+                    
+                    print("{} Score: ${:<7.2f}"\
                       .format(pos['ticker'],score))
                 else:
-                    print("{} Bad indicator.".format(pos['ticker']))
-            print("Done checking.")
+                    pass
+            print("Done checking.\n")
                 
         elif selection == 'Edit':
             edit(watch_list)
