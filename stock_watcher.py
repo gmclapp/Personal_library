@@ -375,7 +375,9 @@ while(True):
         elif selection == 'Indicators':
             ind_dict = {"Last Transaction":[],
                         "High Dividend Yield":[],
-                        "Recent Passed Dividend":[]}
+                        "Recent Passed Dividend":[],
+                        "Upcoming Dividend":[],
+                        "Over-exposure":[]}
             
             print("\nWorking on \"Last Transaction\" indicator.\n")
             for index, pos in enumerate(watch_list.position_list):
@@ -403,7 +405,7 @@ while(True):
             print("\033[1A\033[K", end='')    
             print("Done checking.\n")
             for indicator in ind_dict["Last Transaction"]:
-                print("{:<4} Score: ${:<7.2f} Advise: {}".format\
+                print("{:<6} Score: ${:<7.2f} Advise: {}".format\
                       (indicator["Ticker"],
                        indicator["Score"],
                        indicator["Direction"].upper()))
