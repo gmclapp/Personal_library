@@ -271,16 +271,22 @@ def last_transaction_indicator(position):
             if float(last_t['price']) < float(last_close):
                 indicator = True
                 score = (last_close - last_t['price']) * last_t['shares']
+                direction = last_t['b/s']
+            else:
+                direction = 'N/A'
+
                 
         elif last_t['b/s'].lower() == 's':
             if float(last_t['price']) > float(last_close):
                 indicator = True
                 score = (last_t['price'] - last_close) * last_t['shares']
-
+                direction = last_t['b/s']
+            else:
+                direction = 'N/A'
     except:
         print("Indicator failed.")
                 
-    return(indicator, score)
+    return(indicator, score, direction)
 
 def parse_date(date):
     year,month,day = [int(x) for x in date.split('-')]
@@ -367,12 +373,12 @@ while(True):
             ind_dict = {}
             
             for pos in watch_list.position_list:
-                ind,score = last_transaction_indicator(pos)
+                ind,score,direction = last_transaction_indicator(pos)
                 #print comparison
                 if ind:
                     
-                    print("{} Score: ${:<7.2f}"\
-                      .format(pos['ticker'],score))
+                    print("{} Score: ${:<7.2f} Last transaction: {}"\
+                      .format(pos['ticker'],score,direction.upper()))
                 else:
                     pass
             print("Done checking.\n")
