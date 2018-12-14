@@ -80,7 +80,7 @@ class positions():
             try:        
                 pos['cost basis'] = accum/shares
             except ZeroDivisionError:
-                print("Currently holding zero shares.")
+##                print("Currently holding zero shares.")
                 pos['cost basis'] = 0
             pos['current shares'] = shares
 
@@ -252,7 +252,6 @@ def edit(watch_list):
                 elif edit_sel == 'Delete symbol':
                     pass
                                 
-
 def last_transaction_indicator(position):
     indicator = False
     score = 0
@@ -268,7 +267,8 @@ def last_transaction_indicator(position):
 
         # test for indicator
         if last_t['b/s'].lower() == 'b':
-            if float(last_t['price']) < float(last_close):
+            # Note that this logic assumes a $4.95 commission and $0 fee.
+            if float(last_t['price'])+(4.95/last_t['shares']) < float(last_close):
                 indicator = True
                 score = (last_close - last_t['price']) * last_t['shares']
                 direction = last_t['b/s']
@@ -277,7 +277,8 @@ def last_transaction_indicator(position):
 
                 
         elif last_t['b/s'].lower() == 's':
-            if float(last_t['price']) > float(last_close):
+            # Note that this logic assumes a $4.95 commission and $0 fee.
+            if float(last_t['price']) > float(last_close)+(4.95/last_t['shares']):
                 indicator = True
                 score = (last_t['price'] - last_close) * last_t['shares']
                 direction = last_t['b/s']
@@ -293,11 +294,13 @@ def parse_date(date):
     d = dt.date(year,month,day)
     return(d)
 
-def get_dividends(watch_list):
+def get_dividends(watch_list, force_all=False):
     '''This function gets a list of historical dividends for the given symbol,
     determines how many shares were held at each dividend date and adds a
     dividend transaction for each one to the position data. This function
-    need only be run for dates after the most recent dividend transaction.'''
+    need only be run for dates after the most recent dividend transaction.
+    force_all will find dividends for positions for which no shares are
+    currently held.'''
     for pos in watch_list.position_list:
         div_exists = False
         n = 0
@@ -311,7 +314,7 @@ def get_dividends(watch_list):
             print("Latest recorded dividend was {}".format(pos['dividends'][-1]['date']))
             date = parse_date(pos['dividends'][-1]['date'])
 
-        if pos['current shares'] > 0:
+        if pos['current shares'] > 0 or force_all:
             div_df = web.DataReader(pos['ticker'],'yahoo-dividends',date)
             for stamp in div_df.index:
                 year = stamp.year
@@ -342,17 +345,17 @@ watch_list = positions()
 
 style.use("fivethirtyeight")
 
-print('\033[2J')
+print('\033[2J') # Clear the terminal
 watch_list.load_positions()
 watch_list.calc_cost_basis()
-get_dividends(watch_list)
+
 while(True):
     try:
         selections = ['Order',
                       'View',
                       'Indicators',
                       'Edit',
-                      'Clear console',
+                      'Other',
                       'Save',
                       'Quit']
         selection = selections[si.select(selections)]
@@ -370,25 +373,64 @@ while(True):
                     pass
                 
         elif selection == 'Indicators':
-            ind_dict = {}
+            ind_dict = {"Last Transaction":[],
+                        "High Dividend Yield":[],
+                        "Recent Passed Dividend":[]}
             
-            for pos in watch_list.position_list:
+            print("\nWorking on \"Last Transaction\" indicator.\n")
+            for index, pos in enumerate(watch_list.position_list):
                 ind,score,direction = last_transaction_indicator(pos)
+
+                # Given the direction of the last transaction, the advised
+                # direction should be the opposite.
+                if direction.lower() == 'b':
+                    direction = "Sell"
+                elif direction.lower() == 's':
+                    direction = "Buy"
+                    
                 #print comparison
                 if ind:
-                    
-                    print("{} Score: ${:<7.2f} Last transaction: {}"\
-                      .format(pos['ticker'],score,direction.upper()))
+                    ind_dict["Last Transaction"].append \
+                                   ({"Ticker":pos['ticker'],
+                                     "Score":score,
+                                     "Direction":direction.upper()})
                 else:
                     pass
+                print("\033[1A\033[K", end='')
+                # \033[K = Erase to the end of line
+                # \033[1A = moves the cursor up 1 line.
+                print("{}/{}".format(index, len(watch_list.position_list),end=''))
+            print("\033[1A\033[K", end='')    
             print("Done checking.\n")
-                
+            for indicator in ind_dict["Last Transaction"]:
+                print("{:<4} Score: ${:<7.2f} Advise: {}".format\
+                      (indicator["Ticker"],
+                       indicator["Score"],
+                       indicator["Direction"].upper()))
+            print("\n",end='')
+
+            for indicator in ind_dict["High Dividend Yield"]:
+                pass
+            for indicator in ind_dict["Recent Passed Dividend"]:
+                pass
         elif selection == 'Edit':
             edit(watch_list)
-            
-        elif selection == 'Clear console':
-            print('\033[2J')
-            # console command to clear console and return to (0,0)
+
+        elif selection == 'Other':
+            print('\n',end='')
+            selections = ['Get all dividends',
+                          'Get dividends for current positions',
+                          'Clear console']
+            selection = selections[si.select(selections)]
+            if selection == 'Get all dividends':
+                get_dividends(watch_list, force_all=True)
+
+            elif selection == 'Get dividends for current positions':
+                get_dividends(watch_list)
+                
+            elif selection == 'Clear console':
+                print('\033[2J')
+                # console command to clear console and return to (0,0)
 
         elif selection == 'Save':
             watch_list.save_positions()
