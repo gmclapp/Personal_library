@@ -290,6 +290,28 @@ def last_transaction_indicator(position):
                 
     return(indicator, score, direction)
 
+def div_yield_indicator(position):
+    indicator = False
+    score = 0
+    direction = 'b'
+    # today's date
+    today = dt.date.today()
+    last_year = dt.date(today.year-1,1,1)
+
+    try:
+        df = web.DataReader(position["ticker"],"yahoo",today)
+        last_close = df["Close"][0]
+
+        div_df = web.DataReader(position['ticker'],'yahoo-dividends',last_year)
+        dividend = div_df['value'][0]
+
+        div_yield = (dividend/last_close)*4 # assumes quarterly dividend.
+        print(position['ticker'],':',div_yield)
+    except:
+        print("Indicator failed.")
+        
+    return(indicator, score, direction)
+
 def parse_date(date):
     year,month,day = [int(x) for x in date.split('-')]
     d = dt.date(year,month,day)
@@ -405,6 +427,11 @@ while(True):
                 print("{}/{}".format(index, len(watch_list.position_list),end=''))
             print("\033[1A\033[K", end='')    
             print("Done checking.\n")
+            
+            print("\nWorking on \"Dividend Yield\" indicator.\n")
+            for index,pos in enumerate(watch_list.position_list):
+                ind,score,direction = div_yield_indicator(pos)
+                
             for indicator in ind_dict["Last Transaction"]:
                 print("{:<6} Score: ${:<7.2f} Advise: {}".format\
                       (indicator["Ticker"],
