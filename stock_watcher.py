@@ -5,10 +5,11 @@ import pandas as pd
 import pandas_datareader.data as web
 import json
 import sys
+import os
 import sanitize_inputs as si
 
 __version__ = '0.5.0'
-
+os.system("mode con cols=60 lines=60")
 
 class positions():
     def __init__(self):
