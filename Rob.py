@@ -1,4 +1,6 @@
 import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
 
 def tab_dict(rfile):
     '''This function opens an excel file and returns a dictionary where the
@@ -48,6 +50,31 @@ POSTdf.drop(columns = ['Date',
 
 PREavg = PREdf.groupby("SAMP_NUM").mean()
 POSTavg = POSTdf.groupby("SAMP_NUM").mean()
+# Note that taking the mean by sample number drops columns with text data
+# We still need test condition data before stacking the data
+PREavg["Test Condition"] = "PRE"
+POSTavg["Test Condition"] = "POST"
+
+stacked_data = pd.concat([PREavg,POSTavg])
+stacked_data.to_csv("stacked_data.csv")
+
+# For the actual tests we'll do the following
+diffDF = pd.DataFrame()
+for col in PREavg:
+    try:
+        diffDF[col] = PREavg[col].sub(POSTavg[col])
+    except:
+        continue
+
+# For paired data, if a sample was not measured both PRE and POST that row
+# will contain 'NA' instead of data. Let's remove those rows.
+
+diffDF = diffDF.dropna()
+
+# create the histograms
+histograms = diffDF.hist()
+
+
 
 Specs = {"SA_GS_3":{"USL":8.1,
                     "LSL":6.1},
@@ -78,10 +105,7 @@ Specs = {"SA_GS_3":{"USL":8.1,
 
 sn = "SAMP_NUM" # column containing sample numbers
 
-##print(veg_dataframe.head(1)) # prints the first row of the vegetables tab
-##print(flower_dataframe.tail(1)) # prints the last row of the flower tab
-##dand_column = weed_dataframe["Dandelions"]
-##
-##for row in enumerate(dand_column):
-##    print(row)
+# Show the plots
+plt.show()
+
 
