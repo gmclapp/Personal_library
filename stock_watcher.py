@@ -501,4 +501,7 @@ while(True):
 ## 'dividends':[{'date':'2018-10-02','amount':0.07,'shares':100},
 ##              {'date':'2018-11-25','amount':0.11,'shares':230}],
 ## 'cost basis':9.285,
-##  'current shares':230}]
+##  'current shares':230,
+##  'last price': 5.43,
+##  'last price date':'2018-12-20'}]
+    
