@@ -9,7 +9,7 @@ import sys
 import os
 import sanitize_inputs as si
 
-__version__ = '0.5.0'
+__version__ = '0.6.0'
 os.system("mode con cols=60 lines=60")
 
 class positions():
