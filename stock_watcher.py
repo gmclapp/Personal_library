@@ -9,7 +9,7 @@ import sys
 import os
 import sanitize_inputs as si
 
-__version__ = '0.6.0'
+__version__ = '0.6.1'
 os.system("mode con cols=60 lines=60")
 
 class positions():
@@ -22,7 +22,8 @@ class positions():
             plist.append(pos['ticker'])
         return(plist)
     
-    def enter_order(self, buysell, date, ticker, shares, price, commission=4.95, fees=0):
+    def enter_order(self, buysell, date, ticker, shares, price,
+                    commission=4.95, fees=0):
         '''buysell = 'buy' or 'sell', date of order(str), stock ticker (not case
         sensitive), price of order, number of shares transacted,
         commission, and fees if applicable.'''
@@ -32,7 +33,11 @@ class positions():
             if ticker == pos['ticker']:
                 exists_flag = True
                 print("Position is already on watch list")
-                pos['transactions'].append({'b/s':buysell,'date':date,'price':price,'commission':commission,'fees':fees,'shares':shares})
+                pos['transactions'].append({'b/s':buysell,
+                                            'date':date,
+                                            'price':price,
+                                            'commission':commission,
+                                            'fees':fees,'shares':shares})
         if exists_flag:
             pass
         else:
@@ -49,7 +54,8 @@ class positions():
             if ticker == pos['ticker']:
                 exists_flag = True
                 total = amount*shares
-                print("Shares: {}; Dividend: ${:<7.2f}; Total: ${:<7.2f}".format(shares,amount,total))
+                print("Shares: {}; Dividend: ${:<7.2f}; Total: ${:<7.2f}"\
+                      .format(shares,amount,total))
                 pos['dividends'].append({'date': date,
                                          'amount':amount,
                                          'shares':shares,
@@ -129,7 +135,8 @@ def order(watch_list):
         month = today.month
         day = today.day
     elif date_selection == 'Enter date':
-        year = si.get_integer("Enter year.\n>>>",upper=today.year+1,lower=1970)
+        year = si.get_integer("Enter year.\n>>>",
+                              upper=today.year+1,lower=1970)
         month = si.get_integer("Enter month.\n>>>",upper=13,lower=0)
         day = si.get_integer("Enter day.\n>>>",upper=32,lower=0)
     date_str = str(year)+'-'+str(month)+'-'+str(day)
@@ -153,12 +160,13 @@ def view(pos):
     print("Shares: {}".format(pos["current shares"]))
     print("Current cost basis: ${:<7.2f}".format(pos["cost basis"]))
     today = dt.date.today()
-    try:
-        df = web.DataReader(pos["ticker"],"yahoo",today)
-        last_close = df["Close"][0]
-        print("Current price: ${:<7.2f}\n".format(last_close))
-    except:
-        print("Current price data unavailable.")
+    #try:
+    df = get_quoteDF(pos["ticker"],"yahoo",today)
+    #df = web.DataReader(pos["ticker"],"yahoo",today)
+    last_close = df["Close"][0]
+    print("Current price: ${:<7.2f}\n".format(last_close))
+    #except:
+    #    print("Current price data unavailable.")
         
     
     for t in pos["transactions"]:
@@ -187,7 +195,11 @@ def edit(watch_list):
                 print("Which transaction would you like to edit?")
                 tran_list = []
                 for t in pos["transactions"]:
-                    trans_str = "{}: {} {} @ ${:<7.4f}".format(t['date'],t['b/s'].upper(),t['shares'],t['price'])
+                    trans_str = "{}: {} {} @ ${:<7.4f}"\
+                                .format(t['date'],
+                                        t['b/s'].upper(),
+                                        t['shares'],
+                                        t['price'])
                     tran_list.append(trans_str)
                 t_sel = tran_list[si.select(tran_list)]
                 for i,t in enumerate(tran_list): # get index of transaction
@@ -204,9 +216,12 @@ def edit(watch_list):
                 
                 if e_choice == 'Date':
                     today = dt.date.today()
-                    year = si.get_integer("Enter year.\n>>>",upper=today.year+1,lower=1970)
-                    month = si.get_integer("Enter month.\n>>>",upper=13,lower=0)
-                    day = si.get_integer("Enter day.\n>>>",upper=32,lower=0)
+                    year = si.get_integer("Enter year.\n>>>",
+                                          upper=today.year+1,lower=1970)
+                    month = si.get_integer("Enter month.\n>>>",
+                                           upper=13,lower=0)
+                    day = si.get_integer("Enter day.\n>>>",
+                                         upper=32,lower=0)
                     date_str = str(year)+'-'+str(month)+'-'+str(day)
                     
                     pos["transactions"][i]['date'] = date_str
@@ -220,12 +235,14 @@ def edit(watch_list):
                     pos["transactions"][i]['b/s'] = order[0].lower()
                     
                 elif e_choice == 'Shares':
-                    shares = si.get_integer("Enter number of shares.\n>>>",lower=0)
+                    shares = si.get_integer("Enter number of shares.\n>>>",
+                                            lower=0)
                     
                     pos["transactions"][i]['shares'] = shares
                     
                 elif e_choice == 'Price':
-                    price = si.get_real_number("Enter share price.\n>>>",lower=0)
+                    price = si.get_real_number("Enter share price.\n>>>",
+                                               lower=0)
 
                     pos["transactions"][i]['price'] = price
 
@@ -254,44 +271,78 @@ def edit(watch_list):
                 elif edit_sel == 'Delete symbol':
                     pass
                                 
-def last_transaction_indicator(position):
+def last_transaction_indicator(watch_list, ind_dict):
     indicator = False
     score = 0
     # today's date
     today = dt.date.today()
 
-    try:
-        df = web.DataReader(position["ticker"],"yahoo",today)
-        last_close = df["Close"][0]
+    for index, position in enumerate(watch_list.position_list):
+        # The next few lines print progress indication
+        print("\033[1A\033[K", end='')
+        # \033[K = Erase to the end of line
+        # \033[1A = moves the cursor up 1 line.
+        print("{}/{}".format(index,len(watch_list.position_list),end=''))
+        
+        indicator = False
+        score = 0
+        try:
+            df = web.DataReader(position["ticker"],"yahoo",today)
+            last_close = df["Close"][0]
 
-        # Get last transaction
-        last_t = position["transactions"][-1]
+            position["last price"] = last_close
+            year=today.year
+            month=today.month
+            day=today.day
+            position["last price date"] = \
+                           str(year)+'-'+str(month)+'-'+str(day)
+            # Get last transaction
+            last_t = position["transactions"][-1]
 
-        # test for indicator
-        if last_t['b/s'].lower() == 'b':
-            # Note that this logic assumes a $4.95 commission and $0 fee.
-            if float(last_t['price'])+(4.95/last_t['shares']) < float(last_close):
-                indicator = True
-                score = (last_close - last_t['price']) * last_t['shares']
-                direction = last_t['b/s']
+            # test for indicator
+            if last_t['b/s'].lower() == 'b':
+                # Note that this logic assumes a $4.95 commission and $0 fee.
+                if (float(last_t['price'])
+                    +(4.95/last_t['shares']) < float(last_close)):
+                    
+                    indicator = True
+                    score = (last_close - last_t['price']) * last_t['shares']
+                    direction = last_t['b/s']
+                else:
+                    direction = 'N/A'
+   
+            elif last_t['b/s'].lower() == 's':
+                # Note that this logic assumes a $4.95 commission and $0 fee.
+                if (float(last_t['price']) > float(last_close)
+                    +(4.95/last_t['shares'])):
+                    
+                    indicator = True
+                    score = (last_t['price'] - last_close) * last_t['shares']
+                    direction = last_t['b/s']
+                else:
+                    direction = 'N/A'
+            if direction.lower() == 'b':
+                direction = 'SELL'
+            elif direction.lower() == 's':
+                direction = 'BUY'
             else:
-                direction = 'N/A'
-
+                pass
                 
-        elif last_t['b/s'].lower() == 's':
-            # Note that this logic assumes a $4.95 commission and $0 fee.
-            if float(last_t['price']) > float(last_close)+(4.95/last_t['shares']):
-                indicator = True
-                score = (last_t['price'] - last_close) * last_t['shares']
-                direction = last_t['b/s']
-            else:
-                direction = 'N/A'
-    except:
-        print("Indicator failed.")
-                
-    return(indicator, score, direction)
+        except:
+            print("Indicator failed.")
+        if indicator:
+            ind_dict["Last Transaction"].append \
+                           ({"Ticker":position['ticker'],
+                             "Score":score,
+                             "Direction":direction.upper()})
+        else:
+            pass
 
-def div_yield_indicator(position):
+        #time.sleep(1) # Delay so that we're not throttled by yahoo-finance
+        
+    return(watch_list, ind_dict)
+
+def div_yield_indicator(watch_list, ind_dict):
     indicator = False
     score = 0
     direction = 'b'
@@ -299,19 +350,34 @@ def div_yield_indicator(position):
     today = dt.date.today()
     last_year = dt.date(today.year-1,1,1)
 
-    try:
-        df = web.DataReader(position["ticker"],"yahoo",today)
-        last_close = df["Close"][0]
-
-        div_df = web.DataReader(position['ticker'],'yahoo-dividends',last_year)
-        dividend = div_df['value'][0]
-
-        div_yield = (dividend/last_close)*4 # assumes quarterly dividend.
-        print("{:5}: {:4.2f}%".format(position['ticker'],div_yield*100))
-    except:
-        print("Indicator failed.")
+    for index,position in enumerate(watch_list.position_list):
+        # The next few lines print progress indication
+        print("\033[1A\033[K", end='')
+        # \033[K = Erase to the end of line
+        # \033[1A = moves the cursor up 1 line.
+        print("{}/{}".format(index,len(watch_list.position_list),end=''))
         
-    return(indicator, score, direction)
+        try:
+            df = web.DataReader(position["ticker"],"yahoo",today)
+            last_close = df["Close"][0]
+
+            div_df = web.DataReader(position['ticker'],
+                                    'yahoo-dividends',last_year)
+            dividend = div_df['value'][0]
+
+            score = (dividend/last_close)*4 # assumes quarterly dividend.
+            direction = "N/A"
+            ind_dict["High Dividend Yield"].append \
+                           ({"Ticker":position['ticker'],
+                             "Score":score,
+                             "Direction":direction.upper()})
+            
+            #print("{:5}: {:4.2f}%".format(position['ticker'],div_yield*100))
+        except:
+            print("Indicator failed.")
+        #time.sleep(1)
+        
+    return(watch_list, ind_dict)
 
 def parse_date(date):
     year,month,day = [int(x) for x in date.split('-')]
@@ -329,13 +395,15 @@ def get_dividends(watch_list, force_all=False):
         div_exists = False
         n = 0
         if len(pos['dividends']) == 0:
-            print("No dividends have been recorded for {}.".format(pos['ticker']))
+            print("No dividends have been recorded for {}."\
+                  .format(pos['ticker']))
             # if no dividends have been recorded, find the earliest dated
             # transaction.
             date = parse_date(pos['transactions'][0]['date'])
         else:
             div_exists = True
-            print("Latest recorded dividend was {}".format(pos['dividends'][-1]['date']))
+            print("Latest recorded dividend was {}"\
+                  .format(pos['dividends'][-1]['date']))
             date = parse_date(pos['dividends'][-1]['date'])
 
         if pos['current shares'] > 0 or force_all:
@@ -358,12 +426,30 @@ def get_dividends(watch_list, force_all=False):
             pass
             #print("Didn't fetch dividends. Not holding any shares.")
         print("processed {} dividends.".format(n))
+
+def timeout_handler(num, stack):
+    raise Exception("Timeout")
+
+def get_divDF(ticker,source,date):
+    try:
+        div_df = web.DataReader(ticker,source,date)
+    except Exception as ex:
+        print(ex)
+        print("No response from yahoo-finance.")
+
+    finally:
+        signal.alarm(0)
         
-        
-                
-    # Find the most recent dividend transaction posted in a position
-    # Find the shares held at each dividend ex-date after the last one processed.
-    # Add new dividend transactions
+    return(div_df)
+
+def get_quoteDF(ticker,source,date):
+    try:
+        df = web.DataReader(ticker,source,date)
+    except Exception as ex:
+        print(ex)
+        print("No response from yahoo-finance.")
+    
+    return(df)
 
 watch_list = positions()
 
@@ -404,37 +490,14 @@ while(True):
                         "Over-exposure":[]}
             
             print("\nWorking on \"Last Transaction\" indicator.\n")
-            for index, pos in enumerate(watch_list.position_list):
-                ind,score,direction = last_transaction_indicator(pos)
-
-                # Given the direction of the last transaction, the advised
-                # direction should be the opposite.
-                if direction.lower() == 'b':
-                    direction = "Sell"
-                elif direction.lower() == 's':
-                    direction = "Buy"
-                    
-                #print comparison
-                if ind:
-                    ind_dict["Last Transaction"].append \
-                                   ({"Ticker":pos['ticker'],
-                                     "Score":score,
-                                     "Direction":direction.upper()})
-                else:
-                    pass
-                print("\033[1A\033[K", end='')
-                # \033[K = Erase to the end of line
-                # \033[1A = moves the cursor up 1 line.
-                print("{}/{}".format(index, len(watch_list.position_list),end=''))
-                time.sleep(1)
+            watch_list, ind_dict = last_transaction_indicator(watch_list,
+                                                              ind_dict)
             print("\033[1A\033[K", end='')    
             print("Done checking.\n")
             
             print("\nWorking on \"Dividend Yield\" indicator.\n")
-            for index,pos in enumerate(watch_list.position_list):
-                ind,score,direction = div_yield_indicator(pos)
-                print("{}/{}".format(index, len(watch_list.position_list),end=''))
-                time.sleep(1)
+            watch_list, ind_dict = div_yield_indicator(watch_list,ind_dict)
+                
             for indicator in ind_dict["Last Transaction"]:
                 print("{:<6} Score: ${:<7.2f} Advise: {}".format\
                       (indicator["Ticker"],
@@ -443,7 +506,12 @@ while(True):
             print("\n",end='')
 
             for indicator in ind_dict["High Dividend Yield"]:
-                pass
+                print("{:<6} Score: {:<7.2f}% Advise: {}".format\
+                      (indicator["Ticker"],
+                       indicator["Score"]*100,
+                       indicator["Direction"].upper()))
+            print("\n",end='')
+            
             for indicator in ind_dict["Recent Passed Dividend"]:
                 pass
         elif selection == 'Edit':
@@ -481,8 +549,8 @@ while(True):
         
     except:
         print("Unexpected error:",sys.exc_info())
-        continue
-        #raise
+        #continue
+        raise
     
 ##-example data structure-##
 ##positions = 
@@ -504,4 +572,3 @@ while(True):
 ##  'current shares':230,
 ##  'last price': 5.43,
 ##  'last price date':'2018-12-20'}]
-    
