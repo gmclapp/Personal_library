@@ -1,4 +1,5 @@
 import datetime as dt
+import time
 import matplotlib.pyplot as plt
 from matplotlib import style
 import pandas as pd
@@ -306,7 +307,7 @@ def div_yield_indicator(position):
         dividend = div_df['value'][0]
 
         div_yield = (dividend/last_close)*4 # assumes quarterly dividend.
-        print(position['ticker'],':',div_yield)
+        print("{:5}: {:4.2f}%".format(position['ticker'],div_yield*100))
     except:
         print("Indicator failed.")
         
@@ -425,13 +426,15 @@ while(True):
                 # \033[K = Erase to the end of line
                 # \033[1A = moves the cursor up 1 line.
                 print("{}/{}".format(index, len(watch_list.position_list),end=''))
+                time.sleep(1)
             print("\033[1A\033[K", end='')    
             print("Done checking.\n")
             
             print("\nWorking on \"Dividend Yield\" indicator.\n")
             for index,pos in enumerate(watch_list.position_list):
                 ind,score,direction = div_yield_indicator(pos)
-                
+                print("{}/{}".format(index, len(watch_list.position_list),end=''))
+                time.sleep(1)
             for indicator in ind_dict["Last Transaction"]:
                 print("{:<6} Score: ${:<7.2f} Advise: {}".format\
                       (indicator["Ticker"],
