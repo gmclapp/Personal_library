@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.patches import Patch
 
 def tab_dict(rfile):
     '''This function opens an excel file and returns a dictionary where the
@@ -68,13 +69,7 @@ for col in PREavg:
 
 # For paired data, if a sample was not measured both PRE and POST that row
 # will contain 'NA' instead of data. Let's remove those rows.
-
 diffDF = diffDF.dropna()
-
-# create the histograms
-#histograms = diffDF.hist()
-
-
 
 Specs = {"SA_GS_3":{"USL":8.1,
                     "LSL":6.1},
@@ -103,94 +98,31 @@ Specs = {"SA_GS_3":{"USL":8.1,
          "SA_DET_54":{"USL":22,
                     "LSL":20}}
 
+axes = []
+for ax in range(16):
+    axes.append(plt.subplot2grid((4,4),(int(ax/4),int(ax%4)), rowspan=1,colspan=1))
 
-ax1 = plt.subplot2grid((4,4),(0,0), rowspan=1,colspan=1)
-ax2 = plt.subplot2grid((4,4),(0,1), rowspan=1,colspan=1)
-ax3 = plt.subplot2grid((4,4),(0,2), rowspan=1,colspan=1)
-ax4 = plt.subplot2grid((4,4),(0,3), rowspan=1,colspan=1)
-ax5 = plt.subplot2grid((4,4),(1,0), rowspan=1,colspan=1)
-ax6 = plt.subplot2grid((4,4),(1,1), rowspan=1,colspan=1)
-ax7 = plt.subplot2grid((4,4),(1,2), rowspan=1,colspan=1)
-ax8 = plt.subplot2grid((4,4),(1,3), rowspan=1,colspan=1)
+for i, k in enumerate(Specs.keys()):
+    try:
+        axes[i].hist(x=PREavg[k], bins=10,alpha=0.5,color='blue')
+    except:
+        print("Fucking bins...")
 
-ax9 = plt.subplot2grid((4,4),(2,0), rowspan=1,colspan=1)
-ax10 = plt.subplot2grid((4,4),(2,1), rowspan=1,colspan=1)
-ax11 = plt.subplot2grid((4,4),(2,2), rowspan=1,colspan=1)
-ax12 = plt.subplot2grid((4,4),(2,3), rowspan=1,colspan=1)
-ax13 = plt.subplot2grid((4,4),(3,0), rowspan=1,colspan=1)
-ax14 = plt.subplot2grid((4,4),(3,1), rowspan=1,colspan=1)
-ax15 = plt.subplot2grid((4,4),(3,2), rowspan=1,colspan=1)
-ax16 = plt.subplot2grid((4,4),(3,3), rowspan=1,colspan=1)
+    try:
+        axes[i].hist(x=POSTavg[k], bins=10,alpha=0.5,color='orange')
+    except:
+        print("Fucking bins...")
+        
+    axes[i].axvline(Specs[k]["USL"],color='r')
+    axes[i].axvline(Specs[k]["LSL"],color='r')
+    center = (Specs[k]["USL"]+Specs[k]["LSL"])/2
+    #axes[i].text(center,20,k) Use this kind of thing to display p value
+    axes[i].set_title(k)
 
-ax1.hist(x=PREavg["SA_GS_3"], bins='auto',alpha=0.5)
-ax1.hist(x=POSTavg["SA_GS_3"], bins='auto',alpha=0.5)
-ax1.axvline(Specs["SA_GS_3"]["USL"],color='r')
-ax1.axvline(Specs["SA_GS_3"]["LSL"],color='r')
-
-ax2.hist(x=PREavg["SA_GS_6"], bins='auto',alpha=0.5)
-ax2.hist(x=POSTavg["SA_GS_6"], bins='auto',alpha=0.5)
-ax2.axvline(Specs["SA_GS_6"]["USL"],color='r')
-ax2.axvline(Specs["SA_GS_6"]["LSL"],color='r')
-
-ax3.hist(x=PREavg["SA_GS_9"], bins='auto',alpha=0.5)
-ax3.hist(x=POSTavg["SA_GS_9"], bins='auto',alpha=0.5)
-ax3.axvline(Specs["SA_GS_9"]["USL"],color='r')
-ax3.axvline(Specs["SA_GS_9"]["LSL"],color='r')
-
-#ax4.hist(x=PREavg["SA_GS_12"], bins='auto',alpha=0.5)
-ax4.hist(x=POSTavg["SA_GS_12"], bins='auto',alpha=0.5)
-ax4.axvline(Specs["SA_GS_12"]["USL"],color='r')
-ax4.axvline(Specs["SA_GS_12"]["LSL"],color='r')
-
-ax5.hist(x=PREavg["SA_GS_15"], bins='auto',alpha=0.5)
-ax5.hist(x=POSTavg["SA_GS_15"], bins='auto',alpha=0.5)
-ax5.axvline(Specs["SA_GS_15"]["USL"],color='r')
-ax5.axvline(Specs["SA_GS_15"]["LSL"],color='r')
-
-ax6.hist(x=PREavg["SA_GS_17"], bins='auto',alpha=0.5)
-ax6.hist(x=POSTavg["SA_GS_17"], bins='auto',alpha=0.5)
-ax6.axvline(Specs["SA_GS_17"]["USL"],color='r')
-ax6.axvline(Specs["SA_GS_17"]["LSL"],color='r')
-
-ax7.hist(x=PREavg["SA_GS_19"], bins='auto',alpha=0.5)
-ax7.hist(x=POSTavg["SA_GS_19"], bins='auto',alpha=0.5)
-ax7.axvline(Specs["SA_GS_19"]["USL"],color='r')
-ax7.axvline(Specs["SA_GS_19"]["LSL"],color='r')
-
-ax8.hist(x=PREavg["SA_GS_21"], bins='auto',alpha=0.5)
-ax8.hist(x=POSTavg["SA_GS_21"], bins='auto',alpha=0.5)
-ax8.axvline(Specs["SA_GS_21"]["USL"],color='r')
-ax8.axvline(Specs["SA_GS_21"]["LSL"],color='r')
-
-#ax9.hist(x=PREavg["SA_GS_23"], bins='auto',alpha=0.5)
-ax9.hist(x=POSTavg["SA_GS_23"], bins='auto',alpha=0.5)
-ax9.axvline(Specs["SA_GS_23"]["USL"],color='r')
-ax9.axvline(Specs["SA_GS_23"]["LSL"],color='r')
-
-ax10.hist(x=PREavg["SA_GS_26"], bins='auto',alpha=0.5)
-ax10.hist(x=POSTavg["SA_GS_26"], bins='auto',alpha=0.5)
-ax10.axvline(Specs["SA_GS_26"]["USL"],color='r')
-ax10.axvline(Specs["SA_GS_26"]["LSL"],color='r')
-
-ax11.hist(x=PREavg["SA_GS_29"], bins='auto',alpha=0.5)
-ax11.hist(x=POSTavg["SA_GS_29"], bins='auto',alpha=0.5)
-ax11.axvline(Specs["SA_GS_29"]["USL"],color='r')
-ax11.axvline(Specs["SA_GS_29"]["LSL"],color='r')
-
-ax12.hist(x=PREavg["SA_GS_32"], bins='auto',alpha=0.5)
-ax12.hist(x=POSTavg["SA_GS_32"], bins='auto',alpha=0.5)
-ax12.axvline(Specs["SA_GS_32"]["USL"],color='r')
-ax12.axvline(Specs["SA_GS_32"]["LSL"],color='r')
-
-ax13.hist(x=PREavg["SA_DET_54"], bins='auto',alpha=0.5)
-ax13.hist(x=POSTavg["SA_DET_54"], bins='auto',alpha=0.5)
-ax13.axvline(Specs["SA_DET_54"]["USL"],color='r')
-ax13.axvline(Specs["SA_DET_54"]["LSL"],color='r')
-
-
-sn = "SAMP_NUM" # column containing sample numbers
 
 # Show the plots
+leg_elems = [Patch(facecolor='orange',edgecolor='orange',alpha=0.5,label='POST'),
+             Patch(facecolor='blue',edgecolor='blue',alpha=0.5,label='PRE')]
+plt.subplots_adjust(left=0.05,bottom=0.1,right=0.95,top=0.95,wspace=0.2,hspace=0.4)
+plt.figlegend(handles=leg_elems)
 plt.show()
-
-
