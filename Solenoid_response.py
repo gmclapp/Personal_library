@@ -41,21 +41,53 @@ def response_time(tdms_file):
 
     # Solenoid command times are used to break the laser data into sub frames
     # one for each response.
-    firstDF = LaserDF[int(cmd_time_1):int(cmd_time_2)]
-    secondDF = LaserDF[int(cmd_time_2):int(cmd_time_3)]
-    thirdDF = LaserDF[int(cmd_time_3):]
+    firstDF = LaserDF[int(cmd_time_1)-100:int(cmd_time_2)]
+    secondDF = LaserDF[int(cmd_time_2)-100:int(cmd_time_3)]
+    thirdDF = LaserDF[int(cmd_time_3)-100:]
 
+##    print(firstDF.head())
+##    print(secondDF.head())
+##    print(thirdDF.head())
+##    
+##    print(firstDF.tail())
+##    print(secondDF.tail())
+##    print(thirdDF.tail())
 
-    print(firstDF.head())
-    print(secondDF.head())
-    print(thirdDF.head())
+    plt.close('all')
+    ax1 = plt.subplot2grid((2,3),(0,0),rowspan=1,colspan=1)
+    ax2 = plt.subplot2grid((2,3),(0,1),rowspan=1,colspan=1)
+    ax3 = plt.subplot2grid((2,3),(0,2),rowspan=1,colspan=1)
+
+    ax1.set_xlim(left=int(cmd_time_1)-100, right=int(cmd_time_1)+500)
+    ax2.set_xlim(left=int(cmd_time_2)-100, right=int(cmd_time_2)+500)
+    ax3.set_xlim(left=int(cmd_time_3)-100, right=int(cmd_time_3)+500)
     
-    print(firstDF.tail())
-    print(secondDF.tail())
-    print(thirdDF.tail())
+    ax1.hlines(4.3, 0, 10000)
+    ax2.hlines(4.3, 0, 10000)
+    ax3.hlines(4.3, 0, 10000)
+
+    ax1.plot(firstDF["Time Elapsed [ms]"],
+             firstDF["Laser [mm]"],
+             firstDF["Time Elapsed [ms]"],
+             firstDF["Velocity [m/s]"])
+
+    ax2.plot(secondDF["Time Elapsed [ms]"],
+             secondDF["Laser [mm]"],
+             secondDF["Time Elapsed [ms]"],
+             secondDF["Velocity [m/s]"])
     
-    #print(LaserDF.head())
-    LaserDF.plot(kind='line',x="Time Elapsed [ms]",y=["Laser [mm]","Velocity [m/s]"])
+    ax3.plot(thirdDF["Time Elapsed [ms]"],
+             thirdDF["Laser [mm]"],
+             thirdDF["Time Elapsed [ms]"],
+             thirdDF["Velocity [m/s]"])
+    
+    #LaserDF.plot(kind='line',x="Time Elapsed [ms]",y=["Laser [mm]","Velocity [m/s]"])
+    plt.subplots_adjust(left=0.05,
+                        bottom=0.1,
+                        right=0.95,
+                        top=0.95,
+                        wspace=0.2,
+                        hspace=0.4)
     plt.show()
 
     act_1_flag = False
@@ -112,6 +144,7 @@ try:
         response_time(tdms_file)
 except Exception as ex:
     print(ex)
+    raise
 
 print("Exit?")
 while(True):
