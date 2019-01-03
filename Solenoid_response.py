@@ -25,22 +25,38 @@ def response_time(tdms_file):
     temp = MetaDict['TEST_TEMP']
     volt = MetaDict['TEST_VOLT']
 
-    # This tab contains the time/distance data for the solenoid
-    LaserDF = tdms_file.object("Laser Data").as_dataframe()
-    dxdt(LaserDF,"Laser [mm]","Time Elapsed [ms]",0.085)
-    
-    #print(LaserDF.head())
-    LaserDF.plot(kind='line',x="Time Elapsed [ms]",y=["Laser [mm]","Velocity [m/s]"])
-    plt.show()
-    
     # This tab contains the solenoid actuation times
     SolDF = tdms_file.object("Results").as_dataframe()
     SolDict = SolDF.set_index("Name").to_dict()
     SolDict = SolDict["Value"]
-
+    
+    # These lines retrieve the solenoid activation command times
     cmd_time_1 = float(SolDict["T0_SOL_ON_1"])
     cmd_time_2 = float(SolDict["T0_SOL_ON_2"])
     cmd_time_3 = float(SolDict["T0_SOL_ON_3"])
+    
+    # This tab contains the time/distance data for the solenoid
+    LaserDF = tdms_file.object("Laser Data").as_dataframe()
+    dxdt(LaserDF,"Laser [mm]","Time Elapsed [ms]",0.085)
+
+    # Solenoid command times are used to break the laser data into sub frames
+    # one for each response.
+    firstDF = LaserDF[int(cmd_time_1):int(cmd_time_2)]
+    secondDF = LaserDF[int(cmd_time_2):int(cmd_time_3)]
+    thirdDF = LaserDF[int(cmd_time_3):]
+
+
+    print(firstDF.head())
+    print(secondDF.head())
+    print(thirdDF.head())
+    
+    print(firstDF.tail())
+    print(secondDF.tail())
+    print(thirdDF.tail())
+    
+    #print(LaserDF.head())
+    LaserDF.plot(kind='line',x="Time Elapsed [ms]",y=["Laser [mm]","Velocity [m/s]"])
+    plt.show()
 
     act_1_flag = False
     act_2_flag = False

@@ -494,16 +494,16 @@ while(True):
                                                               ind_dict)
             print("\033[1A\033[K", end='')    
             print("Done checking.\n")
-            
-            print("\nWorking on \"Dividend Yield\" indicator.\n")
-            watch_list, ind_dict = div_yield_indicator(watch_list,ind_dict)
-                
+
             for indicator in ind_dict["Last Transaction"]:
                 print("{:<6} Score: ${:<7.2f} Advise: {}".format\
                       (indicator["Ticker"],
                        indicator["Score"],
                        indicator["Direction"].upper()))
             print("\n",end='')
+            
+            print("\nWorking on \"Dividend Yield\" indicator.\n")
+            watch_list, ind_dict = div_yield_indicator(watch_list,ind_dict)
 
             for indicator in ind_dict["High Dividend Yield"]:
                 print("{:<6} Score: {:<7.2f}% Advise: {}".format\
