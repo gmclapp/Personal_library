@@ -5,6 +5,7 @@ import os
 import matplotlib.pyplot as plt
 
 __version__ = '0.1.0'
+plt.rcParams["figure.figsize"]=(16,8) # default figure size in inches.
 
 def dxdt(df, pos_col, time_col, noise_thres):
     ''' 1st derivative of position data is noisy. Values below noise_thres 
@@ -50,11 +51,18 @@ def response_time(tdms_file):
     start_pad = 100
     end_pad = 500
     plt.close('all')
+
+    row_labels = ["Warrant Number",
+                  "Sample Number",
+                  "Test Condition",
+                  "Temperature",
+                  "Voltage"]
+    
     for i in range(1,4):
         SolDictstr = "T0_SOL_ON_" + str(i)
         cmd_times.append(float(SolDict[SolDictstr]))
 
-        axes.append(plt.subplot2grid((2,3),(0,i%3),rowspan=1,colspan=1))
+        axes.append(plt.subplot2grid((1,3),(0,i-1),rowspan=1,colspan=1))
 
     for i in range(3):
         start = int(cmd_times[i])-start_pad
@@ -62,15 +70,21 @@ def response_time(tdms_file):
         resp_DFs.append(LaserDF[start:end])
 
         axes[i].set_xlim(left=start,right=end)
+        title_str = ("Warrant: {}\nSample: {}\nTest Condition: {}\nTemperature: {}\nVoltage: {}\nResponse: {}\n"\
+                     .format(warrant_number,sample_number,test_condition,temp,volt,i+1))
+        
+        axes[i].set_title(title_str,loc='left',horizontalalignment='left')
         axes[i].hlines(threshold, start, end, linestyles='dashed')
         axes[i].vlines(cmd_times[i], 0, 10, colors='r', linestyles='dashed')
 
         resp_DFs[i] = resp_DFs[i].reset_index()
+        resp_DFshifted = resp_DFs[i].shift(1)
         
         for j,x in enumerate(resp_DFs[i]["Laser [mm]"]):
-            if (float(x) > threshold
-                and not act_flags[i]
-                and cmd_times[i] > j):
+            #if (float(x) > threshold
+            if (float(x) > threshold and float(resp_DFshifted.at[j, "Laser [mm]"]) <= threshold):
+                #and not act_flags[i]
+                #and cmd_times[i] > j):
 
                 act_times.append(resp_DFs[i].at[j,"Time Elapsed [ms]"])
                 act_flags[i] = True
@@ -82,24 +96,23 @@ def response_time(tdms_file):
                 resp_DFs[i]["Laser [mm]"],
                 resp_DFs[i]["Time Elapsed [ms]"],
                 resp_DFs[i]["Velocity [m/s]"])
+        
+        for t in act_times:
+            print("act_time: ",t)
+            ax.scatter(t,threshold)
 
-        print("act_time: ",act_times[i])
-        ax.scatter(act_times[i],threshold)
+    axes[1].set_xlabel("Time since test start [ms]")
+    axes[0].set_ylabel("Displacement [mm]")
+        
 
-
-    plt.subplots_adjust(left=0.05,
+    plt.subplots_adjust(left=0.10,
                         bottom=0.1,
                         right=0.95,
-                        top=0.95,
+                        top=0.70,
                         wspace=0.2,
                         hspace=0.4)
-    plt.show()
     
-##    print("\nSample number:",sample_number)
-##    print("Test Condition:",test_condition)
-##    print("Temperature: {} Voltage:{}".format(temp, volt))
-##    print("Response time 1: {} ms\nResponse time 2: {} ms\nResponse time 3: {} ms"\
-##          .format(resp_time_1,resp_time_2,resp_time_3))
+    plt.show()
 
 # Define the directory in which the data are stored
 directory = input("Enter directory\n>>>")
@@ -116,10 +129,7 @@ try:
         tdms_file = TdmsFile(f)
         response_time(tdms_file)
 except Exception as ex:
-    print(ex)
+    #print(ex)
     raise
 
-print("Exit?")
-while(True):
-    pass
 
