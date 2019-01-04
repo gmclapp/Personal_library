@@ -4,6 +4,8 @@ from nptdms import TdmsFile
 import os
 import matplotlib.pyplot as plt
 
+__version__ = '0.1.0'
+
 def dxdt(df, pos_col, time_col, noise_thres):
     ''' 1st derivative of position data is noisy. Values below noise_thres 
     should be considered zero.'''
@@ -32,96 +34,144 @@ def response_time(tdms_file):
     SolDF = tdms_file.object("Results").as_dataframe()
     SolDict = SolDF.set_index("Name").to_dict()
     SolDict = SolDict["Value"]
-    
-    # These lines retrieve the solenoid activation command times
-    cmd_time_1 = float(SolDict["T0_SOL_ON_1"])
-    cmd_time_2 = float(SolDict["T0_SOL_ON_2"])
-    cmd_time_3 = float(SolDict["T0_SOL_ON_3"])
-    
+
     # This tab contains the time/distance data for the solenoid
     LaserDF = tdms_file.object("Laser Data").as_dataframe()
     dxdt(LaserDF,"Laser [mm]","Time Elapsed [ms]",0.085)
 
-    # Solenoid command times are used to break the laser data into sub frames
-    # one for each response.
-    firstDF = LaserDF[int(cmd_time_1)-100:int(cmd_time_2)]
-    secondDF = LaserDF[int(cmd_time_2)-100:int(cmd_time_3)]
-    thirdDF = LaserDF[int(cmd_time_3)-100:]
-
+#Experimental
+    cmd_times = []
+    resp_DFs = []
+    axes = []
+    
+    act_flags = [False,False,False]
+    act_times = []
+    resp_times = []
+    
+    start_pad = 100
+    end_pad = 500
     plt.close('all')
-    ax1 = plt.subplot2grid((2,3),(0,0),rowspan=1,colspan=1)
-    ax2 = plt.subplot2grid((2,3),(0,1),rowspan=1,colspan=1)
-    ax3 = plt.subplot2grid((2,3),(0,2),rowspan=1,colspan=1)
+    for i in range(1,4):
+        SolDictstr = "T0_SOL_ON_" + str(i)
+        cmd_times.append(float(SolDict[SolDictstr]))
 
-    ax1_xmin = int(cmd_time_1)-100
-    ax1_xmax = int(cmd_time_1)+500
+        axes.append(plt.subplot2grid((2,3),(0,i%3),rowspan=1,colspan=1))
 
-    ax2_xmin = int(cmd_time_2)-100
-    ax2_xmax = int(cmd_time_2)+500
+    for i in range(3):
+        start = int(cmd_times[i])-start_pad
+        end = int(cmd_times[i])+end_pad
+        resp_DFs.append(LaserDF[start:end])
 
-    ax3_xmin = int(cmd_time_3)-100
-    ax3_xmax = int(cmd_time_3)+500
-    
-    ax1.set_xlim(left=ax1_xmin, right=ax1_xmax)
-    ax2.set_xlim(left=ax2_xmin, right=ax2_xmax)
-    ax3.set_xlim(left=ax3_xmin, right=ax3_xmax)
-    
-    ax1.hlines(threshold, ax1_xmin, ax1_xmax, linestyles='dashed')
-    ax2.hlines(threshold, ax2_xmin, ax2_xmax, linestyles='dashed')
-    ax3.hlines(threshold, ax3_xmin, ax3_xmax, linestyles='dashed')
+        axes[i].set_xlim(left=start,right=end)
+        axes[i].hlines(threshold, start, end, linestyles='dashed')
+        axes[i].vlines(cmd_times[i], 0, 10, colors='r', linestyles='dashed')
 
-    ax1.vlines(cmd_time_1, 0, 10, colors='r', linestyles='dashed')
-    ax2.vlines(cmd_time_2, 0, 10, colors='r', linestyles='dashed')
-    ax3.vlines(cmd_time_3, 0, 10, colors='r', linestyles='dashed')
-    
-    ax1.plot(firstDF["Time Elapsed [ms]"],
-             firstDF["Laser [mm]"],
-             firstDF["Time Elapsed [ms]"],
-             firstDF["Velocity [m/s]"])
+        for j,x in enumerate(resp_DFs[i]["Laser [mm]"]):
+            if (float(x) > threshold
+                and not act_flags[i]
+                and cmd_times[i] > j > cmd_times[i+1]):
+                
+                act_times[i] = j
+                act_flags[i] = True
 
-    ax2.plot(secondDF["Time Elapsed [ms]"],
-             secondDF["Laser [mm]"],
-             secondDF["Time Elapsed [ms]"],
-             secondDF["Velocity [m/s]"])
-    
-    ax3.plot(thirdDF["Time Elapsed [ms]"],
-             thirdDF["Laser [mm]"],
-             thirdDF["Time Elapsed [ms]"],
-             thirdDF["Velocity [m/s]"])
+        resp_times.append(j - cmd_times[i])
 
-    act_1_flag = False
-    act_2_flag = False
-    act_3_flag = False
-    for i,x in enumerate(LaserDF["Laser [mm]"]):
-        if (float(x) > threshold
-            and not act_1_flag
-            and cmd_time_2 > i > cmd_time_1):
-            
-            act_time_1 = i
-            act_1_flag = True
+    for i,ax in enumerate(axes):
+        ax.plot(resp_DFs[i]["Time Elapsed [ms]"],
+                resp_DFs[i]["Laser [mm]"],
+                resp_DFs[i]["Time Elapsed [ms]"],
+                resp_DFs[i]["Velocity [m/s]"])
 
-        elif (float(x) > threshold
-              and not act_2_flag
-              and cmd_time_3 > i > cmd_time_2):
+        ax.scatter(act_times[i],threshold)
 
-            act_time_2 = i
-            act_2_flag = True
 
-        elif (float(x) > threshold
-              and not act_3_flag
-              and i > cmd_time_3):
-
-            act_time_3 = i
-            act_3_flag = True
-
-    resp_time_1 = act_time_1 - cmd_time_1
-    resp_time_2 = act_time_2 - cmd_time_2
-    resp_time_3 = act_time_3 - cmd_time_3
-
-    ax1.scatter(act_time_1, threshold)
-    ax2.scatter(act_time_2, threshold)
-    ax3.scatter(act_time_3, threshold)
-    
+#End experimental
+##        
+##    # These lines retrieve the solenoid activation command times
+##    cmd_time_1 = float(SolDict["T0_SOL_ON_1"])
+##    cmd_time_2 = float(SolDict["T0_SOL_ON_2"])
+##    cmd_time_3 = float(SolDict["T0_SOL_ON_3"])
+##
+##    # Solenoid command times are used to break the laser data into sub frames
+##    # one for each response.
+##    firstDF = LaserDF[int(cmd_time_1)-100:int(cmd_time_2)]
+##    secondDF = LaserDF[int(cmd_time_2)-100:int(cmd_time_3)]
+##    thirdDF = LaserDF[int(cmd_time_3)-100:]
+##
+##    plt.close('all')
+##    ax1 = plt.subplot2grid((2,3),(0,0),rowspan=1,colspan=1)
+##    ax2 = plt.subplot2grid((2,3),(0,1),rowspan=1,colspan=1)
+##    ax3 = plt.subplot2grid((2,3),(0,2),rowspan=1,colspan=1)
+##
+##    ax1_xmin = int(cmd_time_1)-100
+##    ax1_xmax = int(cmd_time_1)+500
+##
+##    ax2_xmin = int(cmd_time_2)-100
+##    ax2_xmax = int(cmd_time_2)+500
+##
+##    ax3_xmin = int(cmd_time_3)-100
+##    ax3_xmax = int(cmd_time_3)+500
+##    
+##    ax1.set_xlim(left=ax1_xmin, right=ax1_xmax)
+##    ax2.set_xlim(left=ax2_xmin, right=ax2_xmax)
+##    ax3.set_xlim(left=ax3_xmin, right=ax3_xmax)
+##    
+##    ax1.hlines(threshold, ax1_xmin, ax1_xmax, linestyles='dashed')
+##    ax2.hlines(threshold, ax2_xmin, ax2_xmax, linestyles='dashed')
+##    ax3.hlines(threshold, ax3_xmin, ax3_xmax, linestyles='dashed')
+##
+##    ax1.vlines(cmd_time_1, 0, 10, colors='r', linestyles='dashed')
+##    ax2.vlines(cmd_time_2, 0, 10, colors='r', linestyles='dashed')
+##    ax3.vlines(cmd_time_3, 0, 10, colors='r', linestyles='dashed')
+##    
+##    ax1.plot(firstDF["Time Elapsed [ms]"],
+##             firstDF["Laser [mm]"],
+##             firstDF["Time Elapsed [ms]"],
+##             firstDF["Velocity [m/s]"])
+##
+##    ax2.plot(secondDF["Time Elapsed [ms]"],
+##             secondDF["Laser [mm]"],
+##             secondDF["Time Elapsed [ms]"],
+##             secondDF["Velocity [m/s]"])
+##    
+##    ax3.plot(thirdDF["Time Elapsed [ms]"],
+##             thirdDF["Laser [mm]"],
+##             thirdDF["Time Elapsed [ms]"],
+##             thirdDF["Velocity [m/s]"])
+##
+##    act_1_flag = False
+##    act_2_flag = False
+##    act_3_flag = False
+##    for i,x in enumerate(LaserDF["Laser [mm]"]):
+##        if (float(x) > threshold
+##            and not act_1_flag
+##            and cmd_time_2 > i > cmd_time_1):
+##            
+##            act_time_1 = i
+##            act_1_flag = True
+##
+##        elif (float(x) > threshold
+##              and not act_2_flag
+##              and cmd_time_3 > i > cmd_time_2):
+##
+##            act_time_2 = i
+##            act_2_flag = True
+##
+##        elif (float(x) > threshold
+##              and not act_3_flag
+##              and i > cmd_time_3):
+##
+##            act_time_3 = i
+##            act_3_flag = True
+##
+##    resp_time_1 = act_time_1 - cmd_time_1
+##    resp_time_2 = act_time_2 - cmd_time_2
+##    resp_time_3 = act_time_3 - cmd_time_3
+##
+##    ax1.scatter(act_time_1, threshold)
+##    ax2.scatter(act_time_2, threshold)
+##    ax3.scatter(act_time_3, threshold)
+##    
     #LaserDF.plot(kind='line',x="Time Elapsed [ms]",y=["Laser [mm]","Velocity [m/s]"])
     plt.subplots_adjust(left=0.05,
                         bottom=0.1,
