@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.patches import Patch
 
 def tab_dict(rfile):
     '''This function opens an excel file and returns a dictionary where the
@@ -68,13 +69,7 @@ for col in PREavg:
 
 # For paired data, if a sample was not measured both PRE and POST that row
 # will contain 'NA' instead of data. Let's remove those rows.
-
 diffDF = diffDF.dropna()
-
-# create the histograms
-histograms = diffDF.hist()
-
-
 
 Specs = {"SA_GS_3":{"USL":8.1,
                     "LSL":6.1},
@@ -103,9 +98,31 @@ Specs = {"SA_GS_3":{"USL":8.1,
          "SA_DET_54":{"USL":22,
                     "LSL":20}}
 
-sn = "SAMP_NUM" # column containing sample numbers
+axes = []
+for ax in range(16):
+    axes.append(plt.subplot2grid((4,4),(int(ax/4),int(ax%4)), rowspan=1,colspan=1))
+
+for i, k in enumerate(Specs.keys()):
+    try:
+        axes[i].hist(x=PREavg[k], bins=10,alpha=0.5,color='blue')
+    except:
+        print("Fucking bins...")
+
+    try:
+        axes[i].hist(x=POSTavg[k], bins=10,alpha=0.5,color='orange')
+    except:
+        print("Fucking bins...")
+        
+    axes[i].axvline(Specs[k]["USL"],color='r')
+    axes[i].axvline(Specs[k]["LSL"],color='r')
+    center = (Specs[k]["USL"]+Specs[k]["LSL"])/2
+    #axes[i].text(center,20,k) Use this kind of thing to display p value
+    axes[i].set_title(k)
+
 
 # Show the plots
+leg_elems = [Patch(facecolor='orange',edgecolor='orange',alpha=0.5,label='POST'),
+             Patch(facecolor='blue',edgecolor='blue',alpha=0.5,label='PRE')]
+plt.subplots_adjust(left=0.05,bottom=0.1,right=0.95,top=0.95,wspace=0.2,hspace=0.4)
+plt.figlegend(handles=leg_elems)
 plt.show()
-
-

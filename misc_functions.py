@@ -1,13 +1,12 @@
 '''It is recommended to use this package with the sanitize_inputs package.\n
 The functions contained herein do not check for erroneous inputs.'''
 
-__version__ = "0.2.0"
+__version__ = "0.2.1"
 
 import math
 import csv
 import pandas as pd
 import pdb
-import cutie
 import os
 
 def interpolate(x1,y1,x2,y2,x):
@@ -257,7 +256,7 @@ def favstats(rfile, column):
           "\nStandard deviation: ",sd,
           "\nInter-quartile range: ",IQR,sep='')
 
-def t_test(rfile, col, xbar=0, alpha=0.05, twotail=True, lower=True):
+def t_test_file(rfile, col, xbar=0, alpha=0.05, twotail=True, lower=True):
     '''One sample t-test. Arguments are the csv file in which the data are
     located and the column in which the data are found along with an alpha
     value. var is the column name in which the category of interest is stored.
@@ -337,7 +336,7 @@ def t_test(rfile, col, xbar=0, alpha=0.05, twotail=True, lower=True):
     print("p = ",p)
     # formulate conclusion
     
-def t_test2(rfile, var, c1, c2, treat, alpha=0.05, twotail=True, lower=True):
+def t_test2_file(rfile, var, c1, c2, treat, alpha=0.05, twotail=True, lower=True):
     '''Two sample t-test. Arguments are the csv file in which the data are
     located and the two columns to be compared along with an alpha value.
     var is the column name in which the categories are stored, c1 and c2 are
@@ -446,6 +445,94 @@ def t_test2(rfile, var, c1, c2, treat, alpha=0.05, twotail=True, lower=True):
     
     return(df)
 
+def paired_t_test(DF1, DF2, alpha=0.05, mu=0, twotail=True, lower=True):
+    '''This function takes two pandas dataframes which must have the same index
+    and find the change in each item and perform a t-test to compare the
+    change to a given number.
+    
+    Index entries which don't appear in both dataframes will be removed
+    automatically.'''
+
+    diffDF = pd.DataFrame()
+    for col in DF1:
+        try:
+            diffDF[col] = DF1[col].sub(DF2[col])
+        except:
+            print("Paired data can only be calculated for numeric data.")
+            continue
+
+    diffDF = diffDF.dropna()
+    print(diffDF)
+    p = t_test(diffDF, alpha, mu, twotail, lower)
+    return(p)
+
+def t_test(series, alpha=0.05, mu=0, twotail=True, lower=True):
+    '''This function performs a 1 sample t-test on a pandas data series rather
+    than a file.'''
+
+    xbar_test = series.mean()
+    sd = series.std()
+    n = len(series)
+    DOF = n-1
+
+    # Look up the appropriate t statistic - a 2 parameter interpolation function
+    # would be nice here for an arbitrary value of alpha.
+    if twotail:
+        lookupfile = "twotail tstat.csv"
+        
+    else:
+        lookupfile = "onetail tstat.csv"
+    headers = list_headers(lookupfile,'r')
+    for i, h in enumerate(headers):
+        try:
+            if float(h) == float(alpha):
+                print("Alpha level is: ",float(alpha))
+            else:
+                pass
+        except ValueError:
+            continue
+    x1,y1,x2,y2 = vlookup(lookupfile, DOF, 0, i,skip_headers=False)
+    tsalpha = interpolate(x1,y1,x2,y2,DOF)
+
+    std_err = sd/n**0.5
+
+    # calculate the confidence interval
+    diff = (xbar_test - mu)
+    upper = (diff) + tsalpha*std_err
+    lower = (diff) - tsalpha*std_err
+    print((1-float(alpha))*100,"% Confidence interval: ",lower," - ",upper,sep='')
+    
+    # calculate p-value
+    ts = abs(diff/std_err)
+    if twotail:
+        #find p for given ts in twotail tstat.csv
+        lookupfileT = ("twotail tstat Transpose.csv")
+          
+    else:
+        #find p for given ts in onetail tstat.csv
+        lookupfileT = ("twotail tstat Transpose.csv")
+        if lower:
+            pass
+        else:
+            pass
+    headersT = list_headers(lookupfileT,'r')
+    for i, h in enumerate(headersT):
+        try:
+            if float(h) == float(DOF):
+                break
+            else:
+                pass
+        except ValueError:
+            continue   
+    x1,y1,x2,y2 = vlookup(lookupfileT, ts, i, 0,skip_headers=True)
+    print("({0},{1}) - ({2},{3})".format(x1,y1,x2,y2))
+    print("avg: {0}\nsd: {1}\nn: {2}\ndiff: {3}\nstd_err: {4}"\
+          .format(xbar_test,sd,n,diff,std_err))
+    print("ts = {0}".format(ts))
+    p = interpolate(x1,y1,x2,y2,ts)
+    print("p = ",p)
+
+    return(p)
     
 def r_ch_arc(Arc, Chord, dr):
     '''Find the radius of a circle given a chord length and an arc length. This
