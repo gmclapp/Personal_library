@@ -14,6 +14,9 @@ def dxdt(df, pos_col, time_col, noise_thres):
     df["Velocity [m/s]"] = filtered
     
 def response_time(tdms_file):
+    # The solenoid distance beyond which it is considered activated
+    threshold = 4.3 #mm
+    
     # This tab contains the sample number information
     MetaDF = tdms_file.object("Meta Data").as_dataframe()
     MetaDict = MetaDF.set_index("Name").to_dict()
@@ -45,27 +48,32 @@ def response_time(tdms_file):
     secondDF = LaserDF[int(cmd_time_2)-100:int(cmd_time_3)]
     thirdDF = LaserDF[int(cmd_time_3)-100:]
 
-##    print(firstDF.head())
-##    print(secondDF.head())
-##    print(thirdDF.head())
-##    
-##    print(firstDF.tail())
-##    print(secondDF.tail())
-##    print(thirdDF.tail())
-
     plt.close('all')
     ax1 = plt.subplot2grid((2,3),(0,0),rowspan=1,colspan=1)
     ax2 = plt.subplot2grid((2,3),(0,1),rowspan=1,colspan=1)
     ax3 = plt.subplot2grid((2,3),(0,2),rowspan=1,colspan=1)
 
-    ax1.set_xlim(left=int(cmd_time_1)-100, right=int(cmd_time_1)+500)
-    ax2.set_xlim(left=int(cmd_time_2)-100, right=int(cmd_time_2)+500)
-    ax3.set_xlim(left=int(cmd_time_3)-100, right=int(cmd_time_3)+500)
-    
-    ax1.hlines(4.3, 0, 10000)
-    ax2.hlines(4.3, 0, 10000)
-    ax3.hlines(4.3, 0, 10000)
+    ax1_xmin = int(cmd_time_1)-100
+    ax1_xmax = int(cmd_time_1)+500
 
+    ax2_xmin = int(cmd_time_2)-100
+    ax2_xmax = int(cmd_time_2)+500
+
+    ax3_xmin = int(cmd_time_3)-100
+    ax3_xmax = int(cmd_time_3)+500
+    
+    ax1.set_xlim(left=ax1_xmin, right=ax1_xmax)
+    ax2.set_xlim(left=ax2_xmin, right=ax2_xmax)
+    ax3.set_xlim(left=ax3_xmin, right=ax3_xmax)
+    
+    ax1.hlines(threshold, ax1_xmin, ax1_xmax, linestyles='dashed')
+    ax2.hlines(threshold, ax2_xmin, ax2_xmax, linestyles='dashed')
+    ax3.hlines(threshold, ax3_xmin, ax3_xmax, linestyles='dashed')
+
+    ax1.vlines(cmd_time_1, 0, 10, colors='r', linestyles='dashed')
+    ax2.vlines(cmd_time_2, 0, 10, colors='r', linestyles='dashed')
+    ax3.vlines(cmd_time_3, 0, 10, colors='r', linestyles='dashed')
+    
     ax1.plot(firstDF["Time Elapsed [ms]"],
              firstDF["Laser [mm]"],
              firstDF["Time Elapsed [ms]"],
@@ -80,15 +88,6 @@ def response_time(tdms_file):
              thirdDF["Laser [mm]"],
              thirdDF["Time Elapsed [ms]"],
              thirdDF["Velocity [m/s]"])
-    
-    #LaserDF.plot(kind='line',x="Time Elapsed [ms]",y=["Laser [mm]","Velocity [m/s]"])
-    plt.subplots_adjust(left=0.05,
-                        bottom=0.1,
-                        right=0.95,
-                        top=0.95,
-                        wspace=0.2,
-                        hspace=0.4)
-    plt.show()
 
     act_1_flag = False
     act_2_flag = False
@@ -119,6 +118,19 @@ def response_time(tdms_file):
     resp_time_2 = act_time_2 - cmd_time_2
     resp_time_3 = act_time_3 - cmd_time_3
 
+    ax1.scatter(act_time_1, threshold)
+    ax2.scatter(act_time_2, threshold)
+    ax3.scatter(act_time_3, threshold)
+    
+    #LaserDF.plot(kind='line',x="Time Elapsed [ms]",y=["Laser [mm]","Velocity [m/s]"])
+    plt.subplots_adjust(left=0.05,
+                        bottom=0.1,
+                        right=0.95,
+                        top=0.95,
+                        wspace=0.2,
+                        hspace=0.4)
+    plt.show()
+    
     print("\nSample number:",sample_number)
     print("Test Condition:",test_condition)
     print("Temperature: {} Voltage:{}".format(temp, volt))
@@ -128,9 +140,6 @@ def response_time(tdms_file):
 # Define the directory in which the data are stored
 directory = input("Enter directory\n>>>")
 #directory = r"\\jsjcorp.com\data\GHSP\GH\webdata\Testing\2018\20184410\Parametric Data"
-
-# The solenoid distance beyond which it is considered activated
-threshold = 4.3 #mm
 
 tdms_files = []
 for file in os.listdir(directory):
