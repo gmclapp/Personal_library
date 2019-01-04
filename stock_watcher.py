@@ -337,9 +337,7 @@ def last_transaction_indicator(watch_list, ind_dict):
                              "Direction":direction.upper()})
         else:
             pass
-
-        #time.sleep(1) # Delay so that we're not throttled by yahoo-finance
-        
+  
     return(watch_list, ind_dict)
 
 def div_yield_indicator(watch_list, ind_dict):
@@ -371,11 +369,8 @@ def div_yield_indicator(watch_list, ind_dict):
                            ({"Ticker":position['ticker'],
                              "Score":score,
                              "Direction":direction.upper()})
-            
-            #print("{:5}: {:4.2f}%".format(position['ticker'],div_yield*100))
         except:
-            print("Indicator failed.")
-        #time.sleep(1)
+            pass
         
     return(watch_list, ind_dict)
 
