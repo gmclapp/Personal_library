@@ -173,14 +173,14 @@ def view(pos):
     #except:
     #    print("Current price data unavailable.")
         
-    
+    print("Transactions:")
     for t in pos["transactions"]:
         print("{}: {} {} @ ${:<7.4f}".format(t['date'],t['b/s'].upper(),
                                              t['shares'],t['price']))
-    print("\n",end='')
+    print("\nDividends:")
     for d in pos['dividends']:
-        print("Shares: {}; Dividend: ${:<7.2f}; Total: ${:<7.2f}"\
-              .format(d['shares'],d['amount'],d['total']))
+        print("{}: {} x ${:<7.2f} = ${:<7.2f}"\
+              .format(d['date'],d['shares'],d['amount'],d['total']))
 
 def edit(watch_list):
     print("\n",end='')
@@ -550,7 +550,7 @@ while(True):
     except:
         print("Unexpected error:",sys.exc_info())
         #continue
-        raise
+        #raise
     
 ##-example data structure-##
 ##positions = 
