@@ -10,7 +10,7 @@ import os
 import sanitize_inputs as si
 
 __version__ = '0.6.1'
-os.system("mode con cols=60 lines=60")
+#os.system("mode con cols=60 lines=60")
 
 # Hide all warnings
 if not sys.warnoptions:
@@ -402,10 +402,11 @@ def get_dividends(watch_list, force_all=False):
             date = parse_date(pos['transactions'][0]['date'])
         else:
             div_exists = True
-            print("Latest recorded dividend was {}"\
-                  .format(pos['dividends'][-1]['date']))
-            date = parse_date(pos['dividends'][-1]['date'])
-
+            print("{}: Latest recorded dividend was {}"\
+                  .format(pos["ticker"],pos['dividends'][0]['date']))
+            date = parse_date(pos['dividends'][0]['date'])
+            
+        #date = parse_date(pos['transactions'][0]['date'])
         if pos['current shares'] > 0 or force_all:
             div_df = web.DataReader(pos['ticker'],'yahoo-dividends',date)
             for stamp in div_df.index:
@@ -415,13 +416,16 @@ def get_dividends(watch_list, force_all=False):
                 date_str = str(year)+'-'+str(month)+'-'+str(day)
                 d = dt.date(year,month,day)
                 delta = int((date - d).days)
-                if delta > 0 or not div_exists:
+                if delta < 0 or not div_exists:
+                    print("processing dividend.")
                     n+=1
                     shares = watch_list.shares_at_date(pos['ticker'],d)
                     dividend = float(div_df.loc[stamp]['value'])
                     
                     watch_list.enter_dividend(pos['ticker'],
                                               date_str, dividend, shares)
+                else:
+                    print("{}: dividends are up to date.".format(pos['ticker']))
         else:
             pass
             #print("Didn't fetch dividends. Not holding any shares.")
