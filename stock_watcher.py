@@ -248,7 +248,6 @@ def edit(watch_list):
 
                 elif e_choice == 'Delete transaction':
                     pos["transactions"].pop(i)
-                watch_list.calc_cost_basis()
                 
     elif edit_sel == 'Dividends':
         print("For which position would you like to edit a dividend?")
@@ -307,7 +306,6 @@ def edit(watch_list):
 
                 elif e_choice == 'Delete dividend':
                     pos["dividends"].pop(i)
-                watch_list.calc_cost_basis()
                     
     elif edit_sel == 'Tickers':
         tick_options = ['Edit symbol',
@@ -327,11 +325,11 @@ def edit(watch_list):
                     
                 elif edit_sel == 'Delete symbol':
                     pass
+    watch_list.calc_cost_basis()    
                                 
 def last_transaction_indicator(watch_list, ind_dict):
     indicator = False
     score = 0
-    # today's date
     today = dt.date.today()
 
     for index, position in enumerate(watch_list.position_list):
@@ -400,7 +398,6 @@ def div_yield_indicator(watch_list, ind_dict):
     indicator = False
     score = 0
     direction = 'b'
-    # today's date
     today = dt.date.today()
     last_year = dt.date(today.year-1,1,1)
 
@@ -459,11 +456,17 @@ def get_dividends(watch_list, force_all=False):
             date = parse_date(pos['transactions'][0]['date'])
         else:
             div_exists = True
+            latest = parse_date(pos['transactions'][0]['date'])
+            for d in pos['dividends']:
+                date = parse_date(d['date'])
+                test = int((date-latest).days)
+                if test > 0:
+                    latest = date
+            latest_str = unpack_date(latest)
             print("{}: Latest recorded dividend was {}"\
-                  .format(pos["ticker"],pos['dividends'][0]['date']))
-            date = parse_date(pos['dividends'][0]['date'])
-            
-        #date = parse_date(pos['transactions'][0]['date'])
+                    .format(pos['ticker'],latest_str))
+            date = latest
+
         if pos['current shares'] > 0 or force_all:
             div_df = web.DataReader(pos['ticker'],'yahoo-dividends',date)
             for stamp in div_df.index:
@@ -484,7 +487,6 @@ def get_dividends(watch_list, force_all=False):
                     print("{}: dividends are up to date.".format(pos['ticker']))
         else:
             pass
-            #print("Didn't fetch dividends. Not holding any shares.")
         print("processed {} dividends.".format(n))
 
 def timeout_handler(num, stack):
