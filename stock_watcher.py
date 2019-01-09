@@ -93,7 +93,6 @@ class positions():
             try:        
                 pos['cost basis'] = accum/shares
             except ZeroDivisionError:
-##                print("Currently holding zero shares.")
                 pos['cost basis'] = 0
             pos['current shares'] = shares
 
@@ -110,9 +109,7 @@ class positions():
                            
                         elif transaction['b/s'] == 's':
                             shares -= transaction['shares']
-        return(shares)
-                           
-            
+        return(shares)            
 
     def save_positions(self):
         with open("watchlist.stk",'w') as f:
@@ -165,13 +162,11 @@ def view(pos):
     print("Shares: {}".format(pos["current shares"]))
     print("Current cost basis: ${:<7.2f}".format(pos["cost basis"]))
     today = dt.date.today()
-    #try:
+
     df = get_quoteDF(pos["ticker"],"yahoo",today)
-    #df = web.DataReader(pos["ticker"],"yahoo",today)
+
     last_close = df["Close"][0]
     print("Current price: ${:<7.2f}\n".format(last_close))
-    #except:
-    #    print("Current price data unavailable.")
         
     print("Transactions:")
     for t in pos["transactions"]:
@@ -256,7 +251,64 @@ def edit(watch_list):
                 watch_list.calc_cost_basis()
                 
     elif edit_sel == 'Dividends':
-        pass
+        print("For which position would you like to edit a dividend?")
+        edit_pos = viewlist[si.select(viewlist)]
+        for pos in watch_list.position_list:
+            if pos["ticker"] == edit_pos:
+                print("Which dividend would you like to edit?")
+                div_list = []
+                for d in pos["dividends"]:
+                    div_str = "{}: {} x ${:<7.2f} = ${:<7.2f}"\
+                                .format(d['date'],
+                                        d['shares'],
+                                        d['amount'],
+                                        d['total'])
+                    
+                    div_list.append(div_str)
+                d_sel = div_list[si.select(div_list)]
+                for i,d in enumerate(div_list): # get index of transaction
+                    if d_sel == d:
+                        break
+                    
+                print("What would you like to edit?")
+                edit_choices = ['Date',
+                                'Amount',
+                                'Shares',
+                                'Total',
+                                'Delete dividend']
+                
+                e_choice = edit_choices[si.select(edit_choices)]
+                if e_choice == 'Date':
+                    today = dt.date.today()
+                    year = si.get_integer("Enter year.\n>>>",
+                                          upper=today.year+1,lower=1970)
+                    month = si.get_integer("Enter month.\n>>>",
+                                           upper=13,lower=0)
+                    day = si.get_integer("Enter day.\n>>>",
+                                         upper=32,lower=0)
+                    date_str = str(year)+'-'+str(month)+'-'+str(day)
+                    
+                    pos["dividends"][i]['date'] = date_str
+                    
+                elif e_choice == 'Amount':
+                    amount = si.get_real_number("Enter dividend amount.\n>>>",
+                                               lower=0)
+                    pos["dividends"][i]['amount'] = amount
+                elif e_choice == 'Shares':
+                    shares = si.get_integer("Enter number of shares.\n>>>",
+                                            lower=0)
+                    
+                    pos["dividends"][i]['shares'] = shares
+                    
+                elif e_choice == 'Total':
+                    price = si.get_real_number("Enter total dividend.\n>>>",
+                                               lower=0)
+                    pos["dividends"][i]['total'] = price
+
+                elif e_choice == 'Delete dividend':
+                    pos["dividends"].pop(i)
+                watch_list.calc_cost_basis()
+                    
     elif edit_sel == 'Tickers':
         tick_options = ['Edit symbol',
                         'Delete symbol']
@@ -296,9 +348,8 @@ def last_transaction_indicator(watch_list, ind_dict):
             last_close = df["Close"][0]
 
             position["last price"] = last_close
-            year=today.year
-            month=today.month
-            day=today.day
+            year,month,day = unpack_date(today)
+
             position["last price date"] = \
                            str(year)+'-'+str(month)+'-'+str(day)
             # Get last transaction
@@ -384,6 +435,12 @@ def parse_date(date):
     d = dt.date(year,month,day)
     return(d)
 
+def unpack_date(date):
+    year=date.year
+    month=date.month
+    day=date.day
+    return(year,month,day)
+
 def get_dividends(watch_list, force_all=False):
     '''This function gets a list of historical dividends for the given symbol,
     determines how many shares were held at each dividend date and adds a
@@ -410,9 +467,8 @@ def get_dividends(watch_list, force_all=False):
         if pos['current shares'] > 0 or force_all:
             div_df = web.DataReader(pos['ticker'],'yahoo-dividends',date)
             for stamp in div_df.index:
-                year = stamp.year
-                month = stamp.month
-                day = stamp.day
+                year,month,day = unpack_date(stamp)
+
                 date_str = str(year)+'-'+str(month)+'-'+str(day)
                 d = dt.date(year,month,day)
                 delta = int((date - d).days)
@@ -553,6 +609,7 @@ while(True):
         
     except:
         print("Unexpected error:",sys.exc_info())
+        time.sleep(60)
         #continue
         #raise
     
