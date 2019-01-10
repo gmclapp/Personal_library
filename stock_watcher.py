@@ -536,8 +536,13 @@ while(True):
             
         elif selection == 'View':
             print("\n",end='')# Add whitespace between this and previous menu.
-            viewlist = watch_list.list_positions()
+            viewlist = ["Portfolio"]+watch_list.list_positions()
             view_pos = viewlist[si.select(viewlist)]
+            if view_pos == "Portfolio":
+                for pos in watch_list.position_list:
+                    if pos["current shares"] != 0:
+                        print("{:<6} Shares: {}"\
+                              .format(pos["ticker"], pos["current shares"]))
             for pos in watch_list.position_list:
                 if pos["ticker"] == view_pos:
                     view(pos)
