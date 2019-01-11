@@ -19,7 +19,7 @@ def dxdt(df, pos_col, time_col, noise_thres):
     
 def response_time(tdms_file, directory):
     # The solenoid distance beyond which it is considered activated
-    threshold = 4.3 #mm
+    threshold = 4.5 #mm
     
     # This tab contains the sample number information
     MetaDF = tdms_file.object("Meta Data").as_dataframe()
