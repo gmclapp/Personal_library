@@ -3,6 +3,7 @@ import numpy as np
 from nptdms import TdmsFile
 import os
 import matplotlib.pyplot as plt
+import csv
 
 __version__ = '0.1.0'
 plt.rcParams["figure.figsize"]=(16,8) # default figure size in inches.
@@ -16,7 +17,7 @@ def dxdt(df, pos_col, time_col, noise_thres):
     filtered = round(change/noise_thres,0)*noise_thres
     df["Velocity [m/s]"] = filtered
     
-def response_time(tdms_file):
+def response_time(tdms_file, directory):
     # The solenoid distance beyond which it is considered activated
     threshold = 4.3 #mm
     
@@ -31,6 +32,8 @@ def response_time(tdms_file):
     temp = MetaDict['TEST_TEMP']
     volt = MetaDict['TEST_VOLT']
 
+    newrow = [sample_number, temp, volt]
+    
     # This tab contains the solenoid actuation times
     SolDF = tdms_file.object("Results").as_dataframe()
     SolDict = SolDF.set_index("Name").to_dict()
@@ -79,18 +82,31 @@ def response_time(tdms_file):
 
         resp_DFs[i] = resp_DFs[i].reset_index()
         resp_DFshifted = resp_DFs[i].shift(1)
-        
+
+        first_response_flag = False
+        bounce_flag = False
         for j,x in enumerate(resp_DFs[i]["Laser [mm]"]):
             #if (float(x) > threshold
-            if (float(x) > threshold and float(resp_DFshifted.at[j, "Laser [mm]"]) <= threshold):
-                #and not act_flags[i]
-                #and cmd_times[i] > j):
-
-                act_times.append(resp_DFs[i].at[j,"Time Elapsed [ms]"])
+            if (float(x) > threshold
+                and float(resp_DFshifted.at[j, "Laser [mm]"]) <= threshold):
+                act_time = resp_DFs[i].at[j,"Time Elapsed [ms]"]
+                act_times.append(act_time)
                 act_flags[i] = True
+                if not first_response_flag:
+                    first_response_flag = True
+                    
+                elif first_response_flag:
+                    bounce_flag = True
 
-        resp_times.append(j - cmd_times[i])
-
+                resp_times.append(act_time - cmd_times[i])
+        
+        if bounce_flag:
+            newrow.append(resp_times[-2])
+            newrow.append(resp_times[-1])
+        else:
+            newrow.append(resp_times[-1])
+            newrow.append("N/A")
+            
     for i,ax in enumerate(axes):
         ax.plot(resp_DFs[i]["Time Elapsed [ms]"],
                 resp_DFs[i]["Laser [mm]"],
@@ -98,7 +114,6 @@ def response_time(tdms_file):
                 resp_DFs[i]["Velocity [m/s]"])
         
         for t in act_times:
-            print("act_time: ",t)
             ax.scatter(t,threshold)
 
     axes[1].set_xlabel("Time since test start [ms]")
@@ -111,25 +126,49 @@ def response_time(tdms_file):
                         top=0.70,
                         wspace=0.2,
                         hspace=0.4)
-    
-    plt.show()
 
+    if bounce_flag:
+        filename = str(sample_number)+str(temp)+str(volt)+'.png'
+        plt.savefig(filename, bbox_inches='tight')
+    else:
+        pass
+    
+    #plt.show()
+    csvfile = open('response times.csv','a',newline='')
+    WRT = csv.writer(csvfile, dialect='excel')        
+    WRT.writerow(newrow)
+    csvfile.close()
+    
 # Define the directory in which the data are stored
 directory = input("Enter directory\n>>>")
 #directory = r"\\jsjcorp.com\data\GHSP\GH\webdata\Testing\2018\20184410\Parametric Data"
 
 tdms_files = []
+csvfile = open('response times.csv','w',newline='')
+WRT = csv.writer(csvfile, dialect='excel')
+WRT.writerow(["Sample number","Temperature (C)","Voltage (V)",
+              "Response 1A [ms]","Response 1B [ms]",
+              "Response 2A [ms]","Response 2B [ms]",
+              "Response 3A [ms]","Response 3B [ms]"])
+csvfile.close()
+
 for file in os.listdir(directory):
     if file.endswith(".tdms"):
         #print(file)
         tdms_files.append(os.path.join(directory,file))
 
-try:
-    for f in tdms_files:
-        tdms_file = TdmsFile(f)
-        response_time(tdms_file)
-except Exception as ex:
-    #print(ex)
-    raise
+
+for f in tdms_files:
+    tdms_file = TdmsFile(f)
+    try:
+        response_time(tdms_file, directory)
+    except KeyError:
+        print("Faulty tdms file {}.".format(str(f)))
+        continue
+    except Exception as ex:
+        #print(ex)
+        raise
+
+print("Finished processing {}".format(directory))
 
 
