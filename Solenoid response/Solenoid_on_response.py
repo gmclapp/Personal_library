@@ -86,7 +86,6 @@ def response_time(tdms_file, directory):
         first_response_flag = False
         bounce_flag = False
         for j,x in enumerate(resp_DFs[i]["Laser [mm]"]):
-            #if (float(x) > threshold
             if (float(x) > threshold
                 and float(resp_DFshifted.at[j, "Laser [mm]"]) <= threshold):
                 act_time = resp_DFs[i].at[j,"Time Elapsed [ms]"]
@@ -133,7 +132,6 @@ def response_time(tdms_file, directory):
     else:
         pass
     
-    #plt.show()
     csvfile = open('response times.csv','a',newline='')
     WRT = csv.writer(csvfile, dialect='excel')        
     WRT.writerow(newrow)
@@ -141,7 +139,6 @@ def response_time(tdms_file, directory):
     
 # Define the directory in which the data are stored
 directory = input("Enter directory\n>>>")
-#directory = r"\\jsjcorp.com\data\GHSP\GH\webdata\Testing\2018\20184410\Parametric Data"
 
 tdms_files = []
 csvfile = open('response times.csv','w',newline='')
@@ -154,7 +151,6 @@ csvfile.close()
 
 for file in os.listdir(directory):
     if file.endswith(".tdms"):
-        #print(file)
         tdms_files.append(os.path.join(directory,file))
 
 
@@ -166,7 +162,6 @@ for f in tdms_files:
         print("Faulty tdms file {}.".format(str(f)))
         continue
     except Exception as ex:
-        #print(ex)
         raise
 
 print("Finished processing {}".format(directory))

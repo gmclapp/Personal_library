@@ -117,7 +117,6 @@ def response_time(tdms_file, directory):
     filename = str(sample_number)+str(temp)+str(volt)+'.png'
     plt.savefig(filename, bbox_inches='tight')
     
-    #plt.show()
     csvfile = open('response times.csv','a',newline='')
     WRT = csv.writer(csvfile, dialect='excel')        
     WRT.writerow(newrow)
@@ -138,7 +137,6 @@ csvfile.close()
 
 for file in os.listdir(directory):
     if file.endswith(".tdms"):
-        #print(file)
         tdms_files.append(os.path.join(directory,file))
 
 
@@ -150,7 +148,6 @@ for f in tdms_files:
         print("Faulty tdms file {}.".format(str(f)))
         continue
     except Exception as ex:
-        #print(ex)
         raise
 
 print("Finished processing {}".format(directory))
