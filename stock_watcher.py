@@ -8,6 +8,7 @@ import json
 import sys
 import os
 import sanitize_inputs as si
+import threading
 
 __version__ = '0.6.1'
 #os.system("mode con cols=60 lines=60")
@@ -489,9 +490,6 @@ def get_dividends(watch_list, force_all=False):
             pass
         print("processed {} dividends.".format(n))
 
-def timeout_handler(num, stack):
-    raise Exception("Timeout")
-
 def get_divDF(ticker,source,date):
     try:
         div_df = web.DataReader(ticker,source,date)
@@ -504,13 +502,13 @@ def get_divDF(ticker,source,date):
         
     return(div_df)
 
+def timeout_timer():
+    time.sleep(15)
+    return(True)
+
 def get_quoteDF(ticker,source,date):
-    try:
-        df = web.DataReader(ticker,source,date)
-    except Exception as ex:
-        print(ex)
-        print("No response from yahoo-finance.")
-    
+
+    df = web.DataReader(ticker,source,date)    
     return(df)
 
 watch_list = positions()
