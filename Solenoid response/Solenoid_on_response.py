@@ -85,6 +85,8 @@ def response_time(tdms_file, directory):
 
         first_response_flag = False
         bounce_flag = False
+        rebound_min = float('Inf')
+        rebound_time = 0
         for j,x in enumerate(resp_DFs[i]["Laser [mm]"]):
             if (float(x) > threshold
                 and float(resp_DFshifted.at[j, "Laser [mm]"]) <= threshold):
@@ -98,13 +100,26 @@ def response_time(tdms_file, directory):
                     bounce_flag = True
 
                 resp_times.append(act_time - cmd_times[i])
-        
+            elif first_response_flag and float(x) < rebound_min:
+                rebound_min = float(x)
+
+            if (first_response_flag
+                  and float(x) < threshold
+                  and float(resp_DFshifted.at[j, "Laser [mm]"]) >= threshold):
+                  rebound_time = resp_DFs[i].at[j,"Time Elapsed [ms]"] - cmd_times[i]
+
         if bounce_flag:
             newrow.append(resp_times[-2])
             newrow.append(resp_times[-1])
+            relocked_time = resp_times[-1] - rebound_time
+            #print("down time: {}, up time: {}, difference: {}".format(rebound_time, resp_times[-1],relocked_time))
         else:
             newrow.append(resp_times[-1])
             newrow.append("N/A")
+            relocked_time = 0
+
+        newrow.append(rebound_min)
+        newrow.append(relocked_time)
             
     for i,ax in enumerate(axes):
         ax.plot(resp_DFs[i]["Time Elapsed [ms]"],
@@ -129,6 +144,7 @@ def response_time(tdms_file, directory):
     if bounce_flag:
         filename = str(sample_number)+str(temp)+str(volt)+'.png'
         plt.savefig(filename, bbox_inches='tight')
+        #plt.show()
     else:
         pass
     
@@ -144,9 +160,9 @@ tdms_files = []
 csvfile = open('response times.csv','w',newline='')
 WRT = csv.writer(csvfile, dialect='excel')
 WRT.writerow(["Sample number","Temperature (C)","Voltage (V)",
-              "Response 1A [ms]","Response 1B [ms]",
-              "Response 2A [ms]","Response 2B [ms]",
-              "Response 3A [ms]","Response 3B [ms]"])
+              "Response 1A [ms]","Response 1B [ms]","Rebound distance 1 [mm]","Re-locked time [ms]",
+              "Response 2A [ms]","Response 2B [ms]","Rebound distance 2 [mm]","Re-locked time [ms]",
+              "Response 3A [ms]","Response 3B [ms]","Rebound distance 3 [mm]","Re-locked time [ms]",])
 csvfile.close()
 
 for file in os.listdir(directory):
