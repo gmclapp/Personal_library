@@ -90,6 +90,7 @@ def response_time(tdms_file, directory):
         for j,x in enumerate(resp_DFs[i]["Laser [mm]"]):
             if (float(x) > threshold
                 and float(resp_DFshifted.at[j, "Laser [mm]"]) <= threshold):
+                
                 act_time = resp_DFs[i].at[j,"Time Elapsed [ms]"]
                 act_times.append(act_time)
                 act_flags[i] = True
@@ -104,9 +105,10 @@ def response_time(tdms_file, directory):
                 rebound_min = float(x)
 
             if (first_response_flag
-                  and float(x) < threshold
-                  and float(resp_DFshifted.at[j, "Laser [mm]"]) >= threshold):
-                  rebound_time = resp_DFs[i].at[j,"Time Elapsed [ms]"] - cmd_times[i]
+                and float(x) < threshold
+                and float(resp_DFshifted.at[j, "Laser [mm]"]) >= threshold):
+                
+                rebound_time = resp_DFs[i].at[j,"Time Elapsed [ms]"] - cmd_times[i]
 
         if bounce_flag:
             newrow.append(resp_times[-2])
@@ -133,7 +135,6 @@ def response_time(tdms_file, directory):
     axes[1].set_xlabel("Time since test start [ms]")
     axes[0].set_ylabel("Displacement [mm]")
         
-
     plt.subplots_adjust(left=0.10,
                         bottom=0.1,
                         right=0.95,
@@ -168,7 +169,6 @@ csvfile.close()
 for file in os.listdir(directory):
     if file.endswith(".tdms"):
         tdms_files.append(os.path.join(directory,file))
-
 
 for f in tdms_files:
     tdms_file = TdmsFile(f)
