@@ -143,7 +143,15 @@ def response_time(tdms_file, directory):
                         hspace=0.4)
 
     if bounce_flag:
+        suffix = 1
         filename = str(sample_number)+str(temp)+str(volt)+'.png'
+        f_exists = os.path.isfile(filename)
+        while f_exists:
+            filename=str(sample_number)+str(temp)+str(volt)+'_'+str(suffix)+'.png'
+            
+            f_exists = os.path.isfile(filename)
+            suffix += 1
+            
         plt.savefig(filename, bbox_inches='tight')
         #plt.show()
     else:
