@@ -78,6 +78,9 @@ class positions():
         for pos in self.position_list:
             accum = 0
             shares = 0
+            pos['transactions'].sort(key=lambda x: x['date'], reverse=False)
+            # in place sort of transactions list by date
+            
             for transaction in pos['transactions']:
                 if transaction['b/s'] == 'b':
                     shares += transaction['shares']
@@ -87,6 +90,9 @@ class positions():
                     shares -= transaction['shares']
                     accum -= transaction['price']*transaction['shares']\
                              + transaction['commission'] + transaction['fees']
+                    
+            pos['dividends'].sort(key=lambda x: x['date'], reverse=False)
+            # in place sort of dividends list by date
             for d in pos['dividends']:
                 accum -= d['total']
                     
