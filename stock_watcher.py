@@ -8,9 +8,8 @@ import json
 import sys
 import os
 import sanitize_inputs as si
-import threading
 
-__version__ = '0.6.1'
+__version__ = '0.6.2'
 #os.system("mode con cols=60 lines=60")
 
 # Hide all warnings
@@ -73,12 +72,15 @@ class positions():
                                    'dividends':[],
                                    'cost basis':0,
                                    'current shares':0})
+    def sort_open_positions(self):
+        self.position_list.sort(key=lambda x: x['ticker'], reverse=False)
+        
     def calc_cost_basis(self):
         print("Calculating cost basis...")
         for pos in self.position_list:
             accum = 0
             shares = 0
-            pos['transactions'].sort(key=lambda x: x['date'], reverse=False)
+            pos['transactions'].sort(key=lambda x: parse_date(x['date']), reverse=False)
             # in place sort of transactions list by date
             
             for transaction in pos['transactions']:
@@ -91,7 +93,7 @@ class positions():
                     accum -= transaction['price']*transaction['shares']\
                              + transaction['commission'] + transaction['fees']
                     
-            pos['dividends'].sort(key=lambda x: x['date'], reverse=False)
+            pos['dividends'].sort(key=lambda x: parse_date(x['date']), reverse=False)
             # in place sort of dividends list by date
             for d in pos['dividends']:
                 accum -= d['total']
@@ -171,9 +173,11 @@ def view(pos):
     today = dt.date.today()
 
     df = get_quoteDF(pos["ticker"],"yahoo",today)
-
-    last_close = df["Close"][0]
-    print("Current price: ${:<7.2f}\n".format(last_close))
+    if df is None:
+        print("Current price: No data")
+    else:
+        last_close = df["Close"][0]
+        print("Current price: ${:<7.2f}\n".format(last_close))
         
     print("Transactions:")
     for t in pos["transactions"]:
@@ -183,7 +187,8 @@ def view(pos):
     for d in pos['dividends']:
         print("{}: {} x ${:<7.2f} = ${:<7.2f}"\
               .format(d['date'],d['shares'],d['amount'],d['total']))
-
+    print("\n",end='')
+    
 def edit(watch_list):
     print("\n",end='')
     edit_list = ['Transactions',
@@ -502,10 +507,7 @@ def get_divDF(ticker,source,date):
     except Exception as ex:
         print(ex)
         print("No response from yahoo-finance.")
-
-    finally:
-        signal.alarm(0)
-        
+    
     return(div_df)
 
 def timeout_timer():
@@ -513,9 +515,14 @@ def timeout_timer():
     return(True)
 
 def get_quoteDF(ticker,source,date):
-
-    df = web.DataReader(ticker,source,date)    
-    return(df)
+    try:
+        df = web.DataReader(ticker,source,date)
+        return(df)
+    except:
+        print("No response from yahoo-finance")
+        return(None)
+        
+    
 
 watch_list = positions()
 
@@ -524,6 +531,7 @@ style.use("fivethirtyeight")
 print('\033[2J') # Clear the terminal
 watch_list.load_positions()
 watch_list.calc_cost_basis()
+watch_list.sort_open_positions()
 
 while(True):
     try:
@@ -566,6 +574,7 @@ while(True):
             print("\033[1A\033[K", end='')    
             print("Done checking.\n")
 
+            ind_dict["Last Transaction"].sort(key=lambda x: x["Score"], reverse=True)
             for indicator in ind_dict["Last Transaction"]:
                 print("{:<6} Score: ${:<7.2f} Advise: {}".format\
                       (indicator["Ticker"],
@@ -575,7 +584,8 @@ while(True):
             
             print("\nWorking on \"Dividend Yield\" indicator.\n")
             watch_list, ind_dict = div_yield_indicator(watch_list,ind_dict)
-
+            
+            ind_dict["High Dividend Yield"].sort(key=lambda x: x["Score"],reverse=True)
             for indicator in ind_dict["High Dividend Yield"]:
                 print("{:<6} Score: {:<7.2f}% Advise: {}".format\
                       (indicator["Ticker"],
@@ -620,8 +630,8 @@ while(True):
         
     except:
         print("Unexpected error:",sys.exc_info())
-        time.sleep(60)
-        #continue
+        #time.sleep(60)
+        continue
         #raise
     
 ##-example data structure-##
