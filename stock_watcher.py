@@ -20,7 +20,7 @@ if not sys.warnoptions:
 class positions():
     def __init__(self):
         self.position_list = []
-
+        self.meta_data = {}
     def list_positions(self):
         plist = []
         for pos in self.position_list:
@@ -104,7 +104,14 @@ class positions():
             except ZeroDivisionError:
                 pos['cost basis'] = 0
             pos['current shares'] = shares
-
+            
+    def calc_portfolio_value(self):
+        self.meta_data["portfolio value"] = 0
+        for pos in self.position_list:
+            if pos["current shares"] != 0:
+                pos_value = pos["last price"] * pos["current shares"]
+                self.meta_data["portfolio value"] += pos_value
+                
     def shares_at_date(self, ticker, date):
         '''takes a ticker symbol, and a datetime.date() and returns the number
         of shares of that symbol held at the given date.'''
@@ -122,12 +129,12 @@ class positions():
 
     def save_positions(self):
         with open("watchlist.stk",'w') as f:
-            json.dump(self.position_list, f)
+            json.dump([self.meta_data, self.position_list], f)
 
     def load_positions(self):
         print("Loading trading data...")
         with open("watchlist.stk","r") as f:
-            self.position_list = json.load(f)
+            self.meta_data, self.position_list = json.load(f)
 
 def order(watch_list):
     today = dt.date.today()
@@ -553,8 +560,12 @@ while(True):
             if view_pos == "Portfolio":
                 for pos in watch_list.position_list:
                     if pos["current shares"] != 0:
-                        print("{:<6} Shares: {}"\
-                              .format(pos["ticker"], pos["current shares"]))
+                        pos_value = pos["last price"] * pos["current shares"]
+                        print("{:<6} Shares: {} @ ${:<7.2f} = Value: ${:<7.2f}"\
+                              .format(pos["ticker"], pos["current shares"],
+                                      pos["last price"], pos_value))
+                watch_list.calc_portfolio_value()
+                print("Total value: ${:<7.2f}".format(watch_list.meta_data["portfolio value"]))
             for pos in watch_list.position_list:
                 if pos["ticker"] == view_pos:
                     view(pos)
