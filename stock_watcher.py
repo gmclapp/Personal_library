@@ -413,6 +413,33 @@ def last_transaction_indicator(watch_list, ind_dict):
   
     return(watch_list, ind_dict)
 
+def over_exposure_indicator(watch_list, ind_dict):
+    indicator = False
+    score = 0
+    direction = 's'
+    
+    for index,position in enumerate(watch_list.position_list):
+        # The next few lines print progress indication
+        print("\033[1A\033[K", end='')
+        # \033[K = Erase to the end of line
+        # \033[1A = moves the cursor up 1 line.
+        print("{}/{}".format(index,len(watch_list.position_list),end=''))
+
+        pos_exp = (position["current shares"] * position["last price"])\
+                  /watch_list.meta_data["portfolio value"]
+        score = watch_list.meta_data["exposure target"] - pos_exp
+        if score > 0:
+            direction = 'BUY'
+        elif score < 0:
+            direction = 'SELL'
+        else:
+            direction = 'N/A'
+        ind_dict["Over-exposure"].append \
+                       ({"Ticker":position['ticker'],
+                         "Score":score,
+                         "Direction":direction.upper()})
+    return(watch_list, ind_dict)
+
 def div_yield_indicator(watch_list, ind_dict):
     indicator = False
     score = 0
@@ -578,25 +605,38 @@ while(True):
                         "Recent Passed Dividend":[],
                         "Upcoming Dividend":[],
                         "Over-exposure":[]}
-            
+                
             print("\nWorking on \"Last Transaction\" indicator.\n")
             watch_list, ind_dict = last_transaction_indicator(watch_list,
                                                               ind_dict)
             print("\033[1A\033[K", end='')    
             print("Done checking.\n")
 
-            ind_dict["Last Transaction"].sort(key=lambda x: x["Score"], reverse=True)
+            ind_dict["Last Transaction"].sort(key=lambda x: x["Score"],
+                                              reverse=True)
             for indicator in ind_dict["Last Transaction"]:
                 print("{:<6} Score: ${:<7.2f} Advise: {}".format\
                       (indicator["Ticker"],
                        indicator["Score"],
                        indicator["Direction"].upper()))
             print("\n",end='')
+
+            print("\nWorking on \"Over-exposure\" indicator.\n")
+            watch_list, ind_dict = over_exposure_indicator(watch_list,
+                                                           ind_dict)
+            ind_dict["Over-exposure"].sort(key=lambda x: abs(x["Score"]),
+                                           reverse=True)
+            for indicator in ind_dict["Over-exposure"]:
+                print("{:<6} Score: {:<7.2f}% Advise: {}".format\
+                      (indicator["Ticker"],
+                       indicator["Score"]*100,
+                       indicator["Direction"].upper()))
             
             print("\nWorking on \"Dividend Yield\" indicator.\n")
             watch_list, ind_dict = div_yield_indicator(watch_list,ind_dict)
             
-            ind_dict["High Dividend Yield"].sort(key=lambda x: x["Score"],reverse=True)
+            ind_dict["High Dividend Yield"].sort(key=lambda x: x["Score"],
+                                                 reverse=True)
             for indicator in ind_dict["High Dividend Yield"]:
                 print("{:<6} Score: {:<7.2f}% Advise: {}".format\
                       (indicator["Ticker"],
@@ -613,6 +653,7 @@ while(True):
             print('\n',end='')
             selections = ['Get all dividends',
                           'Get dividends for current positions',
+                          'Edit target exposure',
                           'Clear console']
             selection = selections[si.select(selections)]
             if selection == 'Get all dividends':
@@ -620,6 +661,15 @@ while(True):
 
             elif selection == 'Get dividends for current positions':
                 get_dividends(watch_list)
+
+            elif selection == 'Edit target exposure':
+                print("Current target: {:<7.2f}%".format\
+                      (watch_list.meta_data["exposure target"]*100))
+                new_target = si.get_real_number("Enter new target (0-100).\n>>>",
+                                               lower=0, upper=100)
+                watch_list.meta_data["exposure target"] = new_target/100
+                print("New target: {:<7.2f}%".format\
+                      (watch_list.meta_data["exposure target"]*100)) 
                 
             elif selection == 'Clear console':
                 print('\033[2J')
