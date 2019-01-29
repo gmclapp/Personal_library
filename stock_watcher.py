@@ -334,7 +334,7 @@ def edit(watch_list):
         edit_pos = viewlist[si.select(viewlist)]
         print("What would you like to do with this position?")
         edit_sel = tick_options[si.select(tick_options)]
-        for pos in watch_list.position_list:
+        for i,pos in enumerate(watch_list.position_list):
             if pos["ticker"] == edit_pos:
                 if edit_sel == 'Edit symbol':
                     tick = input("Enter stock ticker.\n>>>").upper()
@@ -343,7 +343,7 @@ def edit(watch_list):
                     # symbols.
                     
                 elif edit_sel == 'Delete symbol':
-                    pass
+                    watch_list.position_list.pop(i)
     watch_list.calc_cost_basis()    
                                 
 def last_transaction_indicator(watch_list, ind_dict):
@@ -463,6 +463,8 @@ def div_yield_indicator(watch_list, ind_dict):
             dividend = div_df['value'][0]
 
             score = (dividend/last_close)*4 # assumes quarterly dividend.
+            # Score is compared to the dividend target.
+            score = score - watch_list.meta_data["dividend target"]
             direction = "N/A"
             ind_dict["High Dividend Yield"].append \
                            ({"Ticker":position['ticker'],
@@ -614,11 +616,14 @@ while(True):
 
             ind_dict["Last Transaction"].sort(key=lambda x: x["Score"],
                                               reverse=True)
-            for indicator in ind_dict["Last Transaction"]:
-                print("{:<6} Score: ${:<7.2f} Advise: {}".format\
-                      (indicator["Ticker"],
-                       indicator["Score"],
-                       indicator["Direction"].upper()))
+            for i,indicator in enumerate(ind_dict["Last Transaction"]):
+                if i > 9:
+                    break
+                else:
+                    print("{:<6} Score: ${:<7.2f} Advise: {}".format\
+                          (indicator["Ticker"],
+                           indicator["Score"],
+                           indicator["Direction"].upper()))
             print("\n",end='')
 
             print("\nWorking on \"Over-exposure\" indicator.\n")
@@ -626,22 +631,28 @@ while(True):
                                                            ind_dict)
             ind_dict["Over-exposure"].sort(key=lambda x: abs(x["Score"]),
                                            reverse=True)
-            for indicator in ind_dict["Over-exposure"]:
-                print("{:<6} Score: {:<7.2f}% Advise: {}".format\
-                      (indicator["Ticker"],
-                       indicator["Score"]*100,
-                       indicator["Direction"].upper()))
+            for i,indicator in enumerate(ind_dict["Over-exposure"]):
+                if i > 9:
+                    break
+                else:
+                    print("{:<6} Score: {:<7.2f}% Advise: {}".format\
+                          (indicator["Ticker"],
+                           indicator["Score"]*100,
+                           indicator["Direction"].upper()))
             
             print("\nWorking on \"Dividend Yield\" indicator.\n")
             watch_list, ind_dict = div_yield_indicator(watch_list,ind_dict)
             
             ind_dict["High Dividend Yield"].sort(key=lambda x: x["Score"],
                                                  reverse=True)
-            for indicator in ind_dict["High Dividend Yield"]:
-                print("{:<6} Score: {:<7.2f}% Advise: {}".format\
-                      (indicator["Ticker"],
-                       indicator["Score"]*100,
-                       indicator["Direction"].upper()))
+            for i,indicator in enumerate(ind_dict["High Dividend Yield"]):
+                if i > 9:
+                    break
+                else:
+                    print("{:<6} Score: {:<7.2f}% Advise: {}".format\
+                          (indicator["Ticker"],
+                           indicator["Score"]*100,
+                           indicator["Direction"].upper()))
             print("\n",end='')
             
             for indicator in ind_dict["Recent Passed Dividend"]:
@@ -654,6 +665,7 @@ while(True):
             selections = ['Get all dividends',
                           'Get dividends for current positions',
                           'Edit target exposure',
+                          'Edit dividend target',
                           'Clear console']
             selection = selections[si.select(selections)]
             if selection == 'Get all dividends':
@@ -669,7 +681,16 @@ while(True):
                                                lower=0, upper=100)
                 watch_list.meta_data["exposure target"] = new_target/100
                 print("New target: {:<7.2f}%".format\
-                      (watch_list.meta_data["exposure target"]*100)) 
+                      (watch_list.meta_data["exposure target"]*100))
+
+            elif selection == 'Edit dividend target':
+                print("Current target: {:<7.2f}%".format\
+                      (watch_list.meta_data["dividend target"]*100))
+                new_target = si.get_real_number("Enter new target (0-100).\n>>>",
+                                               lower=0, upper=100)
+                watch_list.meta_data["dividend target"] = new_target/100
+                print("New target: {:<7.2f}%".format\
+                      (watch_list.meta_data["dividend target"]*100))
                 
             elif selection == 'Clear console':
                 print('\033[2J')
