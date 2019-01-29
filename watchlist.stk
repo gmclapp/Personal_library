@@ -1,6 +1,6 @@
 [
     {
-        "portfolio value": 30864.86106340587,
+        "portfolio value": 30109.16106224805,
         "exposure target": 0.025,
         "dividend target": 0.02675
     },
@@ -164,32 +164,6 @@
             "last yield date": "2019-1-29"
         },
         {
-            "ticker": "AKS",
-            "transactions": [
-                {
-                    "b/s": "b",
-                    "date": "2018-6-8",
-                    "price": 4.6961,
-                    "commission": 4.95,
-                    "fees": 0.0,
-                    "shares": 50
-                },
-                {
-                    "b/s": "s",
-                    "date": "2018-9-19",
-                    "price": 4.845,
-                    "commission": 4.95,
-                    "fees": 0.0,
-                    "shares": 50
-                }
-            ],
-            "dividends": [],
-            "cost basis": 0,
-            "current shares": 0,
-            "last price": 2.742799997329712,
-            "last price date": "2019-1-29"
-        },
-        {
             "ticker": "AMGN",
             "transactions": [
                 {
@@ -229,32 +203,6 @@
             "last price date": "2019-1-29",
             "last dividend": 1.32,
             "last yield date": "2019-1-29"
-        },
-        {
-            "ticker": "AMRS",
-            "transactions": [
-                {
-                    "b/s": "b",
-                    "date": "2018-5-22",
-                    "price": 5.46,
-                    "commission": 4.95,
-                    "fees": 0.0,
-                    "shares": 100
-                },
-                {
-                    "b/s": "s",
-                    "date": "2018-6-1",
-                    "price": 5.1151,
-                    "commission": 4.95,
-                    "fees": 0.0,
-                    "shares": 100
-                }
-            ],
-            "dividends": [],
-            "cost basis": 0,
-            "current shares": 0,
-            "last price": 2.684999942779541,
-            "last price date": "2019-1-29"
         },
         {
             "ticker": "ASTI",
@@ -749,6 +697,14 @@
                     "commission": 4.95,
                     "fees": 0.0,
                     "shares": 150
+                },
+                {
+                    "b/s": "b",
+                    "date": "2019-1-29",
+                    "price": 6.005,
+                    "commission": 4.95,
+                    "fees": 0.0,
+                    "shares": 80
                 }
             ],
             "dividends": [
@@ -765,8 +721,8 @@
                     "total": 0.0
                 }
             ],
-            "cost basis": 0,
-            "current shares": 0,
+            "cost basis": 3.0190249999999983,
+            "current shares": 80,
             "last price": 6.114999771118164,
             "last price date": "2019-1-29",
             "last dividend": 0.15,

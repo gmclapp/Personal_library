@@ -183,8 +183,8 @@ def view(pos):
     print("Current cost basis: ${:<7.2f}".format(pos["cost basis"]))
     today = dt.date.today()
 
-    #df = get_quoteDF(pos["ticker"],pos,today)
-    get_quoteDF(pos["ticker"],pos,today)
+    df = get_quoteDF(pos["ticker"],pos,today)
+    #get_quoteDF(pos["ticker"],pos,today)
     if df is None:
         print("Current price: No data")
     else:
@@ -411,7 +411,9 @@ def last_transaction_indicator(watch_list, ind_dict):
                              "Direction":direction.upper()})
         else:
             pass
-  
+
+    print("\033[1A\033[K", end='')
+    print("\033[1A\033[K", end='')
     return(watch_list, ind_dict)
 
 def over_exposure_indicator(watch_list, ind_dict):
@@ -439,6 +441,9 @@ def over_exposure_indicator(watch_list, ind_dict):
                        ({"Ticker":position['ticker'],
                          "Score":score,
                          "Direction":direction.upper()})
+        
+    print("\033[1A\033[K", end='')
+    print("\033[1A\033[K", end='')
     return(watch_list, ind_dict)
 
 def div_yield_indicator(watch_list, ind_dict):
@@ -465,14 +470,21 @@ def div_yield_indicator(watch_list, ind_dict):
             score = (dividend/last_close)*4 # assumes quarterly dividend.
             # Score is compared to the dividend target.
             score = score - watch_list.meta_data["dividend target"]
-            direction = "N/A"
+            if score > 0:
+                direction = 'BUY'
+            elif score < 0:
+                direction = 'SELL'
+            else:
+                direction = 'N/A'
             ind_dict["High Dividend Yield"].append \
                            ({"Ticker":position['ticker'],
                              "Score":score,
                              "Direction":direction.upper()})
         except:
             pass
-        
+
+    print("\033[1A\033[K", end='')
+    print("\033[1A\033[K", end='')
     return(watch_list, ind_dict)
 
 def parse_date(date):
@@ -624,7 +636,7 @@ while(True):
                 for pos in watch_list.position_list:
                     if pos["current shares"] != 0:
                         pos_value = pos["last price"] * pos["current shares"]
-                        print("{:<6} Shares: {} @ ${:<7.2f} = Value: ${:<7.2f}"\
+                        print("{:<6} Shares: {:<5} @ ${:<7.2f} = Value: ${:<7.2f}"\
                               .format(pos["ticker"], pos["current shares"],
                                       pos["last price"], pos_value))
                 watch_list.calc_portfolio_value()
@@ -636,11 +648,12 @@ while(True):
                     pass
                 
         elif selection == 'Indicators':
-            ind_dict = {"Last Transaction":[],
-                        "High Dividend Yield":[],
-                        "Recent Passed Dividend":[],
-                        "Upcoming Dividend":[],
-                        "Over-exposure":[]}
+            ind_dict = {"Last Transaction":[], # Looks for opportunities to reverse the last transaction recorded
+                        "Matched Transactions":[], # Looks for opportunities to improve cost-basis
+                        "High Dividend Yield":[], # Looks for high dividend yields with respect to a specified target
+                        "Portfolio Yield":[], # Looks for opportunities to increase the average dividend yield of the portfolio
+                        "Recent Passed Dividend":[], # Looks for opportunities in response to recent or upcoming ex-dates
+                        "Over-exposure":[]} # Looks for opportunities to improve exposure with respect to a specified target
                 
             print("\nWorking on \"Last Transaction\" indicator.\n")
             watch_list, ind_dict = last_transaction_indicator(watch_list,
@@ -658,13 +671,15 @@ while(True):
                           (indicator["Ticker"],
                            indicator["Score"],
                            indicator["Direction"].upper()))
-            print("\n",end='')
 
             print("\nWorking on \"Over-exposure\" indicator.\n")
             watch_list, ind_dict = over_exposure_indicator(watch_list,
                                                            ind_dict)
             ind_dict["Over-exposure"].sort(key=lambda x: abs(x["Score"]),
                                            reverse=True)
+            print("Exposure target: {:<7.2f}% (Position value: ${:<7.2f})".format\
+                  (watch_list.meta_data["exposure target"]*100,
+                   watch_list.meta_data["portfolio value"]*watch_list.meta_data["exposure target"]))
             for i,indicator in enumerate(ind_dict["Over-exposure"]):
                 if i > 9:
                     break
@@ -679,6 +694,7 @@ while(True):
             
             ind_dict["High Dividend Yield"].sort(key=lambda x: x["Score"],
                                                  reverse=True)
+            print("Dividend target: {:<7.2f}%".format(watch_list.meta_data["dividend target"]*100))
             for i,indicator in enumerate(ind_dict["High Dividend Yield"]):
                 if i > 9:
                     break
