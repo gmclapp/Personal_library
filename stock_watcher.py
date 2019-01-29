@@ -2,6 +2,7 @@ import datetime as dt
 import time
 import matplotlib.pyplot as plt
 from matplotlib import style
+import numpy as np
 import pandas as pd
 import pandas_datareader.data as web
 import json
@@ -136,7 +137,7 @@ class positions():
         with open("watchlist.stk","r") as f:
             self.meta_data, self.position_list = json.load(f)
 def default(o):
-    if isinstance(o, numpy.int64): return(o)
+    if isinstance(o, np.int64): return(int(o))
     raise TypeError
 
 def order(watch_list):
@@ -182,11 +183,13 @@ def view(pos):
     print("Current cost basis: ${:<7.2f}".format(pos["cost basis"]))
     today = dt.date.today()
 
-    df = get_quoteDF(pos["ticker"],pos,today)
+    #df = get_quoteDF(pos["ticker"],pos,today)
+    get_quoteDF(pos["ticker"],pos,today)
     if df is None:
         print("Current price: No data")
     else:
-        last_close = df["Close"][0]
+        #last_close = df["Close"][0]
+        last_close = pos["last price"]
         print("Current price: ${:<7.2f}\n".format(last_close))
         
     print("Transactions:")
@@ -364,15 +367,10 @@ def last_transaction_indicator(watch_list, ind_dict):
         indicator = False
         score = 0
         try:
-            df = get_quoteDF(position["ticker"],position,today)
-            last_close = df["Close"][0]
+            #df = get_quoteDF(position["ticker"],position,today)
+            get_quoteDF(position["ticker"],position,today)
+            last_close = position["last price"]
 
-##            position["last price"] = last_close
-##            year,month,day = unpack_date(today)
-##
-##            position["last price date"] = \
-##                           str(year)+'-'+str(month)+'-'+str(day)
-            # Get last transaction
             last_t = position["transactions"][-1]
 
             # test for indicator
@@ -458,11 +456,11 @@ def div_yield_indicator(watch_list, ind_dict):
         print("{}/{}".format(index,len(watch_list.position_list),end=''))
         
         try:
-            df = get_quoteDF(position["ticker"],position,today)
-            last_close = df["Close"][0]
+            #df = get_quoteDF(position["ticker"],position,today)
+            last_close = position["last price"]
 
-            div_df = get_divDF(position['ticker'],position,last_year)
-            dividend = div_df['value'][0]
+            dividend = get_divDF(position['ticker'],position,last_year)
+##            dividend = div_df['value'][0]
 
             score = (dividend/last_close)*4 # assumes quarterly dividend.
             # Score is compared to the dividend target.
@@ -518,7 +516,8 @@ def get_dividends(watch_list, force_all=False):
             date = latest
 
         if pos['current shares'] > 0 or force_all:
-            div_df = get_divDF(pos['ticker'],pos,date)
+##            div_df = get_divDF(pos['ticker'],pos,date)
+            get_divDF(pos['ticker'],pos,date)
             for stamp in div_df.index:
                 year,month,day = unpack_date(stamp)
 
@@ -542,20 +541,29 @@ def get_dividends(watch_list, force_all=False):
 def get_divDF(ticker,position,date):
     source = "yahoo-dividends"
     today = dt.date.today()
+    delta = int((today - parse_date(position["last yield date"])).days)
+    if delta == 0:
+        #print("Already fetched dividend yield today.\n")
+        dividend = position["last dividend"]
+        return(dividend)
     try:
         div_df = web.DataReader(ticker,source,date)
         dividend = div_df['value'][0]
-        position["last dividend yield"] = dividend
+        position["last dividend"] = dividend # last dividend in dollars
         year,month,day = unpack_date(today)
         position["last yield date"] = \
                        str(year)+'-'+str(month)+'-'+str(day)
+        # Preceding line is the last date on which the yield was fetched.
+        return(dividend)
     except IndexError:
         print("No dividends for",position["ticker"],'\n')
+        return(None)
     except Exception as ex:
         print(ex)
         print("No response from yahoo-finance.")
+        return(None)
     
-    return(div_df)
+    #return(div_df)
 
 def timeout_timer():
     time.sleep(15)
@@ -564,18 +572,24 @@ def timeout_timer():
 def get_quoteDF(ticker, position, date):
     source = "yahoo"
     today = dt.date.today()
-    try:
-        df = web.DataReader(ticker,source,date)
-        last_close = df["Close"][0]
-        position["last price"] = last_close
-        year,month,day = unpack_date(today)
+    delta = int((today - parse_date(position["last price date"])).days)
+    if delta == 0:
+        #print("Already priced today\n")
+        last_close = position["last price"]
+        return(last_close)
+    else:
+        try:
+            df = web.DataReader(ticker,source,date)
+            last_close = df["Close"][0]
+            position["last price"] = last_close
+            year,month,day = unpack_date(today)
 
-        position["last price date"] = \
-                       str(year)+'-'+str(month)+'-'+str(day)
-        return(df)
-    except:
-        print("No response from yahoo-finance")
-        return(None)
+            position["last price date"] = \
+                           str(year)+'-'+str(month)+'-'+str(day)
+            return(last_close)
+        except:
+            print("No response from yahoo-finance")
+            return(None)
         
     
 
@@ -587,6 +601,7 @@ print('\033[2J') # Clear the terminal
 watch_list.load_positions()
 watch_list.calc_cost_basis()
 watch_list.sort_open_positions()
+today = dt.date.today()
 
 while(True):
     try:
@@ -734,24 +749,3 @@ while(True):
         #time.sleep(60)
         continue
         #raise
-    
-##-example data structure-##
-##positions = 
-##[{'ticker':'TEST',
-## 'transactions':[{'b/s':'buy','date':'2018-11-1','price':35.50,'commission':4.95,'fees':0.00,'shares':15},
-##                 {'b/s':'sell','date':'2018-11-05','price':36.25,'commission':4.95,'fees':0.00,'shares':15},
-##                 {'b/s':'buy','date':'2018-11-06','price':32.25,'commission':4.95,'fees':0.00,'shares':15}],
-## 'dividends':[{'date':'2018-11-02','amount':0.15,'shares':15},
-##              {'date':'2018-11-25','amount':0.12,'shares':15}],
-## 'cost basis':32.22,
-##  'current shares':15},
-## {'ticker':'TEST2',
-## 'transactions':[{'b/s':'buy','date':'2018-10-01','price':12.40,'commission':4.95,'fees':0.00,'shares':100},
-##                 {'b/s':'sell','date':'2018-10-05','price':13.10,'commission':4.95,'fees':0.00,'shares':70},
-##                 {'b/s':'buy','date':'2018-11-06','price':9.15,'commission':4.95,'fees':0.00,'shares':200}],
-## 'dividends':[{'date':'2018-10-02','amount':0.07,'shares':100},
-##              {'date':'2018-11-25','amount':0.11,'shares':230}],
-## 'cost basis':9.285,
-##  'current shares':230,
-##  'last price': 5.43,
-##  'last price date':'2018-12-20'}]
