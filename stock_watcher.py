@@ -129,12 +129,15 @@ class positions():
 
     def save_positions(self):
         with open("watchlist.stk",'w') as f:
-            json.dump([self.meta_data, self.position_list], f)
+            json.dump([self.meta_data, self.position_list], f,sort_keys=False,indent=4,default=default)
 
     def load_positions(self):
         print("Loading trading data...")
         with open("watchlist.stk","r") as f:
             self.meta_data, self.position_list = json.load(f)
+def default(o):
+    if isinstance(o, numpy.int64): return(o)
+    raise TypeError
 
 def order(watch_list):
     today = dt.date.today()
@@ -179,7 +182,7 @@ def view(pos):
     print("Current cost basis: ${:<7.2f}".format(pos["cost basis"]))
     today = dt.date.today()
 
-    df = get_quoteDF(pos["ticker"],"yahoo",today)
+    df = get_quoteDF(pos["ticker"],pos,today)
     if df is None:
         print("Current price: No data")
     else:
@@ -361,14 +364,14 @@ def last_transaction_indicator(watch_list, ind_dict):
         indicator = False
         score = 0
         try:
-            df = web.DataReader(position["ticker"],"yahoo",today)
+            df = get_quoteDF(position["ticker"],position,today)
             last_close = df["Close"][0]
 
-            position["last price"] = last_close
-            year,month,day = unpack_date(today)
-
-            position["last price date"] = \
-                           str(year)+'-'+str(month)+'-'+str(day)
+##            position["last price"] = last_close
+##            year,month,day = unpack_date(today)
+##
+##            position["last price date"] = \
+##                           str(year)+'-'+str(month)+'-'+str(day)
             # Get last transaction
             last_t = position["transactions"][-1]
 
@@ -455,11 +458,10 @@ def div_yield_indicator(watch_list, ind_dict):
         print("{}/{}".format(index,len(watch_list.position_list),end=''))
         
         try:
-            df = web.DataReader(position["ticker"],"yahoo",today)
+            df = get_quoteDF(position["ticker"],position,today)
             last_close = df["Close"][0]
 
-            div_df = web.DataReader(position['ticker'],
-                                    'yahoo-dividends',last_year)
+            div_df = get_divDF(position['ticker'],position,last_year)
             dividend = div_df['value'][0]
 
             score = (dividend/last_close)*4 # assumes quarterly dividend.
@@ -516,7 +518,7 @@ def get_dividends(watch_list, force_all=False):
             date = latest
 
         if pos['current shares'] > 0 or force_all:
-            div_df = web.DataReader(pos['ticker'],'yahoo-dividends',date)
+            div_df = get_divDF(pos['ticker'],pos,date)
             for stamp in div_df.index:
                 year,month,day = unpack_date(stamp)
 
@@ -537,9 +539,18 @@ def get_dividends(watch_list, force_all=False):
             pass
         print("processed {} dividends.".format(n))
 
-def get_divDF(ticker,source,date):
+def get_divDF(ticker,position,date):
+    source = "yahoo-dividends"
+    today = dt.date.today()
     try:
         div_df = web.DataReader(ticker,source,date)
+        dividend = div_df['value'][0]
+        position["last dividend yield"] = dividend
+        year,month,day = unpack_date(today)
+        position["last yield date"] = \
+                       str(year)+'-'+str(month)+'-'+str(day)
+    except IndexError:
+        print("No dividends for",position["ticker"],'\n')
     except Exception as ex:
         print(ex)
         print("No response from yahoo-finance.")
@@ -550,9 +561,17 @@ def timeout_timer():
     time.sleep(15)
     return(True)
 
-def get_quoteDF(ticker,source,date):
+def get_quoteDF(ticker, position, date):
+    source = "yahoo"
+    today = dt.date.today()
     try:
         df = web.DataReader(ticker,source,date)
+        last_close = df["Close"][0]
+        position["last price"] = last_close
+        year,month,day = unpack_date(today)
+
+        position["last price date"] = \
+                       str(year)+'-'+str(month)+'-'+str(day)
         return(df)
     except:
         print("No response from yahoo-finance")
