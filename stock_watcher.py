@@ -117,8 +117,9 @@ class positions():
             except KeyError:
                 annual_yield = 0
                 print("No dividend data for {}".format(pos["ticker"]))
-        accum += position_value*annual_yield        
-        accum /= self.meta_data["portfolio value"]
+            accum += position_value*annual_yield        
+        self.meta_data["average yield"] = accum/self.meta_data["portfolio value"]
+        
         
     def calc_portfolio_value(self):
         self.meta_data["portfolio value"] = 0
@@ -192,9 +193,14 @@ def order(watch_list):
     watch_list.calc_cost_basis()
 
 def view(pos):
+    try:
+        pos_yield = (pos["last dividend"]/pos["last price"])*4
+    except KeyError:
+        pos_yield = 0
     print("Ticker: {}".format(pos["ticker"]))
     print("Shares: {}".format(pos["current shares"]))
     print("Current cost basis: ${:<7.2f}".format(pos["cost basis"]))
+    print("Annual dividend yield: {:<7.2f}%".format(pos_yield*100))
     today = dt.date.today()
 
     df = get_quoteDF(pos["ticker"],pos,today)
@@ -653,7 +659,10 @@ while(True):
                               .format(pos["ticker"], pos["current shares"],
                                       pos["last price"], pos_value))
                 watch_list.calc_portfolio_value()
-                print("Total value: ${:<7.2f}".format(watch_list.meta_data["portfolio value"]))
+                print("Total value: ${:<7.2f}".format\
+                      (watch_list.meta_data["portfolio value"]))
+                print("Average dividend yield: {:<7.2f}%\n".format\
+                      (watch_list.meta_data["average yield"]*100))
             for pos in watch_list.position_list:
                 if pos["ticker"] == view_pos:
                     view(pos)

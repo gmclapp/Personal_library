@@ -1,9 +1,9 @@
 [
     {
-        "portfolio value": 30214.90520856157,
+        "portfolio value": 30025.44825792685,
         "exposure target": 0.025,
         "dividend target": 0.02675,
-        "average yield": 0.02
+        "average yield": 0.048034586781539136
     },
     [
         {
@@ -2441,10 +2441,10 @@
             ],
             "cost basis": 33.52583333333333,
             "current shares": 15,
-            "last price": 71.91000366210938,
-            "last price date": "2019-1-30",
+            "last price": 70.5,
+            "last price date": "2019-2-1",
             "last dividend": 0.64,
-            "last yield date": "2019-1-30"
+            "last yield date": "2019-2-1"
         },
         {
             "ticker": "VZ",
@@ -2869,10 +2869,10 @@
             ],
             "cost basis": 34.308233333333334,
             "current shares": 60,
-            "last price": 36.49399948120117,
-            "last price date": "2019-1-30",
+            "last price": 37.650001525878906,
+            "last price date": "2019-2-1",
             "last dividend": 0.23,
-            "last yield date": "2019-1-30"
+            "last yield date": "2019-2-1"
         },
         {
             "ticker": "XLNX",
