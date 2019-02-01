@@ -1,8 +1,9 @@
 [
     {
-        "portfolio value": 30109.16106224805,
+        "portfolio value": 30214.90520856157,
         "exposure target": 0.025,
-        "dividend target": 0.02675
+        "dividend target": 0.02675,
+        "average yield": 0.02
     },
     [
         {
@@ -2396,6 +2397,14 @@
                     "commission": 4.95,
                     "fees": 0.0,
                     "shares": 15
+                },
+                {
+                    "b/s": "s",
+                    "date": "2019-1-30",
+                    "price": 71.8001,
+                    "commission": 4.95,
+                    "fees": 0.0,
+                    "shares": 15
                 }
             ],
             "dividends": [
@@ -2430,12 +2439,12 @@
                     "total": 0.0
                 }
             ],
-            "cost basis": 52.827966666666676,
-            "current shares": 30,
-            "last price": 71.37999725341797,
-            "last price date": "2019-2-1",
+            "cost basis": 33.52583333333333,
+            "current shares": 15,
+            "last price": 71.91000366210938,
+            "last price date": "2019-1-30",
             "last dividend": 0.64,
-            "last yield date": "2019-2-1"
+            "last yield date": "2019-1-30"
         },
         {
             "ticker": "VZ",
@@ -2816,6 +2825,14 @@
                     "commission": 4.95,
                     "fees": 0.0,
                     "shares": 4
+                },
+                {
+                    "b/s": "b",
+                    "date": "2019-1-30",
+                    "price": 36.6565,
+                    "commission": 4.95,
+                    "fees": 0.0,
+                    "shares": 20
                 }
             ],
             "dividends": [
@@ -2850,12 +2867,12 @@
                     "total": 9.200000000000001
                 }
             ],
-            "cost basis": 33.010349999999995,
-            "current shares": 40,
-            "last price": 37.8849983215332,
-            "last price date": "2019-2-1",
+            "cost basis": 34.308233333333334,
+            "current shares": 60,
+            "last price": 36.49399948120117,
+            "last price date": "2019-1-30",
             "last dividend": 0.23,
-            "last yield date": "2019-2-1"
+            "last yield date": "2019-1-30"
         },
         {
             "ticker": "XLNX",

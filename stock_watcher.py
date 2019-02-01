@@ -105,7 +105,21 @@ class positions():
             except ZeroDivisionError:
                 pos['cost basis'] = 0
             pos['current shares'] = shares
-            
+
+    def calc_average_yield(self):
+        # position value weighted average of dividend yield
+        # this calculation assumes that dividends are paid quarterly
+        accum = 0
+        for pos in self.position_list:
+            position_value = pos["current shares"]*pos["last price"]
+            try:
+                annual_yield = (pos["last dividend"]/pos["last price"])*4
+            except KeyError:
+                annual_yield = 0
+                print("No dividend data for {}".format(pos["ticker"]))
+        accum += position_value*annual_yield        
+        accum /= self.meta_data["portfolio value"]
+        
     def calc_portfolio_value(self):
         self.meta_data["portfolio value"] = 0
         for pos in self.position_list:
@@ -461,11 +475,9 @@ def div_yield_indicator(watch_list, ind_dict):
         print("{}/{}".format(index,len(watch_list.position_list),end=''))
         
         try:
-            #df = get_quoteDF(position["ticker"],position,today)
             last_close = position["last price"]
 
             dividend = get_divDF(position['ticker'],position,last_year)
-##            dividend = div_df['value'][0]
 
             score = (dividend/last_close)*4 # assumes quarterly dividend.
             # Score is compared to the dividend target.
@@ -528,7 +540,6 @@ def get_dividends(watch_list, force_all=False):
             date = latest
 
         if pos['current shares'] > 0 or force_all:
-##            div_df = get_divDF(pos['ticker'],pos,date)
             get_divDF(pos['ticker'],pos,date)
             for stamp in div_df.index:
                 year,month,day = unpack_date(stamp)
@@ -613,6 +624,8 @@ print('\033[2J') # Clear the terminal
 watch_list.load_positions()
 watch_list.calc_cost_basis()
 watch_list.sort_open_positions()
+watch_list.calc_portfolio_value()
+watch_list.calc_average_yield()
 today = dt.date.today()
 
 while(True):
