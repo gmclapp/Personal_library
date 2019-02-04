@@ -108,10 +108,12 @@ def gen_warrant_links(warrants):
     for w in warrants:
         if cur_year == str(w)[:4]:
             #print("Warrant was this year")
-            path = '\\\\jsjcorp.com\\data\\GHSP\\GH\\webdata\\Testing\\' +str(w)
+            #path = '\\\\jsjcorp.com\\data\\GHSP\\GH\\webdata\\Testing\\' +str(w)
+            path = 'Test warrants\\' +str(w)
         else:
             #print("Warrant was not this year")
-            path = '\\\\jsjcorp.com\\data\\GHSP\\GH\\webdata\\Testing\\' +str(w)[:4]+'\\'+str(w)
+            #path = '\\\\jsjcorp.com\\data\\GHSP\\GH\\webdata\\Testing\\' +str(w)[:4]+'\\'+str(w)
+            path = 'Test warrants\\' +str(w)[:4]+'\\'+str(w)
         if os.path.exists(path):
             links.append(path)
         else:

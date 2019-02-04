@@ -4,8 +4,9 @@ from nptdms import TdmsFile
 import os
 import matplotlib.pyplot as plt
 import csv
+import misc_functions as mf
 
-__version__ = '0.1.0'
+__version__ = '0.1.1'
 plt.rcParams["figure.figsize"]=(16,8) # default figure size in inches.
 
 def dxdt(df, pos_col, time_col, noise_thres):
@@ -161,33 +162,38 @@ def response_time(tdms_file, directory):
     WRT = csv.writer(csvfile, dialect='excel')        
     WRT.writerow(newrow)
     csvfile.close()
-    
+
+def main(directory=None):    
 # Define the directory in which the data are stored
-directory = input("Enter directory\n>>>")
+    if directory == None:
+        directory = input("Enter directory\n>>>")
 
-tdms_files = []
-csvfile = open('response times.csv','w',newline='')
-WRT = csv.writer(csvfile, dialect='excel')
-WRT.writerow(["Sample number","Temperature (C)","Voltage (V)",
-              "Response 1A [ms]","Response 1B [ms]","Rebound distance 1 [mm]","Re-locked time [ms]",
-              "Response 2A [ms]","Response 2B [ms]","Rebound distance 2 [mm]","Re-locked time [ms]",
-              "Response 3A [ms]","Response 3B [ms]","Rebound distance 3 [mm]","Re-locked time [ms]",])
-csvfile.close()
+    tdms_files = []
+    csvfile = open('response times.csv','w',newline='')
+    WRT = csv.writer(csvfile, dialect='excel')
+    WRT.writerow(["Sample number","Temperature (C)","Voltage (V)",
+                  "Response 1A [ms]","Response 1B [ms]","Rebound distance 1 [mm]","Re-locked time [ms]",
+                  "Response 2A [ms]","Response 2B [ms]","Rebound distance 2 [mm]","Re-locked time [ms]",
+                  "Response 3A [ms]","Response 3B [ms]","Rebound distance 3 [mm]","Re-locked time [ms]",])
+    csvfile.close()
 
-for file in os.listdir(directory):
-    if file.endswith(".tdms"):
-        tdms_files.append(os.path.join(directory,file))
+    for file in os.listdir(directory):
+        if file.endswith(".tdms"):
+            tdms_files.append(os.path.join(directory,file))
 
-for f in tdms_files:
-    tdms_file = TdmsFile(f)
-    try:
-        response_time(tdms_file, directory)
-    except KeyError:
-        print("Faulty tdms file {}.".format(str(f)))
-        continue
-    except Exception as ex:
-        raise
+    for f in tdms_files:
+        tdms_file = TdmsFile(f)
+        try:
+            response_time(tdms_file, directory)
+        except KeyError:
+            print("Faulty tdms file {}.".format(str(f)))
+            continue
+        except Exception as ex:
+            raise
 
-print("Finished processing {}".format(directory))
+    print("Finished processing {}".format(directory))
+
+if __name__ == '__main__':
+    main()
 
 
