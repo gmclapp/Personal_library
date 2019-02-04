@@ -1,13 +1,32 @@
 '''It is recommended to use this package with the sanitize_inputs package.\n
 The functions contained herein do not check for erroneous inputs.'''
 
-__version__ = "0.2.1"
+__version__ = "0.2.2"
 
 import math
 import csv
 import pandas as pd
 import pdb
 import os
+from difflib import SequenceMatcher
+import datetime as dt
+
+def similar(a,b):
+    return(SequenceMatcher(None,a,b).ratio())
+
+def similar_dir(directory, desired, threshold=0.75):
+    '''Takes the name of a desired subdirectory, and returns a directory that
+    best matches the desired one with certainty above given threshold.'''
+    candidates = []
+    for f in os.listdir(directory):
+        candidates.append((f, similar(f,desired)))
+
+    candidates.sort(key=lambda x: x[1],reverse=True)
+    best_match = candidates[0]
+    if best_match[1] >= threshold:
+        return(best_match[0])
+    else:
+        return(None)
 
 def interpolate(x1,y1,x2,y2,x):
     '''This function returns a value, y, linearly interpolated using two x,y
