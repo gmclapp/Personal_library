@@ -2,6 +2,7 @@ import datetime as dt
 import time
 import matplotlib.pyplot as plt
 from matplotlib import style
+import numpy as np
 import pandas as pd
 import pandas_datareader.data as web
 import json
@@ -9,8 +10,8 @@ import sys
 import os
 import sanitize_inputs as si
 
-__version__ = '0.6.1'
-os.system("mode con cols=60 lines=60")
+__version__ = '0.6.2'
+#os.system("mode con cols=60 lines=60")
 
 # Hide all warnings
 if not sys.warnoptions:
@@ -20,7 +21,7 @@ if not sys.warnoptions:
 class positions():
     def __init__(self):
         self.position_list = []
-
+        self.meta_data = {}
     def list_positions(self):
         plist = []
         for pos in self.position_list:
@@ -72,11 +73,17 @@ class positions():
                                    'dividends':[],
                                    'cost basis':0,
                                    'current shares':0})
+    def sort_open_positions(self):
+        self.position_list.sort(key=lambda x: x['ticker'], reverse=False)
+        
     def calc_cost_basis(self):
         print("Calculating cost basis...")
         for pos in self.position_list:
             accum = 0
             shares = 0
+            pos['transactions'].sort(key=lambda x: parse_date(x['date']), reverse=False)
+            # in place sort of transactions list by date
+            
             for transaction in pos['transactions']:
                 if transaction['b/s'] == 'b':
                     shares += transaction['shares']
@@ -86,6 +93,9 @@ class positions():
                     shares -= transaction['shares']
                     accum -= transaction['price']*transaction['shares']\
                              + transaction['commission'] + transaction['fees']
+                    
+            pos['dividends'].sort(key=lambda x: parse_date(x['date']), reverse=False)
+            # in place sort of dividends list by date
             for d in pos['dividends']:
                 accum -= d['total']
                     
@@ -93,10 +103,31 @@ class positions():
             try:        
                 pos['cost basis'] = accum/shares
             except ZeroDivisionError:
-##                print("Currently holding zero shares.")
                 pos['cost basis'] = 0
             pos['current shares'] = shares
 
+    def calc_average_yield(self):
+        # position value weighted average of dividend yield
+        # this calculation assumes that dividends are paid quarterly
+        accum = 0
+        for pos in self.position_list:
+            position_value = pos["current shares"]*pos["last price"]
+            try:
+                annual_yield = (pos["last dividend"]/pos["last price"])*4
+            except KeyError:
+                annual_yield = 0
+                print("No dividend data for {}".format(pos["ticker"]))
+            accum += position_value*annual_yield        
+        self.meta_data["average yield"] = accum/self.meta_data["portfolio value"]
+        
+        
+    def calc_portfolio_value(self):
+        self.meta_data["portfolio value"] = 0
+        for pos in self.position_list:
+            if pos["current shares"] != 0:
+                pos_value = pos["last price"] * pos["current shares"]
+                self.meta_data["portfolio value"] += pos_value
+                
     def shares_at_date(self, ticker, date):
         '''takes a ticker symbol, and a datetime.date() and returns the number
         of shares of that symbol held at the given date.'''
@@ -110,18 +141,19 @@ class positions():
                            
                         elif transaction['b/s'] == 's':
                             shares -= transaction['shares']
-        return(shares)
-                           
-            
+        return(shares)            
 
     def save_positions(self):
         with open("watchlist.stk",'w') as f:
-            json.dump(self.position_list, f)
+            json.dump([self.meta_data, self.position_list], f,sort_keys=False,indent=4,default=default)
 
     def load_positions(self):
         print("Loading trading data...")
         with open("watchlist.stk","r") as f:
-            self.position_list = json.load(f)
+            self.meta_data, self.position_list = json.load(f)
+def default(o):
+    if isinstance(o, np.int64): return(int(o))
+    raise TypeError
 
 def order(watch_list):
     today = dt.date.today()
@@ -161,27 +193,35 @@ def order(watch_list):
     watch_list.calc_cost_basis()
 
 def view(pos):
+    try:
+        pos_yield = (pos["last dividend"]/pos["last price"])*4
+    except KeyError:
+        pos_yield = 0
     print("Ticker: {}".format(pos["ticker"]))
     print("Shares: {}".format(pos["current shares"]))
     print("Current cost basis: ${:<7.2f}".format(pos["cost basis"]))
+    print("Annual dividend yield: {:<7.2f}%".format(pos_yield*100))
     today = dt.date.today()
-    #try:
-    df = get_quoteDF(pos["ticker"],"yahoo",today)
-    #df = web.DataReader(pos["ticker"],"yahoo",today)
-    last_close = df["Close"][0]
-    print("Current price: ${:<7.2f}\n".format(last_close))
-    #except:
-    #    print("Current price data unavailable.")
+
+    df = get_quoteDF(pos["ticker"],pos,today)
+    #get_quoteDF(pos["ticker"],pos,today)
+    if df is None:
+        print("Current price: No data")
+    else:
+        #last_close = df["Close"][0]
+        last_close = pos["last price"]
+        print("Current price: ${:<7.2f}\n".format(last_close))
         
-    
+    print("Transactions:")
     for t in pos["transactions"]:
         print("{}: {} {} @ ${:<7.4f}".format(t['date'],t['b/s'].upper(),
                                              t['shares'],t['price']))
-    print("\n",end='')
+    print("\nDividends:")
     for d in pos['dividends']:
-        print("Shares: {}; Dividend: ${:<7.2f}; Total: ${:<7.2f}"\
-              .format(d['shares'],d['amount'],d['total']))
-
+        print("{}: {} x ${:<7.2f} = ${:<7.2f}"\
+              .format(d['date'],d['shares'],d['amount'],d['total']))
+    print("\n",end='')
+    
 def edit(watch_list):
     print("\n",end='')
     edit_list = ['Transactions',
@@ -253,10 +293,65 @@ def edit(watch_list):
 
                 elif e_choice == 'Delete transaction':
                     pos["transactions"].pop(i)
-                watch_list.calc_cost_basis()
                 
     elif edit_sel == 'Dividends':
-        pass
+        print("For which position would you like to edit a dividend?")
+        edit_pos = viewlist[si.select(viewlist)]
+        for pos in watch_list.position_list:
+            if pos["ticker"] == edit_pos:
+                print("Which dividend would you like to edit?")
+                div_list = []
+                for d in pos["dividends"]:
+                    div_str = "{}: {} x ${:<7.2f} = ${:<7.2f}"\
+                                .format(d['date'],
+                                        d['shares'],
+                                        d['amount'],
+                                        d['total'])
+                    
+                    div_list.append(div_str)
+                d_sel = div_list[si.select(div_list)]
+                for i,d in enumerate(div_list): # get index of transaction
+                    if d_sel == d:
+                        break
+                    
+                print("What would you like to edit?")
+                edit_choices = ['Date',
+                                'Amount',
+                                'Shares',
+                                'Total',
+                                'Delete dividend']
+                
+                e_choice = edit_choices[si.select(edit_choices)]
+                if e_choice == 'Date':
+                    today = dt.date.today()
+                    year = si.get_integer("Enter year.\n>>>",
+                                          upper=today.year+1,lower=1970)
+                    month = si.get_integer("Enter month.\n>>>",
+                                           upper=13,lower=0)
+                    day = si.get_integer("Enter day.\n>>>",
+                                         upper=32,lower=0)
+                    date_str = str(year)+'-'+str(month)+'-'+str(day)
+                    
+                    pos["dividends"][i]['date'] = date_str
+                    
+                elif e_choice == 'Amount':
+                    amount = si.get_real_number("Enter dividend amount.\n>>>",
+                                               lower=0)
+                    pos["dividends"][i]['amount'] = amount
+                elif e_choice == 'Shares':
+                    shares = si.get_integer("Enter number of shares.\n>>>",
+                                            lower=0)
+                    
+                    pos["dividends"][i]['shares'] = shares
+                    
+                elif e_choice == 'Total':
+                    price = si.get_real_number("Enter total dividend.\n>>>",
+                                               lower=0)
+                    pos["dividends"][i]['total'] = price
+
+                elif e_choice == 'Delete dividend':
+                    pos["dividends"].pop(i)
+                    
     elif edit_sel == 'Tickers':
         tick_options = ['Edit symbol',
                         'Delete symbol']
@@ -265,7 +360,7 @@ def edit(watch_list):
         edit_pos = viewlist[si.select(viewlist)]
         print("What would you like to do with this position?")
         edit_sel = tick_options[si.select(tick_options)]
-        for pos in watch_list.position_list:
+        for i,pos in enumerate(watch_list.position_list):
             if pos["ticker"] == edit_pos:
                 if edit_sel == 'Edit symbol':
                     tick = input("Enter stock ticker.\n>>>").upper()
@@ -274,12 +369,12 @@ def edit(watch_list):
                     # symbols.
                     
                 elif edit_sel == 'Delete symbol':
-                    pass
+                    watch_list.position_list.pop(i)
+    watch_list.calc_cost_basis()    
                                 
 def last_transaction_indicator(watch_list, ind_dict):
     indicator = False
     score = 0
-    # today's date
     today = dt.date.today()
 
     for index, position in enumerate(watch_list.position_list):
@@ -292,16 +387,10 @@ def last_transaction_indicator(watch_list, ind_dict):
         indicator = False
         score = 0
         try:
-            df = web.DataReader(position["ticker"],"yahoo",today)
-            last_close = df["Close"][0]
+            #df = get_quoteDF(position["ticker"],position,today)
+            get_quoteDF(position["ticker"],position,today)
+            last_close = position["last price"]
 
-            position["last price"] = last_close
-            year=today.year
-            month=today.month
-            day=today.day
-            position["last price date"] = \
-                           str(year)+'-'+str(month)+'-'+str(day)
-            # Get last transaction
             last_t = position["transactions"][-1]
 
             # test for indicator
@@ -342,14 +431,45 @@ def last_transaction_indicator(watch_list, ind_dict):
                              "Direction":direction.upper()})
         else:
             pass
-  
+
+    print("\033[1A\033[K", end='')
+    print("\033[1A\033[K", end='')
+    return(watch_list, ind_dict)
+
+def over_exposure_indicator(watch_list, ind_dict):
+    indicator = False
+    score = 0
+    direction = 's'
+    
+    for index,position in enumerate(watch_list.position_list):
+        # The next few lines print progress indication
+        print("\033[1A\033[K", end='')
+        # \033[K = Erase to the end of line
+        # \033[1A = moves the cursor up 1 line.
+        print("{}/{}".format(index,len(watch_list.position_list),end=''))
+
+        pos_exp = (position["current shares"] * position["last price"])\
+                  /watch_list.meta_data["portfolio value"]
+        score = watch_list.meta_data["exposure target"] - pos_exp
+        if score > 0:
+            direction = 'BUY'
+        elif score < 0:
+            direction = 'SELL'
+        else:
+            direction = 'N/A'
+        ind_dict["Over-exposure"].append \
+                       ({"Ticker":position['ticker'],
+                         "Score":score,
+                         "Direction":direction.upper()})
+        
+    print("\033[1A\033[K", end='')
+    print("\033[1A\033[K", end='')
     return(watch_list, ind_dict)
 
 def div_yield_indicator(watch_list, ind_dict):
     indicator = False
     score = 0
     direction = 'b'
-    # today's date
     today = dt.date.today()
     last_year = dt.date(today.year-1,1,1)
 
@@ -361,28 +481,40 @@ def div_yield_indicator(watch_list, ind_dict):
         print("{}/{}".format(index,len(watch_list.position_list),end=''))
         
         try:
-            df = web.DataReader(position["ticker"],"yahoo",today)
-            last_close = df["Close"][0]
+            last_close = position["last price"]
 
-            div_df = web.DataReader(position['ticker'],
-                                    'yahoo-dividends',last_year)
-            dividend = div_df['value'][0]
+            dividend = get_divDF(position['ticker'],position,last_year)
 
             score = (dividend/last_close)*4 # assumes quarterly dividend.
-            direction = "N/A"
+            # Score is compared to the dividend target.
+            score = score - watch_list.meta_data["dividend target"]
+            if score > 0:
+                direction = 'BUY'
+            elif score < 0:
+                direction = 'SELL'
+            else:
+                direction = 'N/A'
             ind_dict["High Dividend Yield"].append \
                            ({"Ticker":position['ticker'],
                              "Score":score,
                              "Direction":direction.upper()})
         except:
             pass
-        
+
+    print("\033[1A\033[K", end='')
+    print("\033[1A\033[K", end='')
     return(watch_list, ind_dict)
 
 def parse_date(date):
     year,month,day = [int(x) for x in date.split('-')]
     d = dt.date(year,month,day)
     return(d)
+
+def unpack_date(date):
+    year=date.year
+    month=date.month
+    day=date.day
+    return(year,month,day)
 
 def get_dividends(watch_list, force_all=False):
     '''This function gets a list of historical dividends for the given symbol,
@@ -402,54 +534,93 @@ def get_dividends(watch_list, force_all=False):
             date = parse_date(pos['transactions'][0]['date'])
         else:
             div_exists = True
-            print("Latest recorded dividend was {}"\
-                  .format(pos['dividends'][-1]['date']))
-            date = parse_date(pos['dividends'][-1]['date'])
+            latest = parse_date(pos['transactions'][0]['date'])
+            for d in pos['dividends']:
+                date = parse_date(d['date'])
+                test = int((date-latest).days)
+                if test > 0:
+                    latest = date
+            latest_str = unpack_date(latest)
+            print("{}: Latest recorded dividend was {}"\
+                    .format(pos['ticker'],latest_str))
+            date = latest
 
         if pos['current shares'] > 0 or force_all:
-            div_df = web.DataReader(pos['ticker'],'yahoo-dividends',date)
+            get_divDF(pos['ticker'],pos,date)
             for stamp in div_df.index:
-                year = stamp.year
-                month = stamp.month
-                day = stamp.day
+                year,month,day = unpack_date(stamp)
+
                 date_str = str(year)+'-'+str(month)+'-'+str(day)
                 d = dt.date(year,month,day)
                 delta = int((date - d).days)
-                if delta > 0 or not div_exists:
+                if delta < 0 or not div_exists:
+                    print("processing dividend.")
                     n+=1
                     shares = watch_list.shares_at_date(pos['ticker'],d)
                     dividend = float(div_df.loc[stamp]['value'])
                     
                     watch_list.enter_dividend(pos['ticker'],
                                               date_str, dividend, shares)
+                else:
+                    print("{}: dividends are up to date.".format(pos['ticker']))
         else:
             pass
-            #print("Didn't fetch dividends. Not holding any shares.")
         print("processed {} dividends.".format(n))
 
-def timeout_handler(num, stack):
-    raise Exception("Timeout")
-
-def get_divDF(ticker,source,date):
+def get_divDF(ticker,position,date):
+    source = "yahoo-dividends"
+    today = dt.date.today()
+    delta = int((today - parse_date(position["last yield date"])).days)
+    if delta == 0:
+        #print("Already fetched dividend yield today.\n")
+        dividend = position["last dividend"]
+        return(dividend)
     try:
         div_df = web.DataReader(ticker,source,date)
+        dividend = div_df['value'][0]
+        position["last dividend"] = dividend # last dividend in dollars
+        year,month,day = unpack_date(today)
+        position["last yield date"] = \
+                       str(year)+'-'+str(month)+'-'+str(day)
+        # Preceding line is the last date on which the yield was fetched.
+        return(dividend)
+    except IndexError:
+        print("No dividends for",position["ticker"],'\n')
+        return(None)
     except Exception as ex:
         print(ex)
         print("No response from yahoo-finance.")
-
-    finally:
-        signal.alarm(0)
-        
-    return(div_df)
-
-def get_quoteDF(ticker,source,date):
-    try:
-        df = web.DataReader(ticker,source,date)
-    except Exception as ex:
-        print(ex)
-        print("No response from yahoo-finance.")
+        return(None)
     
-    return(df)
+    #return(div_df)
+
+def timeout_timer():
+    time.sleep(15)
+    return(True)
+
+def get_quoteDF(ticker, position, date):
+    source = "yahoo"
+    today = dt.date.today()
+    delta = int((today - parse_date(position["last price date"])).days)
+    if delta == 0:
+        #print("Already priced today\n")
+        last_close = position["last price"]
+        return(last_close)
+    else:
+        try:
+            df = web.DataReader(ticker,source,date)
+            last_close = df["Close"][0]
+            position["last price"] = last_close
+            year,month,day = unpack_date(today)
+
+            position["last price date"] = \
+                           str(year)+'-'+str(month)+'-'+str(day)
+            return(last_close)
+        except:
+            print("No response from yahoo-finance")
+            return(None)
+        
+    
 
 watch_list = positions()
 
@@ -458,6 +629,10 @@ style.use("fivethirtyeight")
 print('\033[2J') # Clear the terminal
 watch_list.load_positions()
 watch_list.calc_cost_basis()
+watch_list.sort_open_positions()
+watch_list.calc_portfolio_value()
+watch_list.calc_average_yield()
+today = dt.date.today()
 
 while(True):
     try:
@@ -474,8 +649,20 @@ while(True):
             
         elif selection == 'View':
             print("\n",end='')# Add whitespace between this and previous menu.
-            viewlist = watch_list.list_positions()
+            viewlist = ["Portfolio"]+watch_list.list_positions()
             view_pos = viewlist[si.select(viewlist)]
+            if view_pos == "Portfolio":
+                for pos in watch_list.position_list:
+                    if pos["current shares"] != 0:
+                        pos_value = pos["last price"] * pos["current shares"]
+                        print("{:<6} Shares: {:<5} @ ${:<7.2f} = Value: ${:<7.2f}"\
+                              .format(pos["ticker"], pos["current shares"],
+                                      pos["last price"], pos_value))
+                watch_list.calc_portfolio_value()
+                print("Total value: ${:<7.2f}".format\
+                      (watch_list.meta_data["portfolio value"]))
+                print("Average dividend yield: {:<7.2f}%\n".format\
+                      (watch_list.meta_data["average yield"]*100))
             for pos in watch_list.position_list:
                 if pos["ticker"] == view_pos:
                     view(pos)
@@ -483,33 +670,61 @@ while(True):
                     pass
                 
         elif selection == 'Indicators':
-            ind_dict = {"Last Transaction":[],
-                        "High Dividend Yield":[],
-                        "Recent Passed Dividend":[],
-                        "Upcoming Dividend":[],
-                        "Over-exposure":[]}
-            
+            ind_dict = {"Last Transaction":[], # Looks for opportunities to reverse the last transaction recorded
+                        "Matched Transactions":[], # Looks for opportunities to improve cost-basis
+                        "High Dividend Yield":[], # Looks for high dividend yields with respect to a specified target
+                        "Portfolio Yield":[], # Looks for opportunities to increase the average dividend yield of the portfolio
+                        "Recent Passed Dividend":[], # Looks for opportunities in response to recent or upcoming ex-dates
+                        "Over-exposure":[]} # Looks for opportunities to improve exposure with respect to a specified target
+                
             print("\nWorking on \"Last Transaction\" indicator.\n")
             watch_list, ind_dict = last_transaction_indicator(watch_list,
                                                               ind_dict)
             print("\033[1A\033[K", end='')    
             print("Done checking.\n")
 
-            for indicator in ind_dict["Last Transaction"]:
-                print("{:<6} Score: ${:<7.2f} Advise: {}".format\
-                      (indicator["Ticker"],
-                       indicator["Score"],
-                       indicator["Direction"].upper()))
-            print("\n",end='')
+            ind_dict["Last Transaction"].sort(key=lambda x: x["Score"],
+                                              reverse=True)
+            for i,indicator in enumerate(ind_dict["Last Transaction"]):
+                if i > 9:
+                    break
+                else:
+                    print("{:<6} Score: ${:<7.2f} Advise: {}".format\
+                          (indicator["Ticker"],
+                           indicator["Score"],
+                           indicator["Direction"].upper()))
+
+            print("\nWorking on \"Over-exposure\" indicator.\n")
+            watch_list, ind_dict = over_exposure_indicator(watch_list,
+                                                           ind_dict)
+            ind_dict["Over-exposure"].sort(key=lambda x: abs(x["Score"]),
+                                           reverse=True)
+            print("Exposure target: {:<7.2f}% (Position value: ${:<7.2f})".format\
+                  (watch_list.meta_data["exposure target"]*100,
+                   watch_list.meta_data["portfolio value"]*watch_list.meta_data["exposure target"]))
+            for i,indicator in enumerate(ind_dict["Over-exposure"]):
+                if i > 9:
+                    break
+                else:
+                    print("{:<6} Score: {:<7.2f}% Advise: {}".format\
+                          (indicator["Ticker"],
+                           indicator["Score"]*100,
+                           indicator["Direction"].upper()))
             
             print("\nWorking on \"Dividend Yield\" indicator.\n")
             watch_list, ind_dict = div_yield_indicator(watch_list,ind_dict)
-
-            for indicator in ind_dict["High Dividend Yield"]:
-                print("{:<6} Score: {:<7.2f}% Advise: {}".format\
-                      (indicator["Ticker"],
-                       indicator["Score"]*100,
-                       indicator["Direction"].upper()))
+            
+            ind_dict["High Dividend Yield"].sort(key=lambda x: x["Score"],
+                                                 reverse=True)
+            print("Dividend target: {:<7.2f}%".format(watch_list.meta_data["dividend target"]*100))
+            for i,indicator in enumerate(ind_dict["High Dividend Yield"]):
+                if i > 9:
+                    break
+                else:
+                    print("{:<6} Score: {:<7.2f}% Advise: {}".format\
+                          (indicator["Ticker"],
+                           indicator["Score"]*100,
+                           indicator["Direction"].upper()))
             print("\n",end='')
             
             for indicator in ind_dict["Recent Passed Dividend"]:
@@ -521,6 +736,8 @@ while(True):
             print('\n',end='')
             selections = ['Get all dividends',
                           'Get dividends for current positions',
+                          'Edit target exposure',
+                          'Edit dividend target',
                           'Clear console']
             selection = selections[si.select(selections)]
             if selection == 'Get all dividends':
@@ -528,6 +745,24 @@ while(True):
 
             elif selection == 'Get dividends for current positions':
                 get_dividends(watch_list)
+
+            elif selection == 'Edit target exposure':
+                print("Current target: {:<7.2f}%".format\
+                      (watch_list.meta_data["exposure target"]*100))
+                new_target = si.get_real_number("Enter new target (0-100).\n>>>",
+                                               lower=0, upper=100)
+                watch_list.meta_data["exposure target"] = new_target/100
+                print("New target: {:<7.2f}%".format\
+                      (watch_list.meta_data["exposure target"]*100))
+
+            elif selection == 'Edit dividend target':
+                print("Current target: {:<7.2f}%".format\
+                      (watch_list.meta_data["dividend target"]*100))
+                new_target = si.get_real_number("Enter new target (0-100).\n>>>",
+                                               lower=0, upper=100)
+                watch_list.meta_data["dividend target"] = new_target/100
+                print("New target: {:<7.2f}%".format\
+                      (watch_list.meta_data["dividend target"]*100))
                 
             elif selection == 'Clear console':
                 print('\033[2J')
@@ -549,26 +784,6 @@ while(True):
         
     except:
         print("Unexpected error:",sys.exc_info())
-        #continue
-        raise
-    
-##-example data structure-##
-##positions = 
-##[{'ticker':'TEST',
-## 'transactions':[{'b/s':'buy','date':'2018-11-1','price':35.50,'commission':4.95,'fees':0.00,'shares':15},
-##                 {'b/s':'sell','date':'2018-11-05','price':36.25,'commission':4.95,'fees':0.00,'shares':15},
-##                 {'b/s':'buy','date':'2018-11-06','price':32.25,'commission':4.95,'fees':0.00,'shares':15}],
-## 'dividends':[{'date':'2018-11-02','amount':0.15,'shares':15},
-##              {'date':'2018-11-25','amount':0.12,'shares':15}],
-## 'cost basis':32.22,
-##  'current shares':15},
-## {'ticker':'TEST2',
-## 'transactions':[{'b/s':'buy','date':'2018-10-01','price':12.40,'commission':4.95,'fees':0.00,'shares':100},
-##                 {'b/s':'sell','date':'2018-10-05','price':13.10,'commission':4.95,'fees':0.00,'shares':70},
-##                 {'b/s':'buy','date':'2018-11-06','price':9.15,'commission':4.95,'fees':0.00,'shares':200}],
-## 'dividends':[{'date':'2018-10-02','amount':0.07,'shares':100},
-##              {'date':'2018-11-25','amount':0.11,'shares':230}],
-## 'cost basis':9.285,
-##  'current shares':230,
-##  'last price': 5.43,
-##  'last price date':'2018-12-20'}]
+        #time.sleep(60)
+        continue
+        #raise
