@@ -58,7 +58,7 @@ def Mikes(testPlan):
 
     print("Looking for DVPR sheet")
     testDict = tab_dict(r'\\jsjcorp.com\data\GHSP\GH\webdata\DVPR\\'\
-                        +testPlan+ r'\Update\2590 JL PV Update 11-14-18.xlsx')
+                        +testPlan+ r'\Update\2590 JL PV Update 1-25-19.xlsx')
     if not testDict is None:
         print("Collecting warrants.")
         warrants = get_warrant_nums(testDict[testPlan])
@@ -100,12 +100,18 @@ def get_warrant_nums(xlsxTab):
 
 def gen_warrant_links(warrants):
     '''This function takes a list of warrants and builds network links to those
-    warrants.'''
+    warrants. the list of warrants must be integers'''
+    cur_year = str(dt.date.today().year)
     
     links = []
     broken_links = []
     for w in warrants:
-        path = '\\\\jsjcorp.com\\data\\GHSP\\GH\\webdata\\Testing\\' +str(w)
+        if cur_year == str(w)[:4]:
+            #print("Warrant was this year")
+            path = '\\\\jsjcorp.com\\data\\GHSP\\GH\\webdata\\Testing\\' +str(w)
+        else:
+            #print("Warrant was not this year")
+            path = '\\\\jsjcorp.com\\data\\GHSP\\GH\\webdata\\Testing\\' +str(w)[:4]+'\\'+str(w)
         if os.path.exists(path):
             links.append(path)
         else:
