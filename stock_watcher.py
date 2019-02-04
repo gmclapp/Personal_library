@@ -10,7 +10,7 @@ import sys
 import os
 import sanitize_inputs as si
 
-__version__ = '0.6.2'
+__version__ = '0.7.1'
 #os.system("mode con cols=60 lines=60")
 
 # Hide all warnings
@@ -51,7 +51,11 @@ class positions():
                                        'transactions':[{'b/s':buysell,'date':date,'price':price,'commission':commission,'fees':fees,'shares':shares}],
                                        'dividends':[],
                                        'cost basis':shares*price + commission + fees,
-                                       'current shares':shares})
+                                       'current shares':shares,
+                                       'last price':price,
+                                       'last price date':date,
+                                       'last dividend':0,
+                                       'last yield date':date})
 
     def enter_dividend(self, ticker, date, amount, shares):
         exists_flag = False
@@ -483,7 +487,7 @@ def div_yield_indicator(watch_list, ind_dict):
         try:
             last_close = position["last price"]
 
-            dividend = get_divDF(position['ticker'],position,last_year)
+            dividend = get_last_dividend(position)
 
             score = (dividend/last_close)*4 # assumes quarterly dividend.
             # Score is compared to the dividend target.
@@ -546,35 +550,48 @@ def get_dividends(watch_list, force_all=False):
             date = latest
 
         if pos['current shares'] > 0 or force_all:
-            get_divDF(pos['ticker'],pos,date)
-            for stamp in div_df.index:
-                year,month,day = unpack_date(stamp)
+            try:
+                div_df=get_divDF(pos['ticker'],pos,date)
+                for stamp in div_df.index:
+                    year,month,day = unpack_date(stamp)
 
-                date_str = str(year)+'-'+str(month)+'-'+str(day)
-                d = dt.date(year,month,day)
-                delta = int((date - d).days)
-                if delta < 0 or not div_exists:
-                    print("processing dividend.")
-                    n+=1
-                    shares = watch_list.shares_at_date(pos['ticker'],d)
-                    dividend = float(div_df.loc[stamp]['value'])
-                    
-                    watch_list.enter_dividend(pos['ticker'],
-                                              date_str, dividend, shares)
-                else:
-                    print("{}: dividends are up to date.".format(pos['ticker']))
+                    date_str = str(year)+'-'+str(month)+'-'+str(day)
+                    d = dt.date(year,month,day)
+                    delta = int((date - d).days)
+                    if delta < 0 or not div_exists:
+                        print("processing dividend.")
+                        n+=1
+                        shares = watch_list.shares_at_date(pos['ticker'],d)
+                        dividend = float(div_df.loc[stamp]['value'])
+                        
+                        watch_list.enter_dividend(pos['ticker'],
+                                                  date_str, dividend, shares)
+                    else:
+                        print("{}: dividends are up to date.".format(pos['ticker']))
+            except AttributeError:
+                print("No recent dividends")
         else:
             pass
         print("processed {} dividends.".format(n))
 
-def get_divDF(ticker,position,date):
+def get_last_dividend(position):
+    ticker=position['ticker']
     source = "yahoo-dividends"
     today = dt.date.today()
+    last_year = dt.date(today.year-1,1,1)
     delta = int((today - parse_date(position["last yield date"])).days)
     if delta == 0:
         #print("Already fetched dividend yield today.\n")
         dividend = position["last dividend"]
-        return(dividend)
+    else:
+        div_DF=get_divDF(ticker,position,last_year)
+        dividend = div_df['value'][0]
+
+    return(dividend)
+
+def get_divDF(ticker,position,date):
+    source = "yahoo-dividends"
+    today = dt.date.today()
     try:
         div_df = web.DataReader(ticker,source,date)
         dividend = div_df['value'][0]
@@ -583,7 +600,6 @@ def get_divDF(ticker,position,date):
         position["last yield date"] = \
                        str(year)+'-'+str(month)+'-'+str(day)
         # Preceding line is the last date on which the yield was fetched.
-        return(dividend)
     except IndexError:
         print("No dividends for",position["ticker"],'\n')
         return(None)
@@ -592,7 +608,7 @@ def get_divDF(ticker,position,date):
         print("No response from yahoo-finance.")
         return(None)
     
-    #return(div_df)
+    return(div_df)
 
 def timeout_timer():
     time.sleep(15)
