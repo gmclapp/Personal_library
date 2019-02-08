@@ -502,8 +502,12 @@ def div_yield_indicator(watch_list, ind_dict):
                            ({"Ticker":position['ticker'],
                              "Score":score,
                              "Direction":direction.upper()})
+        except KeyError:
+            print("No dividend fetch date for {}\n".format(position["ticker"]))
+            continue
         except:
-            pass
+            #pass
+            raise
 
     print("\033[1A\033[K", end='')
     print("\033[1A\033[K", end='')
