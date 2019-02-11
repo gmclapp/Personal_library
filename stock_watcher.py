@@ -588,7 +588,7 @@ def get_last_dividend(position):
         #print("Already fetched dividend yield today.\n")
         dividend = position["last dividend"]
     else:
-        div_DF=get_divDF(ticker,position,last_year)
+        div_df=get_divDF(ticker,position,last_year)
         dividend = div_df['value'][0]
 
     return(dividend)
@@ -604,6 +604,7 @@ def get_divDF(ticker,position,date):
         position["last yield date"] = \
                        str(year)+'-'+str(month)+'-'+str(day)
         # Preceding line is the last date on which the yield was fetched.
+        return(div_df)
     except IndexError:
         print("No dividends for",position["ticker"],'\n')
         return(None)
@@ -612,8 +613,6 @@ def get_divDF(ticker,position,date):
         print("No response from yahoo-finance.")
         return(None)
     
-    return(div_df)
-
 def timeout_timer():
     time.sleep(15)
     return(True)
