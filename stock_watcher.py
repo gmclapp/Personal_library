@@ -10,7 +10,7 @@ import sys
 import os
 import sanitize_inputs as si
 
-__version__ = '0.7.1'
+__version__ = '0.7.2'
 #os.system("mode con cols=60 lines=60")
 
 # Hide all warnings
