@@ -207,12 +207,12 @@ def view(pos):
     print("Annual dividend yield: {:<7.2f}%".format(pos_yield*100))
     today = dt.date.today()
 
-    df = get_quoteDF(pos["ticker"],pos,today)
-    #get_quoteDF(pos["ticker"],pos,today)
+    df = get_quoteDF(pos["ticker"],pos,today,force=True)
+    
     if df is None:
         print("Current price: No data")
     else:
-        #last_close = df["Close"][0]
+        
         last_close = pos["last price"]
         print("Current price: ${:<7.2f}\n".format(last_close))
         
@@ -504,6 +504,12 @@ def div_yield_indicator(watch_list, ind_dict):
                              "Direction":direction.upper()})
         except KeyError:
             print("No dividend fetch date for {}\n".format(position["ticker"]))
+            score = 0 - watch_list.meta_data["dividend target"]
+            direction = 'SELL'
+            ind_dict["High Dividend Yield"].append \
+                           ({"Ticker":position['ticker'],
+                             "Score":score,
+                             "Direction":direction.upper()})
             continue
         except:
             #pass
@@ -617,11 +623,11 @@ def timeout_timer():
     time.sleep(15)
     return(True)
 
-def get_quoteDF(ticker, position, date):
+def get_quoteDF(ticker, position, date, force=False):
     source = "yahoo"
     today = dt.date.today()
     delta = int((today - parse_date(position["last price date"])).days)
-    if delta == 0:
+    if (delta == 0 and not force):
         #print("Already priced today\n")
         last_close = position["last price"]
         return(last_close)
@@ -733,7 +739,7 @@ while(True):
             print("\nWorking on \"Dividend Yield\" indicator.\n")
             watch_list, ind_dict = div_yield_indicator(watch_list,ind_dict)
             
-            ind_dict["High Dividend Yield"].sort(key=lambda x: x["Score"],
+            ind_dict["High Dividend Yield"].sort(key=lambda x: abs(x["Score"]),
                                                  reverse=True)
             print("Dividend target: {:<7.2f}%".format(watch_list.meta_data["dividend target"]*100))
             for i,indicator in enumerate(ind_dict["High Dividend Yield"]):
