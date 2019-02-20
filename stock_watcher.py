@@ -483,7 +483,7 @@ def div_yield_indicator(watch_list, ind_dict):
         # \033[K = Erase to the end of line
         # \033[1A = moves the cursor up 1 line.
         print("{}/{}".format(index,len(watch_list.position_list),end=''))
-        
+    
         try:
             last_close = position["last price"]
 
