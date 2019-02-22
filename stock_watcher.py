@@ -511,6 +511,9 @@ def div_yield_indicator(watch_list, ind_dict):
                              "Score":score,
                              "Direction":direction.upper()})
             continue
+        except TypeError:
+            print("No dividends for this position")
+            continue
         except:
             #pass
             raise
@@ -580,6 +583,8 @@ def get_dividends(watch_list, force_all=False):
                         print("{}: dividends are up to date.".format(pos['ticker']))
             except AttributeError:
                 print("No recent dividends")
+            except TypeError:
+                print("No dividends for this position")
         else:
             pass
         print("processed {} dividends.".format(n))
@@ -809,6 +814,6 @@ while(True):
         
     except:
         print("Unexpected error:",sys.exc_info())
-        #time.sleep(60)
+##        time.sleep(60)
         continue
-        #raise
+##        raise
