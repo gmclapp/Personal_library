@@ -1,9 +1,9 @@
 [
     {
-        "portfolio value": 34008.83021302335,
+        "portfolio value": 34384.06022400968,
         "exposure target": 0.025,
         "dividend target": 0.0325,
-        "average yield": 0.03948445129070567
+        "average yield": 0.039292625454878556
     },
     [
         {
@@ -1650,9 +1650,9 @@
                     "total": 1.2
                 }
             ],
-            "cost basis": 19.205033333333326,
+            "cost basis": 19.195033333333324,
             "current shares": 120,
-            "last price": 10.430000305175781,
+            "last price": 10.279999732971191,
             "last price date": "2019-3-14",
             "last dividend": 0.01,
             "last yield date": "2019-3-14"
@@ -1815,7 +1815,7 @@
                     "total": 11.4
                 }
             ],
-            "cost basis": 32.027100000000026,
+            "cost basis": 31.647100000000027,
             "current shares": 30,
             "last price": 38.63999938964844,
             "last price date": "2019-3-14",
@@ -1892,7 +1892,7 @@
                     "total": 17.1
                 }
             ],
-            "cost basis": 6.672577777777776,
+            "cost basis": 6.292577777777775,
             "current shares": 45,
             "last price": 11.204999923706055,
             "last price date": "2019-3-14",
@@ -2273,7 +2273,7 @@
                     "total": 5.6000000000000005
                 }
             ],
-            "cost basis": 46.30357142857144,
+            "cost basis": 45.90357142857143,
             "current shares": 14,
             "last price": 45.685001373291016,
             "last price date": "2019-3-14",
@@ -2474,7 +2474,7 @@
                     "total": 49.6
                 }
             ],
-            "cost basis": 53.44128,
+            "cost basis": 52.44928,
             "current shares": 50,
             "last price": 55.630001068115234,
             "last price date": "2019-3-14",
@@ -3419,7 +3419,7 @@
                     "total": 9.200000000000001
                 }
             ],
-            "cost basis": 32.608549999999994,
+            "cost basis": 32.37855,
             "current shares": 40,
             "last price": 36.599998474121094,
             "last price date": "2019-3-14",
