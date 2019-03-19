@@ -1,7 +1,7 @@
 '''It is recommended to use this package with the sanitize_inputs package.\n
 The functions contained herein do not check for erroneous inputs.'''
 
-__version__ = "0.2.4"
+__version__ = "0.2.5"
 
 import math
 import csv
@@ -80,25 +80,6 @@ def interpolate_y(x1,y1,x2,y2,y):
 
     return(x)
 
-def Mikes(testPlan):
-    '''Takes the test plan number as an argument and returns links to warrants.
-    '''
-
-    print("Looking for DVPR sheet")
-    testDict = tab_dict(r'\\jsjcorp.com\data\GHSP\GH\webdata\DVPR\\'\
-                        +testPlan+ r'\Update\2590 JL PV Update 1-25-19.xlsx')
-    if not testDict is None:
-        print("Collecting warrants.")
-        warrants = get_warrant_nums(testDict[testPlan])
-        print("Testing warrant links.")
-        warrants, broken_links = gen_warrant_links(warrants)
-        print("Found {} warrants.".format(len(warrants)))
-        print("{} broken links".format(len(broken_links)))
-        for b in broken_links:
-            print(b)
-    else:
-        print("DVPR not found.")
-    
 def tab_dict(rfile):
     '''This is a function that opens an excel file and returns a dictionary
     where the keys of the dictionary are the sheet names and the values are
@@ -115,81 +96,7 @@ def tab_dict(rfile):
     except FileNotFoundError:
         print(rfile,"Does not exist.")
         return(None)
-        
-def get_warrant_nums(xlsxTab):
-    '''This function takes a pandas dataframe, probably a tab from tab_dict,
-    and extracts a list of warrants from the "Warrant Number" column.'''
-    series = xlsxTab["Unnamed: 14"]
-    warrants = []
-    for i in series:
-        if isinstance(i,(int, float)) and not math.isnan(i) and len(str(i)) == 8:
-            warrants.append(i)
-    return(warrants)
-
-def gen_warrant_links(warrants):
-    '''This function takes a list of warrants and builds network links to those
-    warrants. the list of warrants must be integers'''
-    cur_year = str(dt.date.today().year)
-    
-    links = []
-    broken_links = []
-    for w in warrants:
-        if cur_year == str(w)[:4]:
-            #print("Warrant was this year")
-            path = '\\\\jsjcorp.com\\data\\GHSP\\GH\\webdata\\Testing\\' +str(w)
-##            path = 'Test warrants\\' +str(w)
-        else:
-            #print("Warrant was not this year")
-            path = '\\\\jsjcorp.com\\data\\GHSP\\GH\\webdata\\Testing\\' +str(w)[:4]+'\\'+str(w)
-##            path = 'Test warrants\\' +str(w)[:4]+'\\'+str(w)
-        if os.path.exists(path):
-            links.append(path)
-        else:
-            broken_links.append(path)
-
-    return(links, broken_links)
-
-def parametric_eval(warrant_link):
-    '''This function takes a link to a warrant folder, and evaluates the
-    parametric stand data contained therein.'''
-    meas_val_header = "Unnamed: 6"
-    lower_spec_header = "Unnamed: 5"
-    upper_spec_header = "Unnamed: 7"
-    attribute_label_header = "Unnamed: 9"
-    
-    folder = warrant_link + r'\Parametric Data'
-    for filename in os.listdir(folder):
-        if filename.endswith(".xlsx"):
-            xlsx = pd.ExcelFile(folder+'\\'+filename)
-            Sheet_frames = {sh:xlsx.parse(sh) for sh in xlsx.sheet_names}
-            for i, element in enumerate(Sheet_frames["EVAL_PARAM_SUM"][meas_val_header]):
-                lower = Sheet_frames["EVAL_PARAM_SUM"][lower_spec_header][i]
-                upper = Sheet_frames["EVAL_PARAM_SUM"][upper_spec_header][i]
-                try:
-                    if (lower <= element <= upper and
-                        str(element) != ""):
-                        print(Sheet_frames["EVAL_PARAM_SUM"][attribute_label_header][i],
-                              " = Pass")
-                    else:
-                        print(Sheet_frames["EVAL_PARAM_SUM"][attribute_label_header][i],
-                              " = Fail")
-                except TypeError:
-                    if str(element) == "0x00":
-                        pass
-                    elif str(element) == "0x40":
-                        print(Sheet_frames["EVAL_PARAM_SUM"][attribute_label_header][i],
-                              ":",element,"Test not complete this cycle",sep='')
-                    elif str(element) == "0x50":
-                        print(Sheet_frames["EVAL_PARAM_SUM"][attribute_label_header][i],
-                              ":",element,
-                              "Test not complete this cycle\n",
-                              "Test not complete since last clear.",
-                              sep='')
-                    else:
-                        pass
-        else:
-            continue
-        
+           
 def list_headers(rfile, r_c='r'):
     '''rfile is the csv file in which the data are stored. pass 'r' or 'c' for
     the second argument to indicate whether the headers are in the first row or
