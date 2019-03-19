@@ -1,7 +1,7 @@
 '''It is recommended to use this package with the sanitize_inputs package.\n
 The functions contained herein do not check for erroneous inputs.'''
 
-__version__ = "0.2.5"
+__version__ = "0.2.6"
 
 import math
 import csv
@@ -12,6 +12,15 @@ from difflib import SequenceMatcher
 import datetime as dt
 import time
 
+def dydx(df, y_col, x_col):
+    '''Given a dataframe and labels of an x and y column, This function
+    returns the data frame with an additional column dx/dy that is the first
+    derivative of x with respect to y.'''
+    
+    df_shifted = df.shift(1)
+    df["dx/dy"] = (df[y_col]-df_shifted[y_col])/(df[x_col]-df_shifted[x_col])
+    return(df)
+    
 def activate(x, k, epsilon=1):
     '''This function takes a value x, a trigger value k, and a smoothing factor
     epsilon and returns a number between 0 and 1 with an epsilon smoothed
