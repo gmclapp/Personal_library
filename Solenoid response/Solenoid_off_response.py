@@ -4,8 +4,9 @@ from nptdms import TdmsFile
 import os
 import matplotlib.pyplot as plt
 import csv
+import misc_functions as mf
 
-__version__ = '0.1.0'
+__version__ = '0.1.1'
 plt.rcParams["figure.figsize"]=(16,8) # default figure size in inches.
 
 def dxdt(df, pos_col, time_col, noise_thres):
@@ -17,7 +18,7 @@ def dxdt(df, pos_col, time_col, noise_thres):
     filtered = round(change/noise_thres,0)*noise_thres
     df["Velocity [m/s]"] = filtered
     
-def response_time(tdms_file, directory):
+def response_time(tdms_file, directory, log):
     # The solenoid distance beyond which it is considered activated
     threshold = 2.3 #mm
     
@@ -32,7 +33,7 @@ def response_time(tdms_file, directory):
     temp = MetaDict['TEST_TEMP']
     volt = MetaDict['TEST_VOLT']
 
-    newrow = [sample_number, temp, volt]
+    newrow = [warrant_number, sample_number, temp, volt]
     
     # This tab contains the solenoid actuation times
     SolDF = tdms_file.object("Results").as_dataframe()
@@ -91,7 +92,11 @@ def response_time(tdms_file, directory):
                 act_flags[i] = True
 
                 resp_times.append(act_time - cmd_times[i])
-        newrow.append(resp_times[-1])
+        try:
+            newrow.append(resp_times[-1])
+        except IndexError:
+            print("{} No response time.".format(mf.timestamp()),file=log)
+            newrow.append("N/A")
         newrow.append("N/A")
             
     for i,ax in enumerate(axes):
@@ -114,42 +119,65 @@ def response_time(tdms_file, directory):
                         wspace=0.2,
                         hspace=0.4)
 
-    filename = str(sample_number)+str(temp)+str(volt)+'.png'
-    plt.savefig(filename, bbox_inches='tight')
+    filename = str(warrant_number)+str(sample_number)+str(temp)+str(volt)+'.png'
+    pathname = warrant_number+"_OFF"
+    if os.path.exists(pathname):
+        pass
+    else:
+        try:
+            os.mkdir(pathname)
+        except OSError:
+            print("{} Directory creation failed.".format(mf.timestamp()),
+                  file=log)
+        else:
+            print("{} Successfully created directory {}".format(mf.timestamp(),
+                                                                pathname),
+                  file=log)
+    plt.savefig((pathname+"\\"+filename), bbox_inches='tight')
     
     csvfile = open('response times.csv','a',newline='')
     WRT = csv.writer(csvfile, dialect='excel')        
     WRT.writerow(newrow)
     csvfile.close()
-    
-# Define the directory in which the data are stored
-directory = input("Enter directory\n>>>")
-#directory = r"\\jsjcorp.com\data\GHSP\GH\webdata\Testing\2018\20184410\Parametric Data"
 
-tdms_files = []
-csvfile = open('response times.csv','w',newline='')
-WRT = csv.writer(csvfile, dialect='excel')
-WRT.writerow(["Sample number","Temperature (C)","Voltage (V)",
-              "Response 1A [ms]","Response 1B [ms]",
-              "Response 2A [ms]","Response 2B [ms]",
-              "Response 3A [ms]","Response 3B [ms]"])
-csvfile.close()
+def main(directory=None):
+    log = open("log.txt",mode='a')
+    # Define the directory in which the data are stored
+    if directory == None:
+        directory = input("Enter directory\n>>>")
 
-for file in os.listdir(directory):
-    if file.endswith(".tdms"):
-        tdms_files.append(os.path.join(directory,file))
+    print(mf.timestamp(),directory,file=log)
+    tdms_files = []
+    csvfile = open('response times.csv','a',newline='')
+    WRT = csv.writer(csvfile, dialect='excel')
+    WRT.writerow(["Warrant","Sample number","Temperature (C)","Voltage (V)",
+                  "Response 1A [ms]","Response 1B [ms]",
+                  "Response 2A [ms]","Response 2B [ms]",
+                  "Response 3A [ms]","Response 3B [ms]"])
+    csvfile.close()
+
+    for file in os.listdir(directory):
+        if file.endswith(".tdms"):
+            tdms_files.append(os.path.join(directory,file))
 
 
-for f in tdms_files:
-    tdms_file = TdmsFile(f)
-    try:
-        response_time(tdms_file, directory)
-    except KeyError:
-        print("Faulty tdms file {}.".format(str(f)))
-        continue
-    except Exception as ex:
-        raise
+    for f in tdms_files:
+        tdms_file = TdmsFile(f)
+        try:
+            response_time(tdms_file, directory, log)
+        except KeyError:
+            print("{} Faulty tdms file {}.".format(mf.timestamp(),
+                                                   str(f)),
+                  file=log)
+            continue
+        except Exception as ex:
+            raise
 
-print("Finished processing {}".format(directory))
+    print("{} Finished processing {}".format(mf.timestamp(),
+                                             directory),
+          file=log)
+    log.close()
 
+if __name__ == '__main__':
+    main()
 
