@@ -10,7 +10,7 @@ import sys
 import os
 import sanitize_inputs as si
 
-__version__ = '0.7.1'
+__version__ = '0.7.2'
 #os.system("mode con cols=60 lines=60")
 
 # Hide all warnings
@@ -162,12 +162,17 @@ def default(o):
 def order(watch_list):
     today = dt.date.today()
     orders = ['Buy',
-              'Sell']
+              'Sell',
+              'Back']
     date_options = ['Today',
-                    'Enter date']
+                    'Enter date',
+                    'Back']
     print("What kind of order?")
 
     order = orders[si.select(orders)]
+    if order == 'Back':
+        print("\n",end='')
+        return()
     print("When was this order?")
     date_selection = date_options[si.select(date_options)]
     if date_selection == 'Today':
@@ -180,6 +185,9 @@ def order(watch_list):
                               upper=today.year+1,lower=1970)
         month = si.get_integer("Enter month.\n>>>",upper=13,lower=0)
         day = si.get_integer("Enter day.\n>>>",upper=32,lower=0)
+    elif date_selection == 'Back':
+        print("\n",end='')
+        return()
     date_str = str(year)+'-'+str(month)+'-'+str(day)
         
     tick = input("Enter stock ticker.\n>>>").upper()
@@ -207,12 +215,12 @@ def view(pos):
     print("Annual dividend yield: {:<7.2f}%".format(pos_yield*100))
     today = dt.date.today()
 
-    df = get_quoteDF(pos["ticker"],pos,today)
-    #get_quoteDF(pos["ticker"],pos,today)
+    df = get_quoteDF(pos["ticker"],pos,today,force=True)
+    
     if df is None:
         print("Current price: No data")
     else:
-        #last_close = df["Close"][0]
+        
         last_close = pos["last price"]
         print("Current price: ${:<7.2f}\n".format(last_close))
         
@@ -230,8 +238,10 @@ def edit(watch_list):
     print("\n",end='')
     edit_list = ['Transactions',
                  'Dividends',
-                 'Tickers']
+                 'Tickers',
+                 'Back']
     viewlist = watch_list.list_positions() # used in several options
+    viewlist.append('Back')
     edit_sel = edit_list[si.select(edit_list)]
     if edit_sel == 'Transactions':
         print("\n",end='')
@@ -260,7 +270,10 @@ def edit(watch_list):
                                 'Buy/Sell',
                                 'Shares',
                                 'Price',
-                                'Delete transaction']
+                                'Commission',
+                                'Fees',
+                                'Delete transaction',
+                                'Back']
                 e_choice = edit_choices[si.select(edit_choices)]
                 
                 if e_choice == 'Date':
@@ -294,9 +307,18 @@ def edit(watch_list):
                                                lower=0)
 
                     pos["transactions"][i]['price'] = price
-
+                elif e_choice == 'Commission':
+                    commission = si.get_real_number("Enter commission.\n>>>",
+                                                    lower=0)
+                    pos["transactions"][i]['commission'] = commission
+                elif e_choice == 'Fees':
+                    fees = si.get_real_number("Enter fees.\n>>>",
+                                                    lower=0)
+                    pos["transactions"][i]['fees'] = fees
                 elif e_choice == 'Delete transaction':
                     pos["transactions"].pop(i)
+                elif e_choice == 'Back':
+                    pass
                 
     elif edit_sel == 'Dividends':
         print("For which position would you like to edit a dividend?")
@@ -313,7 +335,12 @@ def edit(watch_list):
                                         d['total'])
                     
                     div_list.append(div_str)
+                div_list.append('Back')
                 d_sel = div_list[si.select(div_list)]
+                if d_sel == 'Back':
+                    print("\n",end='')
+                    return()
+                
                 for i,d in enumerate(div_list): # get index of transaction
                     if d_sel == d:
                         break
@@ -323,7 +350,8 @@ def edit(watch_list):
                                 'Amount',
                                 'Shares',
                                 'Total',
-                                'Delete dividend']
+                                'Delete dividend',
+                                'Back']
                 
                 e_choice = edit_choices[si.select(edit_choices)]
                 if e_choice == 'Date':
@@ -355,26 +383,36 @@ def edit(watch_list):
 
                 elif e_choice == 'Delete dividend':
                     pos["dividends"].pop(i)
-                    
+
+                elif e_choice == 'Back':
+                    pass
+                
     elif edit_sel == 'Tickers':
         tick_options = ['Edit symbol',
-                        'Delete symbol']
+                        'Delete symbol',
+                        'Back']
         
         print("Which ticker would you like to edit?")
         edit_pos = viewlist[si.select(viewlist)]
-        print("What would you like to do with this position?")
-        edit_sel = tick_options[si.select(tick_options)]
-        for i,pos in enumerate(watch_list.position_list):
-            if pos["ticker"] == edit_pos:
-                if edit_sel == 'Edit symbol':
-                    tick = input("Enter stock ticker.\n>>>").upper()
-                    pos["ticker"] = tick
-                    # There will need to be logic here to merge two identical
-                    # symbols.
-                    
-                elif edit_sel == 'Delete symbol':
-                    watch_list.position_list.pop(i)
-    watch_list.calc_cost_basis()    
+        if edit_pos != 'Back':
+            print("What would you like to do with this position?")
+            edit_sel = tick_options[si.select(tick_options)]
+            for i,pos in enumerate(watch_list.position_list):
+                if pos["ticker"] == edit_pos:
+                    if edit_sel == 'Edit symbol':
+                        tick = input("Enter stock ticker.\n>>>").upper()
+                        pos["ticker"] = tick
+                        # There will need to be logic here to merge two identical
+                        # symbols.
+                        
+                    elif edit_sel == 'Delete symbol':
+                        watch_list.position_list.pop(i)
+                    elif edit_sel == 'Back':
+                        pass
+    elif edit_sel == 'Back':
+        return()
+    watch_list.calc_cost_basis()
+    
                                 
 def last_transaction_indicator(watch_list, ind_dict):
     indicator = False
@@ -483,7 +521,7 @@ def div_yield_indicator(watch_list, ind_dict):
         # \033[K = Erase to the end of line
         # \033[1A = moves the cursor up 1 line.
         print("{}/{}".format(index,len(watch_list.position_list),end=''))
-        
+    
         try:
             last_close = position["last price"]
 
@@ -502,8 +540,21 @@ def div_yield_indicator(watch_list, ind_dict):
                            ({"Ticker":position['ticker'],
                              "Score":score,
                              "Direction":direction.upper()})
+        except KeyError:
+            print("No dividend fetch date for {}\n".format(position["ticker"]))
+            score = 0 - watch_list.meta_data["dividend target"]
+            direction = 'SELL'
+            ind_dict["High Dividend Yield"].append \
+                           ({"Ticker":position['ticker'],
+                             "Score":score,
+                             "Direction":direction.upper()})
+            continue
+        except TypeError:
+            print("No dividends for this position")
+            continue
         except:
-            pass
+            #pass
+            raise
 
     print("\033[1A\033[K", end='')
     print("\033[1A\033[K", end='')
@@ -570,6 +621,8 @@ def get_dividends(watch_list, force_all=False):
                         print("{}: dividends are up to date.".format(pos['ticker']))
             except AttributeError:
                 print("No recent dividends")
+            except TypeError:
+                print("No dividends for this position")
         else:
             pass
         print("processed {} dividends.".format(n))
@@ -584,7 +637,7 @@ def get_last_dividend(position):
         #print("Already fetched dividend yield today.\n")
         dividend = position["last dividend"]
     else:
-        div_DF=get_divDF(ticker,position,last_year)
+        div_df=get_divDF(ticker,position,last_year)
         dividend = div_df['value'][0]
 
     return(dividend)
@@ -600,6 +653,7 @@ def get_divDF(ticker,position,date):
         position["last yield date"] = \
                        str(year)+'-'+str(month)+'-'+str(day)
         # Preceding line is the last date on which the yield was fetched.
+        return(div_df)
     except IndexError:
         print("No dividends for",position["ticker"],'\n')
         return(None)
@@ -608,17 +662,15 @@ def get_divDF(ticker,position,date):
         print("No response from yahoo-finance.")
         return(None)
     
-    return(div_df)
-
 def timeout_timer():
     time.sleep(15)
     return(True)
 
-def get_quoteDF(ticker, position, date):
+def get_quoteDF(ticker, position, date, force=False):
     source = "yahoo"
     today = dt.date.today()
     delta = int((today - parse_date(position["last price date"])).days)
-    if delta == 0:
+    if (delta == 0 and not force):
         #print("Already priced today\n")
         last_close = position["last price"]
         return(last_close)
@@ -636,11 +688,9 @@ def get_quoteDF(ticker, position, date):
             print("No response from yahoo-finance")
             return(None)
         
-    
-
 watch_list = positions()
 
-style.use("fivethirtyeight")
+#style.use("fivethirtyeight")
 
 print('\033[2J') # Clear the terminal
 watch_list.load_positions()
@@ -666,6 +716,7 @@ while(True):
         elif selection == 'View':
             print("\n",end='')# Add whitespace between this and previous menu.
             viewlist = ["Portfolio"]+watch_list.list_positions()
+            viewlist.append('Back')
             view_pos = viewlist[si.select(viewlist)]
             if view_pos == "Portfolio":
                 for pos in watch_list.position_list:
@@ -679,11 +730,15 @@ while(True):
                       (watch_list.meta_data["portfolio value"]))
                 print("Average dividend yield: {:<7.2f}%\n".format\
                       (watch_list.meta_data["average yield"]*100))
-            for pos in watch_list.position_list:
-                if pos["ticker"] == view_pos:
-                    view(pos)
-                else:
-                    pass
+            elif view_pos == 'Back':
+                print("\n",end='')
+                pass
+            else:
+                for pos in watch_list.position_list:
+                    if pos["ticker"] == view_pos:
+                        view(pos)
+                    else:
+                        pass
                 
         elif selection == 'Indicators':
             ind_dict = {"Last Transaction":[], # Looks for opportunities to reverse the last transaction recorded
@@ -730,7 +785,7 @@ while(True):
             print("\nWorking on \"Dividend Yield\" indicator.\n")
             watch_list, ind_dict = div_yield_indicator(watch_list,ind_dict)
             
-            ind_dict["High Dividend Yield"].sort(key=lambda x: x["Score"],
+            ind_dict["High Dividend Yield"].sort(key=lambda x: abs(x["Score"]),
                                                  reverse=True)
             print("Dividend target: {:<7.2f}%".format(watch_list.meta_data["dividend target"]*100))
             for i,indicator in enumerate(ind_dict["High Dividend Yield"]):
@@ -800,6 +855,6 @@ while(True):
         
     except:
         print("Unexpected error:",sys.exc_info())
-        #time.sleep(60)
+##        time.sleep(60)
         continue
-        #raise
+##        raise

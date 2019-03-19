@@ -1,7 +1,7 @@
 '''It is recommended to use this package with the sanitize_inputs package.\n
 The functions contained herein do not check for erroneous inputs.'''
 
-__version__ = "0.2.4"
+__version__ = "0.2.3"
 
 import math
 import csv
@@ -11,22 +11,6 @@ import os
 from difflib import SequenceMatcher
 import datetime as dt
 import time
-
-def activate(x, k, epsilon=1):
-    '''This function takes a value x, a trigger value k, and a smoothing factor
-    epsilon and returns a number between 0 and 1 with an epsilon smoothed
-    transition at x=k.'''
-
-    y=math.tanh((x-k)/epsilon)/2+0.5
-    return(y)
-
-def deactivate(x, k, epsilon=1):
-    '''This function takes a value x, a trigger value k, and a smoothing factor
-    epsilon and returns a number between 0 and 1 with an epsilon smoothed
-    transition at x=k.'''
-    
-    y=math.tanh((x-k)/epsilon)/-2+0.5
-    return(y)
 
 def timestamp():
     now = dt.datetime.fromtimestamp(time.time())
