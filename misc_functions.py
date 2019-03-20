@@ -12,7 +12,7 @@ from difflib import SequenceMatcher
 import datetime as dt
 import time
 
-def dydx(df, y_col, x_col):
+def dxdy(df, y_col, x_col):
     '''Given a dataframe and labels of an x and y column, This function
     returns the data frame with an additional column dx/dy that is the first
     derivative of x with respect to y.'''
