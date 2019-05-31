@@ -63,7 +63,7 @@ def ELOgame(players, D=400, K=16):
         
         
         
-players = (("Glenn",932),("Jeff",823))
+players = (("Glenn",1876),("Dean",2347))
 
-ELOgame(players, D=800, K=32)
+ELOgame(players, D=400, K=16)
 time.sleep(30)
