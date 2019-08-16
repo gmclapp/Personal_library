@@ -1,5 +1,9 @@
 import pygame
 
+def quit_nicely():
+    pygame.display.quit()
+    pygame.quit()
+    
 class board():
     def __init__(self):
         self.dark_color = (50, 50, 50)
@@ -8,9 +12,10 @@ class board():
         self.light_square = pygame.Surface()
         self.board = pygame.Surface()
         for i in range(64):
-            self.board.blit(pygame.rect(0,0)
+            self.board.blit(pygame.rect(0,0))
 
     def draw(self, screen, location, size):
+        pass
         
         
         
@@ -68,6 +73,8 @@ def main():
 
         # Wait long enough to reduce the FPS to 60fps
         fpsClock.tick(60)
+
+    quit_nicely()
      
      
 # run the main function only if this module is executed as the main script
