@@ -3,9 +3,31 @@ import constants
 
 class struct_tile():
     def __init__(self, tile_number):
+        pass
         # Based on tile number get a tile definition to set its image and
         # whether it is blocking.
         # self.block_path = block_path
+
+class actor():
+    def __init__(self,x,y,sprite):
+        self.x = x
+        self.y = y
+        self.sprite = sprite
+
+    def draw(self,surf):
+        surf.blit(self.sprite, (self.x*constants.RES, self.y*constants.RES))
+
+    def move(self, dx, dy):
+        if GAME_MAP[self.x + dx][self.y+dy].block_path == False:
+            self.x += dx
+            self.y += dy
+
+class game_object():
+    def __init__(self):
+        self.actor_list = []
+        self.scene_list = []
+        self.tile_list = []
+        
 
 def map_create():
     new_map = [[struct_tile(False) for y in range(0,30)]for x in range(0,30)]
@@ -28,7 +50,7 @@ def draw_game(SURFACE_MAIN):
 
     pygame.display.flip()
 
-def game_main_loop(SURFACE_MAIN, game_map):
+def game_main_loop(game_obj):
     game_quit = False
     fpsClock = pygame.time.Clock()
     
@@ -38,20 +60,34 @@ def game_main_loop(SURFACE_MAIN, game_map):
         for event in event_list:
             if event.type == pygame.QUIT:
                 game_quit = True
-        draw_game(SURFACE_MAIN)
+
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_w:
+                    player.move(0,-1)
+                if event.key == pygame.K_a:
+                    player.move(-1,0)
+                if event.key == pygame.K_s:
+                    player.move(0,1)
+                if event.key == pygame.K_d:
+                    player.move(1,0)
+                    
+        draw_game(game_obj.SURFACE_MAIN)
         fpsClock.tick(60)
 
     quit_nicely()
                 
 def game_initialize():
     pygame.init()
+    game_obj = game_object()
 
-    SURFACE_MAIN = pygame.display.set_mode((constants.GAME_WIDTH,
+    game_obj.SURFACE_MAIN = pygame.display.set_mode((constants.GAME_WIDTH,
                                             constants.GAME_HEIGHT))
-    game_map = map_create()
+    game_obj.map = map_create()
 
-    return(SURFACE_MAIN, game_map)
+    game_obj.actor_list.append(actor(0,0,constants.S_PLAYER))
+
+    return(game_obj)
 
 if __name__ == "__main__":
-    SURFACE_MAIN, game_map = game_initialize()
-    game_main_loop(SURFACE_MAIN, game_map)
+    game_obj = game_initialize()
+    game_main_loop(game_obj)
