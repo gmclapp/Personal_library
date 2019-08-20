@@ -25,6 +25,8 @@ class actor():
 
 class game_object():
     def __init__(self):
+        self.SURFACE_MAIN = None
+        self.font = pygame.font.Font(None,32)
         self.actor_list = []
         self.scene_list = []
         self.tile_list = []
@@ -60,8 +62,19 @@ def draw_game(game_obj):
     # draw the character
     for a in game_obj.actor_list:
         game_obj.SURFACE_MAIN.blit(a.sprite, (a.x*constants.RES,a.y*constants.RES))
-    
 
+    input_box_hgt = 32
+    input_box = pygame.Rect(0,
+                            constants.GAME_HEIGHT-input_box_hgt,
+                            constants.GAME_WIDTH,
+                            input_box_hgt)
+
+    if game_obj.vars["cheat_codes"]:
+        pygame.draw.rect(game_obj.SURFACE_MAIN, constants.CHEAT_TXT_BOX_BG,input_box, 0)
+        txt_surface = game_obj.font.render(game_obj.vars["cheat_text"],True,constants.CHEAT_TXT)
+        game_obj.SURFACE_MAIN.blit(txt_surface,(input_box.x+5,input_box.y+5))
+    
+    
     pygame.display.flip()
 
 def game_main_loop(game_obj):
