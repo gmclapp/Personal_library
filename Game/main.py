@@ -1,5 +1,6 @@
 import pygame
 import constants
+import json
 
 class struct_tile():
     def __init__(self, tile_number):
@@ -27,6 +28,15 @@ class game_object():
         self.actor_list = []
         self.scene_list = []
         self.tile_list = []
+
+    def load(self):
+        print("Loading tile data...")
+        with open("data\\tiles.txt","r") as f:
+            self.tile_list = json.load(f)
+
+            
+    def save(self):
+        pass
         
 
 def map_create():
@@ -83,6 +93,7 @@ def game_initialize():
     game_obj.SURFACE_MAIN = pygame.display.set_mode((constants.GAME_WIDTH,
                                             constants.GAME_HEIGHT))
     game_obj.map = map_create()
+    game_obj.load()
 
     game_obj.actor_list.append(actor(0,0,constants.S_PLAYER))
 

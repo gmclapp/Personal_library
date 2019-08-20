@@ -1,7 +1,7 @@
 [
     {
         "serial_no":0,
-        "name":"Cave floor"
+        "name":"Cave floor",
         "block_path": false,
         "art": "\\data\\cave_floor.png"
     },
