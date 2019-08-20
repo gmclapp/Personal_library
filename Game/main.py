@@ -28,6 +28,7 @@ class game_object():
         self.actor_list = []
         self.scene_list = []
         self.tile_list = []
+        self.booleans = {"cheat_codes": False}
 
     def load(self):
         print("Loading tile data...")
@@ -63,7 +64,7 @@ def draw_game(game_obj):
 
 def game_main_loop(game_obj):
     game_quit = False
-    cheat_codes = False
+    text = ''
     fpsClock = pygame.time.Clock()
     
     while not game_quit:
@@ -73,7 +74,17 @@ def game_main_loop(game_obj):
             if event.type == pygame.QUIT:
                 game_quit = True
 
-            if event.type == pygame.KEYDOWN:
+            if event.type == pygame.KEYDOWN and game_obj.booleans["cheat_codes"]:
+                if event.key == pygame.K_RETURN:
+                    print(text)
+                    text = ''
+                    game_obj.booleans["cheat_codes"] = not game_obj.booleans["cheat_codes"]
+                elif event.key == pygame.K_BACKSPACE:
+                    text = text[:-1]
+                else:
+                    text += event.unicode
+                    
+            elif event.type == pygame.KEYDOWN and not game_obj.booleans["cheat_codes"]:
                 if event.key == pygame.K_w:
                     game_obj.actor_list[0].move(0,-1)
                 if event.key == pygame.K_a:
@@ -82,7 +93,9 @@ def game_main_loop(game_obj):
                     game_obj.actor_list[0].move(0,1)
                 if event.key == pygame.K_d:
                     game_obj.actor_list[0].move(1,0)
-                    
+                if event.key == pygame.K_RETURN:
+                    game_obj.booleans["cheat_codes"] = not game_obj.booleans["cheat_codes"]
+                 
         draw_game(game_obj)
         fpsClock.tick(60)
 
