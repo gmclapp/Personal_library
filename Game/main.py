@@ -19,9 +19,9 @@ class actor():
         surf.blit(self.sprite, (self.x*constants.RES, self.y*constants.RES))
 
     def move(self, dx, dy):
-        if GAME_MAP[self.x + dx][self.y+dy].block_path == False:
-            self.x += dx
-            self.y += dy
+##        if GAME_MAP[self.x + dx][self.y+dy].block_path == False:
+        self.x += dx
+        self.y += dy
 
 class game_object():
     def __init__(self):
@@ -49,19 +49,21 @@ def quit_nicely():
     pygame.display.quit()
     pygame.quit()
     
-def draw_game(SURFACE_MAIN):
+def draw_game(game_obj):
 
-    SURFACE_MAIN.fill(constants.DEFAULT_BG)
+    game_obj.SURFACE_MAIN.fill(constants.DEFAULT_BG)
 
     # draw the scene
 
     # draw the character
-    SURFACE_MAIN.blit(constants.S_PLAYER, (200,200))
+    for a in game_obj.actor_list:
+        game_obj.SURFACE_MAIN.blit(a.sprite, (a.x*constants.RES,a.y*constants.RES))
 
     pygame.display.flip()
 
 def game_main_loop(game_obj):
     game_quit = False
+    cheat_codes = False
     fpsClock = pygame.time.Clock()
     
     while not game_quit:
@@ -73,15 +75,15 @@ def game_main_loop(game_obj):
 
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_w:
-                    player.move(0,-1)
+                    game_obj.actor_list[0].move(0,-1)
                 if event.key == pygame.K_a:
-                    player.move(-1,0)
+                    game_obj.actor_list[0].move(-1,0)
                 if event.key == pygame.K_s:
-                    player.move(0,1)
+                    game_obj.actor_list[0].move(0,1)
                 if event.key == pygame.K_d:
-                    player.move(1,0)
+                    game_obj.actor_list[0].move(1,0)
                     
-        draw_game(game_obj.SURFACE_MAIN)
+        draw_game(game_obj)
         fpsClock.tick(60)
 
     quit_nicely()
@@ -95,7 +97,7 @@ def game_initialize():
     game_obj.map = map_create()
     game_obj.load()
 
-    game_obj.actor_list.append(actor(0,0,constants.S_PLAYER))
+    game_obj.actor_list.append(actor(7,7,constants.S_PLAYER))
 
     return(game_obj)
 
