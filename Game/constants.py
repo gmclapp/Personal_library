@@ -19,9 +19,12 @@ GAME_HEIGHT = SCENE_HEIGHT
 # Color definitions
 COLOR_BLACK = (0,0,0)
 COLOR_GREY = (100,100,100)
+COLOR_WHITE = (255,255,255)
 
 # Game colors
 DEFAULT_BG = COLOR_GREY
+CHEAT_TXT = COLOR_WHITE
+CHEAT_TXT_BOX_BG = COLOR_BLACK
 
 # Sprites
 S_PLAYER = pygame.image.load("data/character.png")

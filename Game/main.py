@@ -28,7 +28,8 @@ class game_object():
         self.actor_list = []
         self.scene_list = []
         self.tile_list = []
-        self.booleans = {"cheat_codes": False}
+        self.vars = {"cheat_codes": False,
+                     "cheat_text": ''}
 
     def load(self):
         print("Loading tile data...")
@@ -59,12 +60,12 @@ def draw_game(game_obj):
     # draw the character
     for a in game_obj.actor_list:
         game_obj.SURFACE_MAIN.blit(a.sprite, (a.x*constants.RES,a.y*constants.RES))
+    
 
     pygame.display.flip()
 
 def game_main_loop(game_obj):
     game_quit = False
-    text = ''
     fpsClock = pygame.time.Clock()
     
     while not game_quit:
@@ -74,17 +75,17 @@ def game_main_loop(game_obj):
             if event.type == pygame.QUIT:
                 game_quit = True
 
-            if event.type == pygame.KEYDOWN and game_obj.booleans["cheat_codes"]:
+            if event.type == pygame.KEYDOWN and game_obj.vars["cheat_codes"]:
                 if event.key == pygame.K_RETURN:
-                    print(text)
-                    text = ''
-                    game_obj.booleans["cheat_codes"] = not game_obj.booleans["cheat_codes"]
+                    print(game_obj.vars["cheat_text"])
+                    game_obj.vars["cheat_text"] = ''
+                    game_obj.vars["cheat_codes"] = not game_obj.vars["cheat_codes"]
                 elif event.key == pygame.K_BACKSPACE:
-                    text = text[:-1]
+                    game_obj.vars["cheat_text"] = game_obj.vars["cheat_text"][:-1]
                 else:
-                    text += event.unicode
+                    game_obj.vars["cheat_text"] += event.unicode
                     
-            elif event.type == pygame.KEYDOWN and not game_obj.booleans["cheat_codes"]:
+            elif event.type == pygame.KEYDOWN and not game_obj.vars["cheat_codes"]:
                 if event.key == pygame.K_w:
                     game_obj.actor_list[0].move(0,-1)
                 if event.key == pygame.K_a:
@@ -94,7 +95,7 @@ def game_main_loop(game_obj):
                 if event.key == pygame.K_d:
                     game_obj.actor_list[0].move(1,0)
                 if event.key == pygame.K_RETURN:
-                    game_obj.booleans["cheat_codes"] = not game_obj.booleans["cheat_codes"]
+                    game_obj.vars["cheat_codes"] = not game_obj.vars["cheat_codes"]
                  
         draw_game(game_obj)
         fpsClock.tick(60)
