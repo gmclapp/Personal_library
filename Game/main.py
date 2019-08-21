@@ -52,7 +52,28 @@ def map_create():
 def quit_nicely():
     pygame.display.quit()
     pygame.quit()
-    
+
+def handle_cheat_code(game_obj):
+    args = game_obj.vars["cheat_text"].split()
+    for a in args:
+        if a == "test":
+            print("Successful test!")
+    if args[0] == 'tp':
+        print("Teleport an actor")
+        
+        x = args[2]
+        y = args[3]
+
+        if args[1] == 'me':
+            print("Teleport the character. X={}, Y={}".format(x,y))
+            game_obj.actor_list[0].x = int(x)
+            game_obj.actor_list[0].y = int(y)
+            
+        elif args[1] == 'them':
+            print("Teleport someone else. X={}, Y={}".format(x,y))
+        
+        
+        
 def draw_game(game_obj):
 
     game_obj.SURFACE_MAIN.fill(constants.DEFAULT_BG)
@@ -90,7 +111,7 @@ def game_main_loop(game_obj):
 
             if event.type == pygame.KEYDOWN and game_obj.vars["cheat_codes"]:
                 if event.key == pygame.K_RETURN:
-                    print(game_obj.vars["cheat_text"])
+                    handle_cheat_code(game_obj)
                     game_obj.vars["cheat_text"] = ''
                     game_obj.vars["cheat_codes"] = not game_obj.vars["cheat_codes"]
                 elif event.key == pygame.K_BACKSPACE:
