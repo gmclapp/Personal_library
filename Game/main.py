@@ -71,6 +71,9 @@ def handle_cheat_code(game_obj):
             
         elif args[1] == 'them':
             print("Teleport someone else. X={}, Y={}".format(x,y))
+    elif args[0] == 'help':
+        print("tp <target> <x> <y> teleports a target to an x,y destination.")
+        print("for example: \"tp me 0 0 \" teleports the player to the top left corner of the scene.")
         
         
         
