@@ -93,8 +93,10 @@ def handle_cheat_code(game_obj):
         
 def draw_game(game_obj):
 
+    # Background fill to erase previous frame
     game_obj.SURFACE_MAIN.fill(constants.DEFAULT_BG)
 
+    # Render the current scene
     for y,row in enumerate(game_obj.scene_list[0]["map"]):
         for x,tile in enumerate(row):
             for t in game_obj.tile_list:
@@ -102,22 +104,25 @@ def draw_game(game_obj):
                     game_obj.SURFACE_MAIN.blit(t.art,(x*constants.RES,y*constants.RES))
         
 
-    # draw the character
+    # draw the character and other actors
     for a in game_obj.actor_list:
         game_obj.SURFACE_MAIN.blit(a.sprite, (a.x*constants.RES,a.y*constants.RES))
 
+    # Define input box characteristics, this should be moved such that it doesn't happen
+    # every frame.
     input_box_hgt = 32
     input_box = pygame.Rect(0,
                             constants.GAME_HEIGHT-input_box_hgt,
                             constants.GAME_WIDTH,
                             input_box_hgt)
 
+    # Draw the cheat code box if cheat mode is active.
     if game_obj.vars["cheat_codes"]:
         pygame.draw.rect(game_obj.SURFACE_MAIN, constants.CHEAT_TXT_BOX_BG,input_box, 0)
         txt_surface = game_obj.font.render(game_obj.vars["cheat_text"],True,constants.CHEAT_TXT)
         game_obj.SURFACE_MAIN.blit(txt_surface,(input_box.x+5,input_box.y+5))
     
-    
+    # Flip the display to show the next frame
     pygame.display.flip()
 
 def game_main_loop(game_obj):
