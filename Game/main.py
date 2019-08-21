@@ -4,7 +4,15 @@ import json
 
 class struct_tile():
     def __init__(self, tile_number):
-        pass
+        self.serial_no = tile_number
+        with open("data\\tiles.txt","r") as f:
+            tile_list = json.load(f)
+            for t in tile_list:
+                if t["serial_no"] == self.serial_no:
+                    self.name = t["name"]
+                    self.block_path = t["block_path"]
+                    self.art = pygame.image.load(t["art"])
+            
         # Based on tile number get a tile definition to set its image and
         # whether it is blocking.
         # self.block_path = block_path
@@ -35,19 +43,25 @@ class game_object():
 
     def load(self):
         print("Loading tile data...")
-        with open("data\\tiles.txt","r") as f:
-            self.tile_list = json.load(f)
+        for i in range(2):
+            self.tile_list.append(struct_tile(i))
+
+        print("Loading scene...")
+        with open("scenes\\1.txt","r") as f:
+            self.scene_list.append(json.load(f))
+##        for tile in self.scene_list[0]["map"]:
+##            print(tile)
 
             
     def save(self):
         pass
         
 
-def map_create():
-    new_map = [[struct_tile(False) for y in range(0,30)]for x in range(0,30)]
-    new_map[10][10].block_path = True
-    new_map[10][15].block_path = True
-    return(new_map)
+##def map_create():
+##    new_map = [[struct_tile(False) for y in range(0,30)]for x in range(0,30)]
+##    new_map[10][10].block_path = True
+##    new_map[10][15].block_path = True
+##    return(new_map)
         
 def quit_nicely():
     pygame.display.quit()
@@ -81,7 +95,12 @@ def draw_game(game_obj):
 
     game_obj.SURFACE_MAIN.fill(constants.DEFAULT_BG)
 
-    # draw the scene
+    for y,row in enumerate(game_obj.scene_list[0]["map"]):
+        for x,tile in enumerate(row):
+            for t in game_obj.tile_list:
+                if t.serial_no == tile:
+                    game_obj.SURFACE_MAIN.blit(t.art,(x*constants.RES,y*constants.RES))
+        
 
     # draw the character
     for a in game_obj.actor_list:
@@ -145,7 +164,7 @@ def game_initialize():
 
     game_obj.SURFACE_MAIN = pygame.display.set_mode((constants.GAME_WIDTH,
                                             constants.GAME_HEIGHT))
-    game_obj.map = map_create()
+##    game_obj.map = map_create()
     game_obj.load()
 
     game_obj.actor_list.append(actor(7,7,constants.S_PLAYER))

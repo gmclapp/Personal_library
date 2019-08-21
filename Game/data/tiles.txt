@@ -3,12 +3,12 @@
         "serial_no":0,
         "name":"Cave floor",
         "block_path": false,
-        "art": "\\data\\cave_floor.png"
+        "art": "data\\cave_floor.png"
     },
     {
         "serial_no":1,
         "name":"Cave wall",
         "block_path": true,
-        "art":"\\data\\cave_wall.png"
+        "art":"data\\cave_wall.png"
     }
 ]
