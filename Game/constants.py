@@ -3,8 +3,8 @@ import pygame
 pygame.init()
 
 # Scene sizes are number of tiles in the scene.
-SCENE_WIDTH_TILES = 15
-SCENE_HEIGHT_TILES = 15
+SCENE_WIDTH_TILES = 24
+SCENE_HEIGHT_TILES = 24
 
 # Tile resolution
 RES = 32
@@ -13,8 +13,8 @@ SCENE_WIDTH = SCENE_WIDTH_TILES * RES
 SCENE_HEIGHT = SCENE_HEIGHT_TILES * RES
 
 # Game sizes
-GAME_WIDTH = SCENE_WIDTH + 200
-GAME_HEIGHT = SCENE_HEIGHT + 200
+GAME_WIDTH = SCENE_WIDTH + 256
+GAME_HEIGHT = SCENE_HEIGHT + 224
 
 # Color definitions
 COLOR_BLACK = (0,0,0)
