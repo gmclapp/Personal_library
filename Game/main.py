@@ -22,10 +22,21 @@ class actor():
     def draw(self,surf):
         surf.blit(self.sprite, (self.x*constants.RES, self.y*constants.RES))
 
-    def move(self, dx, dy):
-##        if GAME_MAP[self.x + dx][self.y+dy].block_path == False:
-        self.x += dx
-        self.y += dy
+    def move(self, dx, dy, game_obj):
+        try:
+            dest_tile = game_obj.scene_list[0]["map"][self.x+dx+1][self.y+dy-1]
+            for t in game_obj.tile_list:
+                if t.serial_no == dest_tile:
+                    break
+                else:
+                    pass
+            if not t.block_path:
+                self.x += dx
+                self.y += dy
+        except IndexError:
+            print("Tile out of range")
+            
+        
 
 class game_object():
     def __init__(self):
@@ -136,13 +147,13 @@ def game_main_loop(game_obj):
                     
             elif event.type == pygame.KEYDOWN and not game_obj.vars["cheat_codes"]:
                 if event.key == pygame.K_w:
-                    game_obj.actor_list[0].move(0,-1)
+                    game_obj.actor_list[0].move(0,-1,game_obj)
                 if event.key == pygame.K_a:
-                    game_obj.actor_list[0].move(-1,0)
+                    game_obj.actor_list[0].move(-1,0,game_obj)
                 if event.key == pygame.K_s:
-                    game_obj.actor_list[0].move(0,1)
+                    game_obj.actor_list[0].move(0,1,game_obj)
                 if event.key == pygame.K_d:
-                    game_obj.actor_list[0].move(1,0)
+                    game_obj.actor_list[0].move(1,0,game_obj)
                 if event.key == pygame.K_RETURN:
                     game_obj.vars["cheat_codes"] = not game_obj.vars["cheat_codes"]
                  
