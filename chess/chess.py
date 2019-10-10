@@ -8,14 +8,28 @@ class board():
     def __init__(self):
         self.dark_color = (50, 50, 50)
         self.light_color = (255, 255, 255)
+        
         self.square_size = 25
-        self.light_square = pygame.Surface()
-        self.board = pygame.Surface()
-        for i in range(64):
-            self.board.blit(pygame.rect(0,0))
+        
+        self.light_square = pygame.Surface((self.square_size,self.square_size))
+        self.light_square.fill(self.light_color)
+        
+        self.board_size = self.square_size*8
+        self.board = pygame.Surface((self.board_size,self.board_size))
+        self.board.fill(self.dark_color)
 
-    def draw(self, screen, location, size):
-        pass
+        for i in range(32):
+            if int(i/4)%2:
+                self.board.blit(self.light_square,
+                                (2*self.square_size*(i%4),
+                                 self.square_size*int(i/4)))
+            else:
+                self.board.blit(self.light_square,
+                                (2*self.square_size*(i%4) + self.square_size,
+                                 self.square_size*int(i/4)))
+
+    def draw(self, screen):
+        screen.blit(self.board, (0,0))
         
         
         
@@ -30,7 +44,7 @@ def main():
     screen_bg = (73, 106, 117) # grey
 
     msg = ''
-    msg_color = (255, 255, 255) # white
+    msg_color = (0, 0, 255) # blue
     
     # Create a Font object with a font of size 24 points
     fontObj = pygame.font.Font('freesansbold.ttf', 24)
@@ -46,17 +60,15 @@ def main():
      
     # create a surface on screen that has the size of 240 x 180
     screen = pygame.display.set_mode((screen_wid,screen_hgt))
-     
+
+    # create board surface
+    Board = board()
+    
     # define a variable to control the main loop
     running = True
-     
+
     # main loop
     while running:
-        #Fill the screen surface object with the specified color
-        screen.fill(screen_bg)
-        msgBox = fontObj.render(msg, False, msg_color)
-        screen.blit(msgBox, (0,0))
-                    
         # event handling, gets all event from the eventqueue
         for event in pygame.event.get():
             # only do something if the event is of type QUIT
@@ -68,8 +80,16 @@ def main():
                 mx, my = event.pos
                 msg = ('X: %.3f, Y: %.3f' %(mx, my))
 
+        #Fill the screen surface object with the specified color
+        screen.fill(screen_bg)
+
+        # Render the board
+        Board.draw(screen)
+        msgBox = fontObj.render(msg, False, msg_color)
+        screen.blit(msgBox, (0,0))
+        
         # Draw the window to the screen
-        pygame.display.update()
+        pygame.display.flip()
 
         # Wait long enough to reduce the FPS to 60fps
         fpsClock.tick(60)
