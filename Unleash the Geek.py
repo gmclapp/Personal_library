@@ -278,6 +278,14 @@ while True:
                     release_site(i.dest_x,i.dest_y,radar_site_list)
                     i.job = "IDLE"
                     i.action = "WAIT"
+                elif i.item == 4: # bot got ore when burying radar
+                    if i.home == False:
+                        release_site(i.dest_x,i.dest_y,ore_site_list)
+                        i.set_destination(0,i.y)
+                        i.job = "RETURNING"
+                        i.action = "MOVE"
+                    else:
+                        i.action = "WAIT"
                 else:
                     release_site(i.dest_x,i.dest_y,radar_site_list,complete=False)
                     i.job = "IDLE"
