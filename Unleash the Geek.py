@@ -64,6 +64,7 @@ class robot():
                     self.set_destination(x,y)
                     self.job_x = x
                     self.job_y = y
+                    self.radar_flag = False
                     self.job = "SURVEYOR"
                     break
                 
@@ -80,6 +81,7 @@ class robot():
                     self.set_destination(x,y)
                     self.job_x = x
                     self.job_y = y
+                    self.trap_flag = False
                     self.job = "TRAPPER"
                     break
                 
@@ -163,12 +165,14 @@ radar_site_list = [radar_site(6,3),
                    radar_site(23,3),
                    radar_site(23,11)]
 
-trap_site_list = [trap_site(3,3),
+'''trap_site_list = [trap_site(3,3),
                    trap_site(3,5),
                    trap_site(3,7),
                    trap_site(3,9),
                    trap_site(3,11),
-                   trap_site(3,13)]
+                   trap_site(3,13)]'''
+trap_site_list = []
+
 first_turn = True  
 radar_cooldown = 0
 trap_cooldown = 0
