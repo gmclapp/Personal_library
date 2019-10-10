@@ -18,6 +18,7 @@ class robot():
         self.action = "WAIT"
         self.radar_flag = False
         self.trap_flag = False
+        self.dig_timeout = 7
     
     def act(self):
         if self.action == "WAIT":
@@ -44,8 +45,9 @@ class robot():
         if len(o_list) != 0:
             for o in o_list:
                 if not o.reserved and not o.complete and not o.trapped:
-                    x,y = o.reserve()
+                    x,y,dig_delay = o.reserve()
                     self.set_destination(x,y)
+                    self.dig_delay = dig_delay
                     self.job = "MINER"
                     break
                 
@@ -108,6 +110,11 @@ class ore_site(job_site):
         super().__init__(x,y)
         self.ore = int(ore)
         self.hole = hole
+        self.dig_timeout = self.x/4 + 1
+        
+    def reserve(self):
+        x,y = super().reserve()
+        return(x,y,self.dig_timeout)
         
     def release(self,complete=True):
         self.ore -= 1
@@ -163,7 +170,6 @@ trap_site_list = [trap_site(3,3),
                    trap_site(3,11),
                    trap_site(3,13)]
 first_turn = True  
-dig_timeout = 7
 radar_cooldown = 0
 trap_cooldown = 0
             
@@ -244,11 +250,10 @@ while True:
                 else:
                     i.action = "WAIT"
             elif i.item == -1: # bot does not have ore
-                if i.timeout > dig_timeout:
+                if i.timeout > i.dig_delay:
                     release_site(i.dest_x,i.dest_y,ore_site_list)
-                    i.set_destination(0,i.y)
-                    i.job = "RETURNING"
-                    i.action = "MOVE"
+                    i.job = "IDLE"
+                    i.action = "WAIT"
                     i.timeout = 0
                     
                 i.action = "DIG"
@@ -260,13 +265,17 @@ while True:
                 i.set_destination(i.job_x, i.job_y)
                 i.action = "DIG"
             elif i.item == -1: # bot does not have radar
-                if i.home == False and i.radar_flag == False:
+                if not i.home and not i.radar_flag:
                     i.set_destination(0,i.y)
                     i.action = "MOVE"
-                elif i.home == True and i.radar_flag == False:
+                elif i.home and not i.radar_flag:
                     i.action = "REQUEST"
-                else:
+                elif i.item == -1 and i.radar_flag:
                     release_site(i.dest_x,i.dest_y,radar_site_list)
+                    i.job = "IDLE"
+                    i.action = "WAIT"
+                else:
+                    release_site(i.dest_x,i.dest_y,radar_site_list,complete=False)
                     i.job = "IDLE"
                     i.action = "WAIT"
                     
