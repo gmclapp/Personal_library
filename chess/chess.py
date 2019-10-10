@@ -31,7 +31,11 @@ class board():
     def draw(self, screen):
         screen.blit(self.board, (0,0))
         
-        
+def FEN_to_array(FEN):
+    return(array)
+
+def array_to_FEN(array):
+    return(FEN)
         
 # define a main function
 def main():
