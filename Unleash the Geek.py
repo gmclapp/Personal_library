@@ -43,7 +43,7 @@ class robot():
     def mine(self, o_list):
         if len(o_list) != 0:
             for o in o_list:
-                if not o.reserved and not o.complete:
+                if not o.reserved and not o.complete and not o.trapped:
                     x,y = o.reserve()
                     self.set_destination(x,y)
                     self.job = "MINER"
@@ -92,6 +92,7 @@ class job_site():
         self.y = y
         self.reserved = False
         self.complete = False
+        self.trapped = False
         
     def reserve(self):
         self.reserved = True
@@ -135,6 +136,15 @@ def release_site(x,y,sites,complete=True):
     for s in sites:
         if x == s.x and y == s.y:
             s.release(complete)
+            
+def flag_trap(x,y,ore_sites,radar_sites):
+    for o in ore_sites:
+        if x == o.x and y == o.y:
+            o.trapped = True
+    
+    for r in radar_sites:
+        if x == r.x and y == r.y:
+            r.trapped = True
             
 width, height = [int(i) for i in input().split()]
 robot_list = []
@@ -200,6 +210,9 @@ while True:
                     r.x = x
                     r.y = y
                     r.item = item
+        
+        elif entity_type == 3:
+            flag_trap(x,y,ore_site_list,radar_site_list)
             
     for i in robot_list:
         if i.x == 0:
@@ -259,7 +272,7 @@ while True:
                     
         elif i.job == "TRAPPER":
             if i.item == 3: # bot has trap
-                i.trap_flag = True # flag that bot once had a radar
+                i.trap_flag = True # flag that bot once had a trap
                 i.set_destination(i.job_x, i.job_y)
                 i.action = "DIG"
             elif i.item == -1: # bot does not have trap
@@ -270,6 +283,7 @@ while True:
                     i.action = "REQUEST"
                 else:
                     release_site(i.dest_x,i.dest_y,trap_site_list)
+                    flag_trap(i.dest_x, i.dest_y,ore_site_list,radar_site_list)
                     i.job = "IDLE"
                     i.action = "WAIT"
                     
