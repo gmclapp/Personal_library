@@ -254,9 +254,8 @@ while True:
                     i.action = "REQUEST"
                 else:
                     release_site(i.dest_x,i.dest_y,radar_site_list)
-                    i.set_destination(0,i.y)
-                    i.job = "RETURNING"
-                    i.action = "MOVE"
+                    i.job = "IDLE"
+                    i.action = "WAIT"
                     
         elif i.job == "TRAPPER":
             if i.item == 3: # bot has trap
@@ -271,9 +270,8 @@ while True:
                     i.action = "REQUEST"
                 else:
                     release_site(i.dest_x,i.dest_y,trap_site_list)
-                    i.set_destination(0,i.y)
-                    i.job = "RETURNING"
-                    i.action = "MOVE"
+                    i.job = "IDLE"
+                    i.action = "WAIT"
                     
         elif i.job == "RETURNING":
             if not i.home:
