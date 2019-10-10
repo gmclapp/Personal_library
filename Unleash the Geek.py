@@ -111,6 +111,8 @@ class ore_site(job_site):
     def __init__(self, x, y, ore, hole=False):
         super().__init__(x,y)
         self.ore = int(ore)
+        if self.ore <=0:
+            self.complete=True
         self.hole = hole
         self.dig_timeout = self.x/4 + 1
         
@@ -188,7 +190,7 @@ while True:
             # hole: 1 if cell has a hole
             ore = inputs[2*i]
             hole = int(inputs[2*i+1])
-            if(ore != "?" and int(ore)>0):
+            if(ore != "?"):
                     print("X:{},Y:{}\nOre?:{} Hole?:{}".format(i,j,int(ore),hole),file=sys.stderr)
                     exists = False
                     for o in ore_site_list:
