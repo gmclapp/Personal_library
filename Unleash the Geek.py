@@ -176,8 +176,9 @@ def flag_trap(x,y,ore_sites,radar_sites):
 width, height = [int(i) for i in input().split()]
 robot_list = []
 ore_site_list = []
-radar_site_list = [radar_site(6,3),
-                   radar_site(6,11),
+radar_site_list = [radar_site(7,3),
+                   radar_site(7,11),
+                   radar_site(11,7),
                    radar_site(14,3),
                    radar_site(14,11),
                    radar_site(23,3),
