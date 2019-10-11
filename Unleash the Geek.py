@@ -105,7 +105,7 @@ class job_site():
     def calc_score(self):
         self.score = (29 - self.x)/29 # sites closer to the base get priority
          # sites closer to the last robot to run the distance function get priority
-        self.sccore += (1037 - self.d)/1037
+        self.score += (1037 - self.d)/1037
         
     def reserve(self):
         self.reserved = True
@@ -238,14 +238,17 @@ while True:
     for i in robot_list:
         for o in ore_site_list:
             o.distance(i.x,i.y)
+            o.calc_score()
         for r in radar_site_list:
             r.distance(i.x,i.y)
+            r.calc_score()
         for t in trap_site_list:
             t.distance(i.x,i.y)
+            t.calc_score()
             
-        ore_site_list.sort(key=lambda i: i.score)
-        radar_site_list.sort(key=lambda i: i.score)
-        trap_site_list.sort(key=lambda i: i.score)
+        ore_site_list.sort(key=lambda i: i.score, reverse = True)
+        radar_site_list.sort(key=lambda i: i.score, reverse = True)
+        trap_site_list.sort(key=lambda i: i.score, reverse = True)
         
         for o in ore_site_list:
             print("Site score: {}".format(o.score),file=sys.stderr)
