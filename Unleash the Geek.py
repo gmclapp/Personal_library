@@ -97,6 +97,15 @@ class job_site():
         self.reserved = False
         self.complete = False
         self.trapped = False
+        self.score = 0
+        
+    def distance(self,x,y):
+        self.d = (self.x - x)**2 + (self.y - y)**2
+    
+    def calc_score(self):
+        self.score = (29 - self.x)/29 # sites closer to the base get priority
+         # sites closer to the last robot to run the distance function get priority
+        self.score += (1037 - self.d)/1037
         
     def reserve(self):
         self.reserved = True
@@ -116,6 +125,12 @@ class ore_site(job_site):
         self.hole = hole
         self.dig_timeout = self.x/4 + 1
         
+    def calc_score(self):
+        super().calc_score()
+        if self.hole:
+            self.score -= 0.2
+            
+        
     def reserve(self):
         x,y = super().reserve()
         return(x,y,self.dig_timeout)
@@ -126,8 +141,9 @@ class ore_site(job_site):
             self.complete = True
         self.reserved = False
         
-    def update(self,ore):
+    def update(self,ore,hole):
         self.ore = int(ore)
+        self.hole = hole
         if self.ore <= 0:
             self.complete = True
         else:
@@ -160,10 +176,12 @@ def flag_trap(x,y,ore_sites,radar_sites):
 width, height = [int(i) for i in input().split()]
 robot_list = []
 ore_site_list = []
-radar_site_list = [radar_site(6,3),
-                   radar_site(6,11),
+radar_site_list = [radar_site(7,3),
+                   radar_site(7,11),
+                   radar_site(11,7),
                    radar_site(14,3),
                    radar_site(14,11),
+                   radar_site(18,7),
                    radar_site(23,3),
                    radar_site(23,11)]
 
@@ -191,12 +209,12 @@ while True:
             ore = inputs[2*i]
             hole = int(inputs[2*i+1])
             if(ore != "?"):
-                    print("X:{},Y:{}\nOre?:{} Hole?:{}".format(i,j,int(ore),hole),file=sys.stderr)
+                    #print("X:{},Y:{}\nOre?:{} Hole?:{}".format(i,j,int(ore),hole),file=sys.stderr)
                     exists = False
                     for o in ore_site_list:
                         if o.x == i and o.y == j:
                             exists = True
-                            o.update(ore)
+                            o.update(ore,hole)
                             break
                         else:
                             pass
@@ -227,6 +245,20 @@ while True:
             flag_trap(x,y,ore_site_list,radar_site_list)
             
     for i in robot_list:
+        for o in ore_site_list:
+            o.distance(i.x,i.y)
+            o.calc_score()
+        for r in radar_site_list:
+            r.distance(i.x,i.y)
+            r.calc_score()
+        for t in trap_site_list:
+            t.distance(i.x,i.y)
+            t.calc_score()
+            
+        ore_site_list.sort(key=lambda i: i.score, reverse = True)
+        radar_site_list.sort(key=lambda i: i.score, reverse = True)
+        trap_site_list.sort(key=lambda i: i.score, reverse = True)
+
         if i.x == 0:
             i.home = True
         else:
@@ -280,17 +312,19 @@ while True:
                     release_site(i.dest_x,i.dest_y,radar_site_list)
                     i.job = "IDLE"
                     i.action = "WAIT"
-                elif i.item == 4: # bot got ore when burying radar
-                    if i.home == False:
-                        release_site(i.dest_x,i.dest_y,ore_site_list)
-                        i.set_destination(0,i.y)
-                        i.job = "RETURNING"
-                        i.action = "MOVE"
-                    else:
-                        i.action = "WAIT"
+                
                 else:
                     release_site(i.dest_x,i.dest_y,radar_site_list,complete=False)
                     i.job = "IDLE"
+                    i.action = "WAIT"
+                
+            elif i.item == 4: # bot got ore when burying radar
+                if i.home == False:
+                    release_site(i.dest_x,i.dest_y,ore_site_list)
+                    i.set_destination(0,i.y)
+                    i.job = "RETURNING"
+                    i.action = "MOVE"
+                else:
                     i.action = "WAIT"
                     
         elif i.job == "TRAPPER":
@@ -316,7 +350,7 @@ while True:
             else:
                 i.job = "IDLE"
         
-        print("R_cool: {} T_cool: {}".format(radar_cooldown, trap_cooldown),file=sys.stderr)
+        #print("R_cool: {} T_cool: {}".format(radar_cooldown, trap_cooldown),file=sys.stderr)
         i.speak()    
         i.act()
         first_turn = False
