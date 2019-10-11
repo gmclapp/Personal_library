@@ -181,6 +181,7 @@ radar_site_list = [radar_site(7,3),
                    radar_site(11,7),
                    radar_site(14,3),
                    radar_site(14,11),
+                   radar_site(18,7),
                    radar_site(23,3),
                    radar_site(23,11)]
 
