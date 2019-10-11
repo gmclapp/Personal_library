@@ -125,6 +125,12 @@ class ore_site(job_site):
         self.hole = hole
         self.dig_timeout = self.x/4 + 1
         
+    def calc_score(self):
+        super().calc_score()
+        if self.hole:
+            self.score -= 0.2
+            
+        
     def reserve(self):
         x,y = super().reserve()
         return(x,y,self.dig_timeout)
@@ -135,8 +141,9 @@ class ore_site(job_site):
             self.complete = True
         self.reserved = False
         
-    def update(self,ore):
+    def update(self,ore,hole):
         self.ore = int(ore)
+        self.hole = hole
         if self.ore <= 0:
             self.complete = True
         else:
@@ -205,7 +212,7 @@ while True:
                     for o in ore_site_list:
                         if o.x == i and o.y == j:
                             exists = True
-                            o.update(ore)
+                            o.update(ore,hole)
                             break
                         else:
                             pass
@@ -249,10 +256,7 @@ while True:
         ore_site_list.sort(key=lambda i: i.score, reverse = True)
         radar_site_list.sort(key=lambda i: i.score, reverse = True)
         trap_site_list.sort(key=lambda i: i.score, reverse = True)
-        
-        for o in ore_site_list:
-            print("Site score: {}".format(o.score),file=sys.stderr)
-            
+
         if i.x == 0:
             i.home = True
         else:
