@@ -97,6 +97,15 @@ class job_site():
         self.reserved = False
         self.complete = False
         self.trapped = False
+        self.score = 0
+        
+    def distance(self,x,y):
+        self.d = (self.x - x)**2 + (self.y - y)**2
+    
+    def calc_score(self):
+        self.score = (29 - self.x)/29 # sites closer to the base get priority
+         # sites closer to the last robot to run the distance function get priority
+        self.sccore += (1037 - self.d)/1037
         
     def reserve(self):
         self.reserved = True
@@ -191,7 +200,7 @@ while True:
             ore = inputs[2*i]
             hole = int(inputs[2*i+1])
             if(ore != "?"):
-                    print("X:{},Y:{}\nOre?:{} Hole?:{}".format(i,j,int(ore),hole),file=sys.stderr)
+                    #print("X:{},Y:{}\nOre?:{} Hole?:{}".format(i,j,int(ore),hole),file=sys.stderr)
                     exists = False
                     for o in ore_site_list:
                         if o.x == i and o.y == j:
@@ -227,6 +236,20 @@ while True:
             flag_trap(x,y,ore_site_list,radar_site_list)
             
     for i in robot_list:
+        for o in ore_site_list:
+            o.distance(i.x,i.y)
+        for r in radar_site_list:
+            r.distance(i.x,i.y)
+        for t in trap_site_list:
+            t.distance(i.x,i.y)
+            
+        ore_site_list.sort(key=lambda i: i.score)
+        radar_site_list.sort(key=lambda i: i.score)
+        trap_site_list.sort(key=lambda i: i.score)
+        
+        for o in ore_site_list:
+            print("Site score: {}".format(o.score),file=sys.stderr)
+            
         if i.x == 0:
             i.home = True
         else:
@@ -316,7 +339,7 @@ while True:
             else:
                 i.job = "IDLE"
         
-        print("R_cool: {} T_cool: {}".format(radar_cooldown, trap_cooldown),file=sys.stderr)
+        #print("R_cool: {} T_cool: {}".format(radar_cooldown, trap_cooldown),file=sys.stderr)
         i.speak()    
         i.act()
         first_turn = False
