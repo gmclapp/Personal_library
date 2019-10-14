@@ -9,7 +9,7 @@ class board():
         self.dark_color = (50, 50, 50)
         self.light_color = (255, 255, 255)
         
-        self.square_size = 25
+        self.square_size = 60
         
         self.light_square = pygame.Surface((self.square_size,self.square_size))
         self.light_square.fill(self.light_color)
@@ -32,8 +32,21 @@ class board():
         screen.blit(self.board, (0,0))
         
 def FEN_to_array(FEN):
-    return(array)
+    board_array = []
+                   
+    board, turn, castle, enpassant, halfmoves, fullmoves = FEN.split()
+    rows = board.split("/")
+    for i,row in enumerate(rows):
+        for square in row:
+            try:
+                square = int(square)
+                for sq in range(square):
+                    board_array.append(".")
+            except:
+                board_array.append(square)
 
+    print(board_array)
+    
 def array_to_FEN(array):
     return(FEN)
         
@@ -71,6 +84,9 @@ def main():
     # define a variable to control the main loop
     running = True
 
+    FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+    FEN_to_array(FEN)
+    
     # main loop
     while running:
         # event handling, gets all event from the eventqueue
