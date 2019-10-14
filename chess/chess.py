@@ -80,12 +80,30 @@ def main():
 
     # create board surface
     Board = board()
+
+    # Load chess piece artwork
+    art = {'r':pygame.image.load("black rook.png"),
+           'n':pygame.image.load("black knight.png"),
+           'b':pygame.image.load("black bishop.png"),
+           'q':pygame.image.load("black queen.png"),
+           'k':pygame.image.load("black king.png"),
+           'p':pygame.image.load("black pawn.png"),
+           'R':pygame.image.load("white rook.png"),
+           'N':pygame.image.load("white knight.png"),
+           'B':pygame.image.load("white bishop.png"),
+           'Q':pygame.image.load("white queen.png"),
+           'K':pygame.image.load("white king.png"),
+           'P':pygame.image.load("white pawn.png")}
+    
     
     # define a variable to control the main loop
     running = True
 
-    FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
-    FEN_to_array(FEN)
+    starting_position = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+    FEN_to_array(starting_position)
+
+    v_marcques = "2kr3r/pp3ppp/2pbbq2/4n2Q/4B3/2N4P/PPP2PP1/R2R2K1 w - - 3 17"
+    FEN_to_array(v_marcques)
     
     # main loop
     while running:
