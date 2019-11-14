@@ -6,8 +6,7 @@ random.seed(time.time())
 def fight():
     # Defense die rolls
     d1 = random.randint(1,6)
-    #d2 = random.randint(1,6)
-    d2 = 0
+    d2 = random.randint(1,6)
 
     # Offense die rolls
     d3 = random.randint(1,6)
@@ -31,11 +30,24 @@ n = 10000
 off_tally = 0
 def_tally = 0
 
-for k in range(n):
-    result = fight()
-    if result:
-        off_tally += 1
-    else:
-        def_tally += 1
+class territory():
+    def __init__(self, serial_number, name, continent, edges):
+        self.serial = serial_number
+        self.name = name
+        self.continent = continent
+        self.edges = edges # list of territories directly connected to this one
 
-print("Of {} games, Offense wins {}, Defense wins {}".format(n, off_tally,def_tally))
+    def set_player(self, player):
+        self.player = player
+        # serial number of player who controls this territory
+        
+
+if __name__ == "__main__":
+    for k in range(n):
+        result = fight()
+        if result:
+            off_tally += 1
+        else:
+            def_tally += 1
+
+    print("Of {} games, Offense wins {}, Defense wins {}".format(n, off_tally,def_tally))
