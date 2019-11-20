@@ -1,4 +1,5 @@
 import pygame
+from pygame.locals import *
 
 def quit_nicely():
     pygame.display.quit()
@@ -111,6 +112,7 @@ def main():
     
     screen_hgt = 640
     screen_wid = 640
+    start_size = [screen_wid,screen_hgt]
     screen_bg = (73, 106, 117) # grey
 
     msg = ''
@@ -124,12 +126,12 @@ def main():
     fpsClock = pygame.time.Clock()
 
     # load and set the logo.
-    #logo = pygame.image.load("O2Included\logo_32x32.png")
-    #pygame.display.set_icon(logo)
-    #pygame.display.set_caption("minimal program")
+    logo = pygame.image.load("board_node_icon.png")
+    pygame.display.set_icon(logo)
+    pygame.display.set_caption("Chess Permutations")
      
     # create a surface on screen that has the size of 240 x 180
-    screen = pygame.display.set_mode((screen_wid,screen_hgt))
+    screen = pygame.display.set_mode(start_size, RESIZABLE)
 
     # create board surface
     Board = board()
@@ -171,6 +173,9 @@ def main():
             elif event.type == pygame.MOUSEMOTION:
                 mx, my = event.pos
                 msg = ('X: %.3f, Y: %.3f' %(mx, my))
+
+            elif event.type == pygame.VIDEORESIZE:
+                screen = pygame.display.set_mode((event.w, event.h), RESIZABLE)
 
         #Fill the screen surface object with the specified color
         screen.fill(screen_bg)
