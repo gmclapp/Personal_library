@@ -54,12 +54,54 @@ class Position():
                     self.board_array.append(square)
 
         print(self.board_array)
-        
-        
 
-    
-def array_to_FEN(array):   
-    return(FEN)
+    def piece_on_square(self, square):
+        '''Takes a algebraic representation of a square and returns the piece on that square.
+        None if no piece is present on that square.'''
+
+        try:
+            file, rank = list(square)
+        except ValueError:
+            print("Invalid square, specify letter rank, and number file.")
+
+        ord_file = ord(file.lower()) - 96
+        rank = int(rank)
+        
+        if ord_file > 8 or ord_file < 1:
+            print("{} is not a valid file.".format(file))
+        if rank > 8 or rank < 1:
+            print("{} is not a valid rank.".format(rank))
+
+        board_index = (8-rank)*8 + ord_file-1
+        piece = self.board_array[board_index]
+        if piece == '.':
+            piece = None
+            
+        print("{} is on {}{}".format(piece, file, rank))
+        return(piece)
+
+    def check_file(file):
+        '''Takes a letter designation for a file and returns all the pieces on
+        that file and their positions.'''
+        pass
+    def check_rank(rank):
+        '''Takes a number designation for a rank and returns all the pieces on
+        that rank and their positions.'''
+        pass
+    def check_diag(pos):
+        '''checks both diagonals containing the given position for other pieces
+        and returns those pieces and their positions.'''
+        pass
+    def check_knight(pos):
+        '''Checks for knights attacking the given square. Returns those knights
+        and their positions'''
+        pass
+
+class game():
+    def __init__(self, PGN):
+        self.positions = [Position("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")]
+        self.pgn = PGN
+        
         
 # define a main function
 def main():
