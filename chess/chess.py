@@ -32,30 +32,31 @@ class board():
         screen.blit(self.board, (0,0))
 
 class Position():
-    def __init__(self):
+    def __init__(self, FEN):
         self.board_array = []
-        self.FEN = ""
+        self.FEN = FEN
 
     def draw(self, screen):
         for square in self.board_array:
             pass
-        
-        
-def FEN_to_array(FEN):
-    board_array = []
-                   
-    board, turn, castle, enpassant, halfmoves, fullmoves = FEN.split()
-    rows = board.split("/")
-    for i,row in enumerate(rows):
-        for square in row:
-            try:
-                square = int(square)
-                for sq in range(square):
-                    board_array.append(".")
-            except:
-                board_array.append(square)
 
-    print(board_array)
+    def FEN_to_array(self):
+                   
+        board, self.turn, self.castle, self.enpassant, self.halfmoves, self.fullmoves = self.FEN.split()
+        rows = board.split("/")
+        for i,row in enumerate(rows):
+            for square in row:
+                try:
+                    square = int(square)
+                    for sq in range(square):
+                        self.board_array.append(".")
+                except:
+                    self.board_array.append(square)
+
+        print(self.board_array)
+        
+        
+
     
 def array_to_FEN(array):   
     return(FEN)
@@ -109,12 +110,12 @@ def main():
     # define a variable to control the main loop
     running = True
 
-    starting_position = Position()
-    starting_position.FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
-    starting_position.board_array = FEN_to_array(starting_position.FEN)
+    starting_position = Position("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
+    
+    starting_position.FEN_to_array()
 
-    v_marcques = "2kr3r/pp3ppp/2pbbq2/4n2Q/4B3/2N4P/PPP2PP1/R2R2K1 w - - 3 17"
-    # FEN_to_array(v_marcques)
+    v_marcques = Position("2kr3r/pp3ppp/2pbbq2/4n2Q/4B3/2N4P/PPP2PP1/R2R2K1 w - - 3 17")
+    v_marcques.FEN_to_array()
     
     # main loop
     while running:
