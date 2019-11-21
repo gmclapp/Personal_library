@@ -110,7 +110,67 @@ class Position():
     def check_diag(self,pos):
         '''checks both diagonals containing the given position for other pieces
         and returns those pieces and their positions.'''
-        pass
+
+        try:
+            file, rank = list(pos)
+        except ValueError:
+            print("Invalid square, specify letter rank, and number file.")
+
+        ord_file = ord(file.lower()) - 96
+        rank = int(rank)
+
+        squares = []
+        f = ord_file
+        r = rank
+
+        # squares on the same diagonal can be found by adding or subtracting
+        # the same integer from both the rank and file. There will be between
+        # 8 and 15 squares sharing a diagonal with a given square.
+        
+        for i in range(8):
+            f -= 1
+            r -= 1
+            if r >= 1 and r >= 1:
+                squares.append(chr(f + 96) + str(r))
+            else:
+                break
+        f = ord_file
+        r = rank
+        for i in range(8):
+            f += 1
+            r += 1
+            if r <= 8 and f <= 8:
+                squares.append(chr(f + 96) + str(r))
+            else:
+                break
+        f = ord_file
+        r = rank
+        for i in range(8):
+            f += 1
+            r -= 1
+            if r >= 1 and f <= 8:
+                squares.append(chr(f + 96) + str(r))
+            else:
+                break
+        f = ord_file
+        r = rank
+        for i in range(8):
+            f -= 1
+            r += 1
+            if r <= 8 and f >= 1:
+                squares.append(chr(f + 96) + str(r))
+            else:
+                break
+
+        print(squares)
+        pieces = []
+        for s in squares:
+            piece = self.piece_on_square(s)
+            if piece != None:
+                pieces.append((s, piece))
+        return(pieces)
+        
+        
     def check_knight(self,pos):
         '''Checks for knights attacking the given square. Returns those knights
         and their positions'''
