@@ -119,10 +119,10 @@ class Position():
         ord_file = ord(file.lower()) - 96
         rank = int(rank)
 
-        squares = []
+        squares = [pos]
         f = ord_file
         r = rank
-
+        
         # squares on the same diagonal can be found by adding or subtracting
         # the same integer from both the rank and file. There will be between
         # 8 and 15 squares sharing a diagonal with a given square.
