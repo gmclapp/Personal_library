@@ -78,22 +78,40 @@ class Position():
         if piece == '.':
             piece = None
             
-        print("{} is on {}{}".format(piece, file, rank))
+##        print("{} is on {}{}".format(piece, file, rank))
         return(piece)
 
-    def check_file(file):
+    def check_file(self,file):
         '''Takes a letter designation for a file and returns all the pieces on
         that file and their positions.'''
-        pass
-    def check_rank(rank):
+        pieces = []
+        for i in range(8):
+            rank = i+1
+            square = file + str(rank)
+            piece = self.piece_on_square(square)
+            if piece != None:
+                pieces.append((square,piece))
+        return(pieces)
+        
+    def check_rank(self,rank):
         '''Takes a number designation for a rank and returns all the pieces on
         that rank and their positions.'''
-        pass
-    def check_diag(pos):
+        pieces = []
+        for i in range(8):
+            file = chr(i + 96 + 1)
+            # ASCII position of lower case numbers. + 1 to compensate for i
+            # starting at 0
+            square = file + str(rank)            
+            piece = self.piece_on_square(square)
+            if piece != None:
+                pieces.append((square, piece))
+        return(pieces)
+    
+    def check_diag(self,pos):
         '''checks both diagonals containing the given position for other pieces
         and returns those pieces and their positions.'''
         pass
-    def check_knight(pos):
+    def check_knight(self,pos):
         '''Checks for knights attacking the given square. Returns those knights
         and their positions'''
         pass
