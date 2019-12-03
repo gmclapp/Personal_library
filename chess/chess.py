@@ -174,8 +174,66 @@ class Position():
     def check_knight(self,pos):
         '''Checks for knights attacking the given square. Returns those knights
         and their positions'''
-        pass
+        try:
+            file, rank = list(pos)
+        except ValueError:
+            print("Invalid square, specify letter rank, and number file.")
 
+        ord_file = ord(file.lower()) - 96
+        rank = int(rank)
+
+        squares = []
+        f = ord_file
+        r = rank
+
+        f = ord_file + 2
+        r = rank + 1
+        if r >= 1 and r >= 1:
+            squares.append(chr(f + 96) + str(r))
+
+        f = ord_file + 2
+        r = rank - 1
+        if r >= 1 and r >= 1:
+            squares.append(chr(f + 96) + str(r))
+
+        f = ord_file - 2
+        r = rank + 1
+        if r >= 1 and r >= 1:
+            squares.append(chr(f + 96) + str(r))
+
+        f = ord_file - 2
+        r = rank - 1
+        if r >= 1 and r >= 1:
+            squares.append(chr(f + 96) + str(r))
+
+        f = ord_file + 1
+        r = rank + 2
+        if r >= 1 and r >= 1:
+            squares.append(chr(f + 96) + str(r))
+
+        f = ord_file - 1
+        r = rank + 2
+        if r >= 1 and r >= 1:
+            squares.append(chr(f + 96) + str(r))
+
+        f = ord_file + 1
+        r = rank - 2
+        if r >= 1 and r >= 1:
+            squares.append(chr(f + 96) + str(r))
+
+        f = ord_file - 1
+        r = rank - 2
+        if r >= 1 and r >= 1:
+            squares.append(chr(f + 96) + str(r))
+        
+        print(squares)
+        pieces = []
+        for s in squares:
+            piece = self.piece_on_square(s)
+            if piece != None:
+                pieces.append((s, piece))
+        return(pieces)
+    
 class game():
     def __init__(self, PGN):
         self.positions = [Position("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")]
@@ -254,6 +312,14 @@ def main():
 
             elif event.type == pygame.VIDEORESIZE:
                 screen = pygame.display.set_mode((event.w, event.h), RESIZABLE)
+
+            elif event.type == pygame.MOUSEBUTTONUP:
+                if event.button == 1:
+                    click_x, click_y = event.pos
+                    f = chr(int(click_x / Board.square_size) + 97)
+                    r = 8 - int(click_y / Board.square_size)
+
+                    print("Clicked {}{}".format(f,r))
 
         #Fill the screen surface object with the specified color
         screen.fill(screen_bg)
