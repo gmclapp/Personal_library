@@ -233,6 +233,28 @@ class Position():
             if piece != None:
                 pieces.append((s, piece))
         return(pieces)
+
+    def get_king_pos(self):
+        white_king_found = False
+        black_king_found = False
+        for i,sq in enumerate(self.board_array):
+            if sq == 'k':
+                file = (i % 8) + 1
+                rank = int(8 - i/8) + 1
+                print("found black king {}{}".format(file,rank))
+                black_king_found = True
+            elif sq == 'K':
+                file = (i % 8) + 1
+                rank = int(8 - i/8) + 1
+                print("found white king {}{}".format(file,rank))
+                white_king_found = True
+            else:
+                pass
+                
+            if white_king_found and black_king_found:
+                break
+            else:
+                pass
     
 class game():
     def __init__(self, PGN):
