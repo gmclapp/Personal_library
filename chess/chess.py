@@ -175,7 +175,6 @@ class Position():
             else:
                 break
 
-        print(squares)
         pieces = []
         for s in squares:
             piece = self.piece_on_square(s)
@@ -280,20 +279,41 @@ class Position():
             if p[1] == 'r' or p[1] == 'q':
                 print("Potential threat: {} on {}".format(p[1],p[0]))
         
-##        self.check_file(w_king)
-##        self.check_knight(w_king)
-##
+        for p in self.check_file(w_king):
+            if p[1] == 'r' or p[1] == 'q':
+                print("Potential threat: {} on {}".format(p[1],p[0]))
+                
+        for p in self.check_diag(w_king):
+            if p[1] == 'b' or p[1] == 'q':
+                print("Potential threat: {} on {}".format(p[1],p[0]))
+                
+        for p in self.check_knight(w_king):
+            if p[1] == 'n':
+                print("Potential threat: {} on {}".format(p[1],p[0]))
+
         for p in self.check_rank(b_king):
             if p[1] == 'R' or p[1] == 'Q':
-                print("Potential threat: {} on {}".format(p[1],p[0])
+                print("Potential threat: {} on {}".format(p[1],p[0]))
                       
-##        self.check_file(b_king)
-##        self.check_knight(b_king)
-        
-        if white_check:
-            return(-1)
-        elif black_check:
+        for p in self.check_file(b_king):
+            if p[1] == 'R' or p[1] == 'Q':
+                print("Potential threat: {} on {}".format(p[1],p[0]))
+                      
+        for p in self.check_diag(b_king):
+            if p[1] == 'B' or p[1] == 'Q':
+                print("Potential threat: {} on {}".format(p[1],p[0]))
+                
+        for p in self.check_knight(b_king):
+            if p[1] == 'N':
+                    print("Potential threat: {} on {}".format(p[1],p[0]))
+                    
+        if white_check and not black_check:
             return(1)
+        elif black_check and not white_check:
+            return(1)
+        elif white_check and black_check:
+            print("Illegal position")
+            return(2)
         else:
             return(0)
         
