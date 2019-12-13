@@ -54,7 +54,7 @@ class Position():
                 except:
                     self.board_array.append(square)
 
-        print(self.board_array)
+        # print(self.board_array)
 
     def piece_on_square(self, square):
         '''Takes a algebraic representation of a square and returns the piece on that square.
@@ -81,9 +81,15 @@ class Position():
 ##        print("{} is on {}{}".format(piece, file, rank))
         return(piece)
 
-    def check_file(self,file):
-        '''Takes a letter designation for a file and returns all the pieces on
-        that file and their positions.'''
+    def check_file(self,pos):
+        '''Takes a position and returns all the pieces on the same file and
+        their positions.'''
+
+        try:
+            file, rank = list(pos)
+        except ValueError:
+            print("Invalid square, specify letter rank, and number file.")
+        
         pieces = []
         for i in range(8):
             rank = i+1
@@ -93,9 +99,17 @@ class Position():
                 pieces.append((square,piece))
         return(pieces)
         
-    def check_rank(self,rank):
-        '''Takes a number designation for a rank and returns all the pieces on
-        that rank and their positions.'''
+    def check_rank(self,pos):
+        '''Takes a position and returns all the pieces on the same rank and
+        their positions.'''
+
+        try:
+            file, rank = list(pos)
+        except ValueError:
+            print("Invalid square, specify letter rank, and number file.")
+
+        rank = int(rank)
+        
         pieces = []
         for i in range(8):
             file = chr(i + 96 + 1)
@@ -188,45 +202,45 @@ class Position():
 
         f = ord_file + 2
         r = rank + 1
-        if r >= 1 and r >= 1:
+        if (r >= 1 and f >= 1) and (r <= 8 and f <= 8):
             squares.append(chr(f + 96) + str(r))
 
         f = ord_file + 2
         r = rank - 1
-        if r >= 1 and r >= 1:
+        if (r >= 1 and f >= 1) and (r <= 8 and f <= 8):
             squares.append(chr(f + 96) + str(r))
 
         f = ord_file - 2
         r = rank + 1
-        if r >= 1 and r >= 1:
+        if (r >= 1 and f >= 1) and (r <= 8 and f <= 8):
             squares.append(chr(f + 96) + str(r))
 
         f = ord_file - 2
         r = rank - 1
-        if r >= 1 and r >= 1:
+        if (r >= 1 and f >= 1) and (r <= 8 and f <= 8):
             squares.append(chr(f + 96) + str(r))
 
         f = ord_file + 1
         r = rank + 2
-        if r >= 1 and r >= 1:
+        if (r >= 1 and f >= 1) and (r <= 8 and f <= 8):
             squares.append(chr(f + 96) + str(r))
 
         f = ord_file - 1
         r = rank + 2
-        if r >= 1 and r >= 1:
+        if (r >= 1 and f >= 1) and (r <= 8 and f <= 8):
             squares.append(chr(f + 96) + str(r))
 
         f = ord_file + 1
         r = rank - 2
-        if r >= 1 and r >= 1:
+        if (r >= 1 and f >= 1) and (r <= 8 and f <= 8):
             squares.append(chr(f + 96) + str(r))
 
         f = ord_file - 1
         r = rank - 2
-        if r >= 1 and r >= 1:
+        if (r >= 1 and f >= 1) and (r <= 8 and f <= 8):
             squares.append(chr(f + 96) + str(r))
         
-        print(squares)
+        # print(squares)
         pieces = []
         for s in squares:
             piece = self.piece_on_square(s)
@@ -258,6 +272,29 @@ class Position():
             else:
                 pass
         return(white_king,black_king)
+
+    def is_check(self):
+        w_king, b_king = self.get_king_pos()
+        white_check = False
+        black_check = False
+
+        for p in self.check_rank(w_king):
+            if p[1] == 'r' or 'q':
+                print("Potential threat: {} on {}".format(p[1],p[0]))
+        
+        self.check_file(w_king)
+        self.check_knight(w_king)
+
+        self.check_rank(b_king)
+        self.check_file(b_king)
+        self.check_knight(b_king)
+        
+        if white_check:
+            return(-1)
+        elif black_check:
+            return(1)
+        else:
+            return(0)
         
     
 class game():
