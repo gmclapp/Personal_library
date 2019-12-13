@@ -239,14 +239,16 @@ class Position():
         black_king_found = False
         for i,sq in enumerate(self.board_array):
             if sq == 'k':
-                file = (i % 8) + 1
-                rank = int(8 - i/8) + 1
-                print("found black king {}{}".format(file,rank))
+                f = (i % 8) + 1
+                r = int(8 - i/8) + 1
+                black_king = chr(f + 96) + str(r)
+                print("found black king {}".format(black_king))
                 black_king_found = True
             elif sq == 'K':
-                file = (i % 8) + 1
-                rank = int(8 - i/8) + 1
-                print("found white king {}{}".format(file,rank))
+                f = (i % 8) + 1
+                r = int(8 - i/8) + 1
+                white_king = chr(f + 96) + str(r)
+                print("found white king {}".format(white_king))
                 white_king_found = True
             else:
                 pass
@@ -255,6 +257,8 @@ class Position():
                 break
             else:
                 pass
+        return(white_king,black_king)
+        
     
 class game():
     def __init__(self, PGN):
