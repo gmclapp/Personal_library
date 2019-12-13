@@ -54,8 +54,6 @@ class Position():
                 except:
                     self.board_array.append(square)
 
-        # print(self.board_array)
-
     def piece_on_square(self, square):
         '''Takes a algebraic representation of a square and returns the piece on that square.
         None if no piece is present on that square.'''
@@ -78,7 +76,6 @@ class Position():
         if piece == '.':
             piece = None
             
-##        print("{} is on {}{}".format(piece, file, rank))
         return(piece)
 
     def check_file(self,pos):
@@ -97,6 +94,7 @@ class Position():
             piece = self.piece_on_square(square)
             if piece != None:
                 pieces.append((square,piece))
+
         return(pieces)
         
     def check_rank(self,pos):
@@ -119,6 +117,7 @@ class Position():
             piece = self.piece_on_square(square)
             if piece != None:
                 pieces.append((square, piece))
+
         return(pieces)
     
     def check_diag(self,pos):
@@ -240,7 +239,6 @@ class Position():
         if (r >= 1 and f >= 1) and (r <= 8 and f <= 8):
             squares.append(chr(f + 96) + str(r))
         
-        # print(squares)
         pieces = []
         for s in squares:
             piece = self.piece_on_square(s)
@@ -279,15 +277,18 @@ class Position():
         black_check = False
 
         for p in self.check_rank(w_king):
-            if p[1] == 'r' or 'q':
+            if p[1] == 'r' or p[1] == 'q':
                 print("Potential threat: {} on {}".format(p[1],p[0]))
         
-        self.check_file(w_king)
-        self.check_knight(w_king)
-
-        self.check_rank(b_king)
-        self.check_file(b_king)
-        self.check_knight(b_king)
+##        self.check_file(w_king)
+##        self.check_knight(w_king)
+##
+        for p in self.check_rank(b_king):
+            if p[1] == 'R' or p[1] == 'Q':
+                print("Potential threat: {} on {}".format(p[1],p[0])
+                      
+##        self.check_file(b_king)
+##        self.check_knight(b_king)
         
         if white_check:
             return(-1)
