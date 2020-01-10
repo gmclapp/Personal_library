@@ -19,8 +19,8 @@ class element():
         self.y = y
         self.sprite = sprite
 
+        self.ai = ai
         if ai:
-            self.ai = ai
             ai.owner = self
 
     def draw(self,surf):
