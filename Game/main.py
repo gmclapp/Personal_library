@@ -44,7 +44,7 @@ class element():
 class actor(element):
     def move(self, dx, dy):
         try:
-            dest_tile = game_obj.scene_list[0]["map"][self.y+dy][self.x+dx]
+            dest_tile = game_obj.scene_list[game_obj.vars["current_scene"]]["map"][self.y+dy][self.x+dx]
             for t in game_obj.tile_list:
                 if t.serial_no == dest_tile:
                     break
@@ -78,7 +78,6 @@ class prop(element):
                 self.state = "open"
             elif self.state == "open":
                 self.state = "closed"
-                print("Closing")
         self.update()
         
         # This value is checked in order to determine if a player turn is complete
@@ -92,6 +91,9 @@ class prop(element):
         elif self.prop_type == "chest" and self.state == "open":
             print("Changing sprite")
             self.sprite = constants.S_CHEST_OPEN
+        elif self.prop_type == "door":
+            game_obj.vars["current_scene"] = 1
+            game_obj.get_props()
 
 
 class simple_ai():
@@ -134,13 +136,31 @@ class game_object():
             self.tile_list.append(struct_tile(i))
 
         print("Loading scene...")
-        with open("scenes\\1.txt","r") as f:
+        with open("scenes\\0.txt","r") as f:
             self.scene_list.append(json.load(f))
+        with open("scenes\\1.txt","r") as f:
+            self.scene_list.append(json.load(f))   
 
             
     def save(self):
         pass
+
+    def get_props(self):
+        self.prop_list = []
         
+        for p in self.scene_list[self.vars["current_scene"]]["props"]:
+            if p["type"] == "chest" and p["state"] == "closed":
+                p_sprite = constants.S_CHEST
+            elif p["type"] == "chest" and p["state"] == "open":
+                p_sprite = constants.S_CHEST_OPEN
+            elif p["type"] == "door" and p["state"] == "closed":
+                p_sprite = constants.S_DOOR
+            elif p["type"] == "door" and p["state"] == "open":
+                p_sprite = constants.S_DOOR_OPEN
+                
+            self.prop_list.append(prop(p["x"],p["y"],p["type"],p["state"],p_sprite))
+            
+            
         
 def quit_nicely():
     pygame.display.quit()
@@ -226,20 +246,17 @@ def draw_game():
     # Flip the display to show the next frame
     pygame.display.flip()
 
+
 def game_main_loop():
     game_quit = False
     new_click = False
     move_successful = False
     fpsClock = pygame.time.Clock()
+    mx = 0
+    my = 0
 
-    for p in game_obj.scene_list[game_obj.vars["current_scene"]]["props"]:
-        if p["type"] == "chest" and p["state"] == "closed":
-            p_sprite = constants.S_CHEST
-        elif p["type"] == "chest" and p["state"] == "open":
-            p_sprite = constants.S_CHEST_OPEN
-            
-        game_obj.prop_list.append(prop(p["x"],p["y"],p["type"],p["state"],p_sprite))
-        
+    game_obj.get_props()
+    
     while not game_quit:
         event_list = pygame.event.get()
         for p in game_obj.prop_list:
