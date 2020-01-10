@@ -37,12 +37,22 @@ class actor():
             print("Tile out of range")
             
         
+class prop():
+    def __init__(self,x,y,sprite):
+        self.x = x
+        self.y = y
+        self.sprite = sprite
 
+    def draw(self,surf):
+        surf.blit(self.sprite, (self.x*constants.RES, self.y*constants.RES))
+
+    
 class game_object():
     def __init__(self):
         self.SURFACE_MAIN = None
         self.font = pygame.font.Font(None,32)
         self.actor_list = []
+        self.prop_list = []
         self.scene_list = []
         self.tile_list = []
         self.vars = {"cheat_codes": False,
@@ -68,9 +78,7 @@ def quit_nicely():
 
 def handle_cheat_code(game_obj):
     args = game_obj.vars["cheat_text"].split()
-    for a in args:
-        if a == "test":
-            print("Successful test!")
+
     if args[0] == 'tp':
         print("Teleport an actor")
         
@@ -87,6 +95,9 @@ def handle_cheat_code(game_obj):
     elif args[0] == 'help':
         print("tp <target> <x> <y> teleports a target to an x,y destination.")
         print("for example: \"tp me 0 0 \" teleports the player to the top left corner of the scene.")
+
+    else:
+        print(args)
         
         
         
@@ -102,11 +113,11 @@ def draw_game(game_obj):
                 if t.serial_no == tile:
                     game_obj.SURFACE_MAIN.blit(t.art,(x*constants.RES,y*constants.RES))
         
-
+    
     # draw the character and other actors
     for a in game_obj.actor_list:
         game_obj.SURFACE_MAIN.blit(a.sprite, (a.x*constants.RES,a.y*constants.RES))
-
+        
     # Define input box characteristics, this should be moved such that it doesn't happen
     # every frame.
     input_box_hgt = 32
