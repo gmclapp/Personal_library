@@ -36,4 +36,6 @@ S_PLAYER = pygame.image.load("data/character.png")
 MENU_FIRST_PAGE = pygame.image.load("data/Side bar menu first page.png")
 MENU_MIDDLE_PAGE = pygame.image.load("data/Side bar menu middle page.png")
 MENU_LAST_PAGE = pygame.image.load("data/Side bar menu last page.png")
+MENU_BACKGROUND = pygame.image.load("data/Side bar menu background.png")
+SIDE_HEADER_HEIGHT = 64
 PAGE_TURN_HITBOX = 20 # Height and width of the page turn hitbox in pixels

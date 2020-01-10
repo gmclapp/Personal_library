@@ -140,6 +140,8 @@ def draw_game():
     elif game_obj.vars["page"] == 3:
         game_obj.SURFACE_MAIN.blit(constants.MENU_LAST_PAGE,
                                    (constants.SCENE_WIDTH,0))
+    game_obj.SURFACE_MAIN.blit(constants.MENU_BACKGROUND,
+                               (constants.SCENE_WIDTH,constants.SIDE_HEADER_HEIGHT))
 
     
     # draw the character and other actors
