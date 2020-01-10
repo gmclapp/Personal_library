@@ -87,7 +87,8 @@ class game_object():
                      "cheat_text": '',
                      "page":1,
                      "debug": False,
-                     "turn": 0}
+                     "turn": 0,
+                     "current_scene":0}
 
     def load(self):
         print("Loading tile data...")
@@ -141,12 +142,12 @@ def draw_game():
     game_obj.SURFACE_MAIN.fill(constants.DEFAULT_BG)
 
     # Render the current scene
-    for y,row in enumerate(game_obj.scene_list[0]["map"]):
+    for y,row in enumerate(game_obj.scene_list[game_obj.vars["current_scene"]]["map"]):
         for x,tile in enumerate(row):
             for t in game_obj.tile_list:
                 if t.serial_no == tile:
                     game_obj.SURFACE_MAIN.blit(t.art,(x*constants.RES,y*constants.RES))
-        
+
     # Draw the side bar menu
     if game_obj.vars["page"] == 1:
         game_obj.SURFACE_MAIN.blit(constants.MENU_FIRST_PAGE,
@@ -160,7 +161,10 @@ def draw_game():
     game_obj.SURFACE_MAIN.blit(constants.MENU_BACKGROUND,
                                (constants.SCENE_WIDTH,constants.SIDE_HEADER_HEIGHT))
 
-    
+    # Draw props
+    for p in game_obj.prop_list:
+        p.draw(game_obj.SURFACE_MAIN)
+        
     # draw the character and other actors
     for a in game_obj.actor_list:
         a.draw(game_obj.SURFACE_MAIN)
@@ -192,10 +196,17 @@ def game_main_loop():
     new_click = False
     move_successful = False
     fpsClock = pygame.time.Clock()
-    
+
+    for p in game_obj.scene_list[game_obj.vars["current_scene"]]["props"]:
+        if p["type"] == "chest":
+            p_sprite = constants.S_CHEST
+        game_obj.prop_list.append(prop(p["x"],p["y"],p_sprite))
+        
     while not game_quit:
         event_list = pygame.event.get()
-
+        for p in game_obj.prop_list:
+            pass
+            
         for event in event_list:
             if event.type == pygame.QUIT:
                 game_quit = True
