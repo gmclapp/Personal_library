@@ -33,6 +33,8 @@ DEBUG_TXT = COLOR_WHITE
 S_PLAYER = pygame.image.load("data/character.png")
 S_ENEMY = pygame.image.load("data/enemy.png")
 S_CHEST = pygame.image.load("data/chest.png")
+S_CHEST_OPEN = pygame.image.load("data/chest_open.png")
+S_SELECTOR = pygame.image.load("data/selector.png")
 
 #Menus
 MENU_FIRST_PAGE = pygame.image.load("data/Side bar menu first page.png")

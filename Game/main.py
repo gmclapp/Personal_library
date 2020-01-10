@@ -19,6 +19,7 @@ class element():
         self.x = x
         self.y = y
         self.sprite = sprite
+        self.clicked = False
 
         self.ai = ai
         if ai:
@@ -28,6 +29,17 @@ class element():
         
     def draw(self,surf):
         surf.blit(self.sprite, (self.x*constants.RES, self.y*constants.RES))
+        if self.clicked:
+            surf.blit(constants.S_SELECTOR, (self.x*constants.RES, self.y*constants.RES))
+
+    def is_clicked(self,x,y):
+        dx = self.x*constants.RES - x
+        dy = self.y*constants.RES - y
+
+        if (dx**2 + dy**2 ) < constants.RES**2:
+            self.clicked = True
+        else:
+            self.clicked = False
         
 class actor(element):
     def move(self, dx, dy):
@@ -198,8 +210,11 @@ def game_main_loop():
     fpsClock = pygame.time.Clock()
 
     for p in game_obj.scene_list[game_obj.vars["current_scene"]]["props"]:
-        if p["type"] == "chest":
+        if p["type"] == "chest" and p["state"] == "closed":
             p_sprite = constants.S_CHEST
+        elif p["type"] == "chest" and p["state"] == "open":
+            p_sprite = constants.S_CHEST_OPEN
+            
         game_obj.prop_list.append(prop(p["x"],p["y"],p_sprite))
         
     while not game_quit:
@@ -242,7 +257,7 @@ def game_main_loop():
                 if event.button == 1:
                     new_click = True
                     left_click_x, left_click_y = event.pos
-                    print("Left click ({},{})".format(left_click_x,left_click_y))
+                    
             
         if move_successful:
             game_obj.vars["turn"] += 1
@@ -256,10 +271,21 @@ def game_main_loop():
                                                                                  int(my/constants.RES),
                                                                                  game_obj.vars["turn"])
         if new_click:
+            # Check side menu page change hitboxes
             if left_click_x > constants.GAME_WIDTH - constants.PAGE_TURN_HITBOX and left_click_y < constants.PAGE_TURN_HITBOX:
                 game_obj.vars["page"] += 1
             elif constants.SCENE_WIDTH < left_click_x < constants.SCENE_WIDTH + constants.PAGE_TURN_HITBOX and left_click_y < constants.PAGE_TURN_HITBOX:
                 game_obj.vars["page"] -= 1
+
+            # Check scene area
+            if (0 < left_click_x < constants.SCENE_WIDTH
+                and 0 < left_click_y < constants.SCENE_HEIGHT):
+
+                for a in game_obj.actor_list:
+                    a.is_clicked(left_click_x,left_click_y)
+                    
+                for p in game_obj.prop_list:
+                    p.is_clicked(left_click_x,left_click_y)
                 
             new_click = False
                 
