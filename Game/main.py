@@ -170,6 +170,7 @@ def draw_game():
 
 def game_main_loop():
     game_quit = False
+    new_click = False
     fpsClock = pygame.time.Clock()
     
     while not game_quit:
@@ -206,10 +207,25 @@ def game_main_loop():
             elif event.type == pygame.MOUSEMOTION:
                 mx, my = event.pos
 
+            elif event.type == pygame.MOUSEBUTTONUP:
+                if event.button == 1:
+                    new_click = True
+                    left_click_x, left_click_y = event.pos
+                    print("Left click ({},{})".format(left_click_x,left_click_y))
+            
+
         game_obj.vars["debug_text"] = "X: {} Y: {} TILE: ({},{}) TURN: {}".format(mx,my,
                                                                                  int(mx/constants.RES),
                                                                                  int(my/constants.RES),
                                                                                  game_obj.vars["turn"])
+        if new_click:
+            if left_click_x > 1010 and left_click_y < 20:
+                game_obj.vars["page"] += 1
+            elif constants.SCENE_WIDTH < left_click_x < constants.SCENE_WIDTH + 20 and left_click_y < 20:
+                game_obj.vars["page"] -= 1
+                
+            new_click = False
+                
                  
         draw_game()
         fpsClock.tick(60)
