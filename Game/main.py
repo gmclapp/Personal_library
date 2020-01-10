@@ -112,7 +112,7 @@ def draw_game(game_obj):
     
     # draw the character and other actors
     for a in game_obj.actor_list:
-        game_obj.SURFACE_MAIN.blit(a.sprite, (a.x*constants.RES,a.y*constants.RES))
+        a.draw(game_obj.SURFACE_MAIN)
         
     # Define input box characteristics, this should be moved such that it doesn't happen
     # every frame.
