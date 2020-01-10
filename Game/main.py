@@ -73,13 +73,16 @@ class prop(element):
         self.prop_type = prop_type
         
     def interact(self):
-        if self.state == "closed":
-            self.state = "open"
-            print("Opening")
-        elif self.state == "open":
-            self.state = "closed"
-            print("Closing")
+        if self.prop_type == "chest":
+            if self.state == "closed":
+                self.state = "open"
+            elif self.state == "open":
+                self.state = "closed"
+                print("Closing")
         self.update()
+        
+        # This value is checked in order to determine if a player turn is complete
+        return(True)
 
     def update(self):
         
@@ -275,7 +278,7 @@ def game_main_loop():
                             print("Attack!")
                     for p in game_obj.prop_list:
                         if p.clicked:
-                            p.interact()
+                            move_successful = p.interact()
                             
 
             elif event.type == pygame.MOUSEMOTION:
