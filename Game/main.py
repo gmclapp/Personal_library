@@ -14,16 +14,20 @@ class struct_tile():
                     self.art = pygame.image.load(t["art"])
 
 class element():
-    def __init__(self,x,y,sprite):
+    def __init__(self,x,y,sprite,ai=None):
         self.x = x
         self.y = y
         self.sprite = sprite
+
+        if ai:
+            self.ai = ai
+            ai.owner = self
 
     def draw(self,surf):
         surf.blit(self.sprite, (self.x*constants.RES, self.y*constants.RES))
         
 class actor(element):
-    def move(self, dx, dy, game_obj):
+    def move(self, dx, dy):
         try:
             dest_tile = game_obj.scene_list[0]["map"][self.y+dy][self.x+dx]
             for t in game_obj.tile_list:
@@ -45,7 +49,11 @@ class prop(element):
     def interact(self):
         pass
 
-    
+
+class ai():
+    def take_turn(self):
+        self.owner.move(1,1)
+        
 class game_object():
     def __init__(self):
         self.SURFACE_MAIN = None
@@ -80,7 +88,7 @@ def quit_nicely():
     pygame.display.quit()
     pygame.quit()
 
-def handle_cheat_code(game_obj):
+def handle_cheat_code():
     args = game_obj.vars["cheat_text"].split()
 
     if args[0] == 'tp':
@@ -105,7 +113,7 @@ def handle_cheat_code(game_obj):
         
         
         
-def draw_game(game_obj):
+def draw_game():
 
     # Background fill to erase previous frame
     game_obj.SURFACE_MAIN.fill(constants.DEFAULT_BG)
@@ -155,7 +163,7 @@ def draw_game(game_obj):
     # Flip the display to show the next frame
     pygame.display.flip()
 
-def game_main_loop(game_obj):
+def game_main_loop():
     game_quit = False
     fpsClock = pygame.time.Clock()
     
@@ -168,7 +176,7 @@ def game_main_loop(game_obj):
 
             if event.type == pygame.KEYDOWN and game_obj.vars["cheat_codes"]:
                 if event.key == pygame.K_RETURN:
-                    handle_cheat_code(game_obj)
+                    handle_cheat_code()
                     game_obj.vars["cheat_text"] = ''
                     game_obj.vars["cheat_codes"] = not game_obj.vars["cheat_codes"]
                 elif event.key == pygame.K_BACKSPACE:
@@ -178,13 +186,13 @@ def game_main_loop(game_obj):
                     
             elif event.type == pygame.KEYDOWN and not game_obj.vars["cheat_codes"]:
                 if event.key == pygame.K_w:
-                    game_obj.actor_list[0].move(0,-1,game_obj)
+                    game_obj.actor_list[0].move(0,-1)
                 if event.key == pygame.K_a:
-                    game_obj.actor_list[0].move(-1,0,game_obj)
+                    game_obj.actor_list[0].move(-1,0)
                 if event.key == pygame.K_s:
-                    game_obj.actor_list[0].move(0,1,game_obj)
+                    game_obj.actor_list[0].move(0,1)
                 if event.key == pygame.K_d:
-                    game_obj.actor_list[0].move(1,0,game_obj)
+                    game_obj.actor_list[0].move(1,0)
                 if event.key == pygame.K_RETURN:
                     game_obj.vars["cheat_codes"] = not game_obj.vars["cheat_codes"]
                 if event.key == pygame.K_F3:
@@ -196,7 +204,7 @@ def game_main_loop(game_obj):
                                                                                  int(mx/constants.RES),
                                                                                  int(my/constants.RES))
                  
-        draw_game(game_obj)
+        draw_game()
         fpsClock.tick(60)
 
     quit_nicely()
@@ -215,4 +223,6 @@ def game_initialize():
 
 if __name__ == "__main__":
     game_obj = game_initialize()
-    game_main_loop(game_obj)
+##    game_initialize()
+##    game_main_loop(game_obj)
+    game_main_loop()
