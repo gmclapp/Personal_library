@@ -33,10 +33,10 @@ class element():
             surf.blit(constants.S_SELECTOR, (self.x*constants.RES, self.y*constants.RES))
 
     def is_clicked(self,x,y):
-        dx = self.x*constants.RES - x
-        dy = self.y*constants.RES - y
+        dx = (self.x+0.5)*constants.RES - x
+        dy = (self.y+0.5)*constants.RES - y
 
-        if (dx**2 + dy**2 ) < constants.RES**2:
+        if (dx**2 + dy**2 ) < (constants.RES/2)**2:
             self.clicked = True
         else:
             self.clicked = False
