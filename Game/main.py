@@ -13,7 +13,7 @@ class struct_tile():
                     self.block_path = t["block_path"]
                     self.art = pygame.image.load(t["art"])
 
-class actor():
+class element():
     def __init__(self,x,y,sprite):
         self.x = x
         self.y = y
@@ -21,7 +21,8 @@ class actor():
 
     def draw(self,surf):
         surf.blit(self.sprite, (self.x*constants.RES, self.y*constants.RES))
-
+        
+class actor(element):
     def move(self, dx, dy, game_obj):
         try:
             dest_tile = game_obj.scene_list[0]["map"][self.x+dx+1][self.y+dy-1]
@@ -37,14 +38,9 @@ class actor():
             print("Tile out of range")
             
         
-class prop():
-    def __init__(self,x,y,sprite):
-        self.x = x
-        self.y = y
-        self.sprite = sprite
-
-    def draw(self,surf):
-        surf.blit(self.sprite, (self.x*constants.RES, self.y*constants.RES))
+class prop(element):
+    def interact(self):
+        pass
 
     
 class game_object():
