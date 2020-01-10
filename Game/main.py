@@ -34,6 +34,9 @@ class actor(element):
             if not t.block_path:
                 self.x += dx
                 self.y += dy
+            else:
+                print("Can't walk there.")
+                
         except IndexError:
             print("Tile out of range")
             
@@ -177,7 +180,7 @@ def game_initialize():
                                             constants.GAME_HEIGHT))
     game_obj.load()
 
-    game_obj.actor_list.append(actor(7,7,constants.S_PLAYER))
+    game_obj.actor_list.append(actor(1,1,constants.S_PLAYER))
 
     return(game_obj)
 
