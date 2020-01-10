@@ -67,8 +67,28 @@ class actor(element):
             
         
 class prop(element):
+    def __init__(self,x,y,prop_type,state,sprite,player=False,ai=None):
+        super().__init__(x,y,sprite,player=False,ai=None)
+        self.state = state
+        self.prop_type = prop_type
+        
     def interact(self):
-        pass
+        if self.state == "closed":
+            self.state = "open"
+            print("Opening")
+        elif self.state == "open":
+            self.state = "closed"
+            print("Closing")
+        self.update()
+
+    def update(self):
+        
+        if self.prop_type == "chest" and self.state == "closed":
+            print("Changing sprite")
+            self.sprite = constants.S_CHEST
+        elif self.prop_type == "chest" and self.state == "open":
+            print("Changing sprite")
+            self.sprite = constants.S_CHEST_OPEN
 
 
 class simple_ai():
@@ -215,7 +235,7 @@ def game_main_loop():
         elif p["type"] == "chest" and p["state"] == "open":
             p_sprite = constants.S_CHEST_OPEN
             
-        game_obj.prop_list.append(prop(p["x"],p["y"],p_sprite))
+        game_obj.prop_list.append(prop(p["x"],p["y"],p["type"],p["state"],p_sprite))
         
     while not game_quit:
         event_list = pygame.event.get()
@@ -249,6 +269,14 @@ def game_main_loop():
                     game_obj.vars["cheat_codes"] = not game_obj.vars["cheat_codes"]
                 if event.key == pygame.K_F3:
                     game_obj.vars["debug"] = not game_obj.vars["debug"]
+                if event.key == pygame.K_SPACE:
+                    for a in game_obj.actor_list:
+                        if a.clicked and not a.player:
+                            print("Attack!")
+                    for p in game_obj.prop_list:
+                        if p.clicked:
+                            p.interact()
+                            
 
             elif event.type == pygame.MOUSEMOTION:
                 mx, my = event.pos
