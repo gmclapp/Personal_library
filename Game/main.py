@@ -25,7 +25,7 @@ class element():
 class actor(element):
     def move(self, dx, dy, game_obj):
         try:
-            dest_tile = game_obj.scene_list[0]["map"][self.x+dx+1][self.y+dy-1]
+            dest_tile = game_obj.scene_list[0]["map"][self.y+dy][self.x+dx]
             for t in game_obj.tile_list:
                 if t.serial_no == dest_tile:
                     break
@@ -35,7 +35,7 @@ class actor(element):
                 self.x += dx
                 self.y += dy
             else:
-                print("Can't walk there.")
+                print("Can't walk there. It's a {}".format(t.name))
                 
         except IndexError:
             print("Tile out of range")
