@@ -219,9 +219,9 @@ def game_main_loop():
                                                                                  int(my/constants.RES),
                                                                                  game_obj.vars["turn"])
         if new_click:
-            if left_click_x > 1010 and left_click_y < 20:
+            if left_click_x > constants.GAME_WIDTH - constants.PAGE_TURN_HITBOX and left_click_y < constants.PAGE_TURN_HITBOX:
                 game_obj.vars["page"] += 1
-            elif constants.SCENE_WIDTH < left_click_x < constants.SCENE_WIDTH + 20 and left_click_y < 20:
+            elif constants.SCENE_WIDTH < left_click_x < constants.SCENE_WIDTH + constants.PAGE_TURN_HITBOX and left_click_y < constants.PAGE_TURN_HITBOX:
                 game_obj.vars["page"] -= 1
                 
             new_click = False
