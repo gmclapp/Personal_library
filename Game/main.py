@@ -38,14 +38,16 @@ class actor(element):
             if not t.block_path:
                 self.x += dx
                 self.y += dy
-                game_obj.vars["turn"] += 1
+                return(True)
                 
             else:
                 print("Can't walk there. It's a {}".format(t.name))
+                return(False)
                 
                 
         except IndexError:
             print("Tile out of range")
+            return(False)
             
             
         
@@ -173,6 +175,7 @@ def draw_game():
 def game_main_loop():
     game_quit = False
     new_click = False
+    move_successful = False
     fpsClock = pygame.time.Clock()
     
     while not game_quit:
@@ -194,13 +197,13 @@ def game_main_loop():
                     
             elif event.type == pygame.KEYDOWN and not game_obj.vars["cheat_codes"]:
                 if event.key == pygame.K_w:
-                    game_obj.actor_list[0].move(0,-1)
+                    move_successful = game_obj.actor_list[0].move(0,-1)
                 if event.key == pygame.K_a:
-                    game_obj.actor_list[0].move(-1,0)
+                    move_successful = game_obj.actor_list[0].move(-1,0)
                 if event.key == pygame.K_s:
-                    game_obj.actor_list[0].move(0,1)
+                    move_successful = game_obj.actor_list[0].move(0,1)
                 if event.key == pygame.K_d:
-                    game_obj.actor_list[0].move(1,0)
+                    move_successful = game_obj.actor_list[0].move(1,0)
                 if event.key == pygame.K_RETURN:
                     game_obj.vars["cheat_codes"] = not game_obj.vars["cheat_codes"]
                 if event.key == pygame.K_F3:
@@ -215,7 +218,10 @@ def game_main_loop():
                     left_click_x, left_click_y = event.pos
                     print("Left click ({},{})".format(left_click_x,left_click_y))
             
-
+        if move_successful:
+            game_obj.vars["turn"] += 1
+            move_successful = False
+            
         game_obj.vars["debug_text"] = "X: {} Y: {} TILE: ({},{}) TURN: {}".format(mx,my,
                                                                                  int(mx/constants.RES),
                                                                                  int(my/constants.RES),
