@@ -1,6 +1,7 @@
 import pygame
 import constants
 import json
+import random
 
 class struct_tile():
     def __init__(self, tile_number):
@@ -14,7 +15,7 @@ class struct_tile():
                     self.art = pygame.image.load(t["art"])
 
 class element():
-    def __init__(self,x,y,sprite,ai=None):
+    def __init__(self,x,y,sprite,player=False,ai=None):
         self.x = x
         self.y = y
         self.sprite = sprite
@@ -22,7 +23,9 @@ class element():
         self.ai = ai
         if ai:
             ai.owner = self
-
+            
+        self.player = player
+        
     def draw(self,surf):
         surf.blit(self.sprite, (self.x*constants.RES, self.y*constants.RES))
         
@@ -56,9 +59,21 @@ class prop(element):
         pass
 
 
-class ai():
+class simple_ai():
     def take_turn(self):
-        self.owner.move(1,1)
+        decision = random.randint(0,4)
+        if decision == 0: # Don't move
+            pass
+        elif decision == 1: # Move right
+            self.owner.move(1,0)
+        elif decision == 2: # Move left
+            self.owner.move(-1,0)
+        elif decision == 3: # Move up
+            self.owner.move(0,-1)
+        elif decision == 4: # Move down
+            self.owner.move(0,1)
+        else:
+            print("Indecision!")
         
 class game_object():
     def __init__(self):
@@ -221,6 +236,9 @@ def game_main_loop():
         if move_successful:
             game_obj.vars["turn"] += 1
             move_successful = False
+            for a in game_obj.actor_list:
+                if not a.player:
+                    a.ai.take_turn()
             
         game_obj.vars["debug_text"] = "X: {} Y: {} TILE: ({},{}) TURN: {}".format(mx,my,
                                                                                  int(mx/constants.RES),
@@ -248,7 +266,8 @@ def game_initialize():
                                             constants.GAME_HEIGHT))
     game_obj.load()
 
-    game_obj.actor_list.append(actor(1,1,constants.S_PLAYER))
+    game_obj.actor_list.append(actor(1,1,constants.S_PLAYER,player=True))
+    game_obj.actor_list.append(actor(15,15,constants.S_ENEMY,player=False,ai=simple_ai()))
 
     return(game_obj)
 

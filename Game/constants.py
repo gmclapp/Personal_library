@@ -31,6 +31,7 @@ DEBUG_TXT = COLOR_WHITE
 
 # Sprites
 S_PLAYER = pygame.image.load("data/character.png")
+S_ENEMY = pygame.image.load("data/enemy.png")
 
 #Menus
 MENU_FIRST_PAGE = pygame.image.load("data/Side bar menu first page.png")
