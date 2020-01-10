@@ -38,11 +38,15 @@ class actor(element):
             if not t.block_path:
                 self.x += dx
                 self.y += dy
+                game_obj.vars["turn"] += 1
+                
             else:
                 print("Can't walk there. It's a {}".format(t.name))
                 
+                
         except IndexError:
             print("Tile out of range")
+            
             
         
 class prop(element):
@@ -65,7 +69,8 @@ class game_object():
         self.vars = {"cheat_codes": False,
                      "cheat_text": '',
                      "page":1,
-                     "debug": False}
+                     "debug": False,
+                     "turn": 0}
 
     def load(self):
         print("Loading tile data...")
@@ -200,9 +205,11 @@ def game_main_loop():
 
             elif event.type == pygame.MOUSEMOTION:
                 mx, my = event.pos
-                game_obj.vars["debug_text"] = "X: {} Y: {} TILE: ({},{})".format(mx,my,
+
+        game_obj.vars["debug_text"] = "X: {} Y: {} TILE: ({},{}) TURN: {}".format(mx,my,
                                                                                  int(mx/constants.RES),
-                                                                                 int(my/constants.RES))
+                                                                                 int(my/constants.RES),
+                                                                                 game_obj.vars["turn"])
                  
         draw_game()
         fpsClock.tick(60)
@@ -223,6 +230,4 @@ def game_initialize():
 
 if __name__ == "__main__":
     game_obj = game_initialize()
-##    game_initialize()
-##    game_main_loop(game_obj)
     game_main_loop()
