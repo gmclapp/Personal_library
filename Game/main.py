@@ -61,7 +61,10 @@ class game_object():
 
     def load(self):
         print("Loading tile data...")
-        for i in range(2):
+        with open("data\\tiles.txt","r") as f:
+            tile_data = json.load(f)
+            num_tiles = len(tile_data)
+        for i in range(num_tiles):
             self.tile_list.append(struct_tile(i))
 
         print("Loading scene...")

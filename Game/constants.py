@@ -30,10 +30,6 @@ DEBUG_TXT = COLOR_WHITE
 # Sprites
 S_PLAYER = pygame.image.load("data/character.png")
 
-# Tiles
-CAVE_WALL = pygame.image.load("data/cave_wall.png")
-CAVE_FLOOR = pygame.image.load("data/cave_floor.png")
-
 #Menus
 MENU_FIRST_PAGE = pygame.image.load("data/Side bar menu first page.png")
 MENU_MIDDLE_PAGE = pygame.image.load("data/Side bar menu middle page.png")
