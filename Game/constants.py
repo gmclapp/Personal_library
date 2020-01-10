@@ -13,8 +13,10 @@ SCENE_WIDTH = SCENE_WIDTH_TILES * RES
 SCENE_HEIGHT = SCENE_HEIGHT_TILES * RES
 
 # Game sizes
-GAME_WIDTH = SCENE_WIDTH + 256
-GAME_HEIGHT = SCENE_HEIGHT + 224
+SIDE_BAR_WIDTH = 256
+LOWER_BANNER_HEIGHT = 224
+GAME_WIDTH = SCENE_WIDTH + SIDE_BAR_WIDTH
+GAME_HEIGHT = SCENE_HEIGHT + LOWER_BANNER_HEIGHT
 
 # Color definitions
 COLOR_BLACK = (0,0,0)
@@ -34,4 +36,4 @@ S_PLAYER = pygame.image.load("data/character.png")
 MENU_FIRST_PAGE = pygame.image.load("data/Side bar menu first page.png")
 MENU_MIDDLE_PAGE = pygame.image.load("data/Side bar menu middle page.png")
 MENU_LAST_PAGE = pygame.image.load("data/Side bar menu last page.png")
-PAGE_TURN_HITBOX = 20
+PAGE_TURN_HITBOX = 20 # Height and width of the page turn hitbox in pixels
