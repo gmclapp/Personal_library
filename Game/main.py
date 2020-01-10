@@ -55,7 +55,8 @@ class game_object():
         self.scene_list = []
         self.tile_list = []
         self.vars = {"cheat_codes": False,
-                     "cheat_text": ''}
+                     "cheat_text": '',
+                     "page":1}
 
     def load(self):
         print("Loading tile data...")
@@ -112,6 +113,17 @@ def draw_game(game_obj):
                 if t.serial_no == tile:
                     game_obj.SURFACE_MAIN.blit(t.art,(x*constants.RES,y*constants.RES))
         
+    # Draw the side bar menu
+    if game_obj.vars["page"] == 1:
+        game_obj.SURFACE_MAIN.blit(constants.MENU_FIRST_PAGE,
+                                   (constants.SCENE_WIDTH,0))
+    elif game_obj.vars["page"] == 2:
+        game_obj.SURFACE_MAIN.blit(constants.MENU_MIDDLE_PAGE,
+                                   (constants.SCENE_WIDTH,0))
+    elif game_obj.vars["page"] == 3:
+        game_obj.SURFACE_MAIN.blit(constants.MENU_LAST_PAGE,
+                                   (constants.SCENE_WIDTH,0))
+
     
     # draw the character and other actors
     for a in game_obj.actor_list:
