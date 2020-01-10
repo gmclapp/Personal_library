@@ -56,7 +56,8 @@ class game_object():
         self.tile_list = []
         self.vars = {"cheat_codes": False,
                      "cheat_text": '',
-                     "page":1}
+                     "page":1,
+                     "debug": False}
 
     def load(self):
         print("Loading tile data...")
@@ -142,7 +143,12 @@ def draw_game(game_obj):
         pygame.draw.rect(game_obj.SURFACE_MAIN, constants.CHEAT_TXT_BOX_BG,input_box, 0)
         txt_surface = game_obj.font.render(game_obj.vars["cheat_text"],True,constants.CHEAT_TXT)
         game_obj.SURFACE_MAIN.blit(txt_surface,(input_box.x+5,input_box.y+5))
-    
+
+    # Draw debug information if debug mode is active.
+    if game_obj.vars["debug"]:
+        debug_text = game_obj.font.render(game_obj.vars["debug_text"],True,constants.DEBUG_TXT)
+        game_obj.SURFACE_MAIN.blit(debug_text,(0,0))
+        
     # Flip the display to show the next frame
     pygame.display.flip()
 
@@ -178,6 +184,14 @@ def game_main_loop(game_obj):
                     game_obj.actor_list[0].move(1,0,game_obj)
                 if event.key == pygame.K_RETURN:
                     game_obj.vars["cheat_codes"] = not game_obj.vars["cheat_codes"]
+                if event.key == pygame.K_F3:
+                    game_obj.vars["debug"] = not game_obj.vars["debug"]
+
+            elif event.type == pygame.MOUSEMOTION:
+                mx, my = event.pos
+                game_obj.vars["debug_text"] = "X: {} Y: {} TILE: ({},{})".format(mx,my,
+                                                                                 int(mx/constants.RES),
+                                                                                 int(my/constants.RES))
                  
         draw_game(game_obj)
         fpsClock.tick(60)
