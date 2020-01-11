@@ -15,7 +15,7 @@ class struct_tile():
                     self.art = pygame.image.load(t["art"])
 
 class element():
-    def __init__(self,x,y,sprite,player=False,ai=None):
+    def __init__(self,x,y,sprite=None,player=False,ai=None):
         self.x = x
         self.y = y
         self.sprite = sprite
@@ -67,35 +67,68 @@ class actor(element):
             
         
 class prop(element):
-    def __init__(self,x,y,prop_type,state,sprite,player=False,ai=None):
+    def __init__(self,x,y,prop_type,state,sprite=None,player=False,ai=None):
         super().__init__(x,y,sprite,player=False,ai=None)
         self.state = state
         self.prop_type = prop_type
         
     def interact(self):
-        if self.prop_type == "chest":
-            if self.state == "closed":
-                self.state = "open"
-            elif self.state == "open":
-                self.state = "closed"
         self.update()
-        
         # This value is checked in order to determine if a player turn is complete
         return(True)
 
     def update(self):
-        
+        pass
+
+class container(prop):
+    def interact(self):
+        if self.state == "closed":
+            self.state = "open"
+        elif self.state == "open":
+            self.state = "closed"
+            
+        self.update()
+        return(True)
+
+    def update(self):
         if self.prop_type == "chest" and self.state == "closed":
             print("Changing sprite")
             self.sprite = constants.S_CHEST
         elif self.prop_type == "chest" and self.state == "open":
             print("Changing sprite")
             self.sprite = constants.S_CHEST_OPEN
-        elif self.prop_type == "door":
-            game_obj.vars["current_scene"] = 1
-            game_obj.get_props()
 
+class portal(prop):
+    def __init__(self,x,y,prop_type,state,dest_scene,dest_x,dest_y,sprite=None,player=False,ai=None):
+        
+        super().__init__(x,y,prop_type,state,sprite,player,ai)
+        self.dest_scene = dest_scene
+        self.dest_x = dest_x
+        self.dest_y = dest_y
+        
+    def interact(self):
+        if self.state == "closed":
+            self.state = "open"
+        elif self.state == "open":
+            self.state = "closed"
+            
+        self.travel()
+        return(True)
 
+    def travel(self):
+        game_obj.vars["current_scene"] = self.dest_scene
+        game_obj.get_props()
+        game_obj.actor_list[0].x = self.dest_x
+        game_obj.actor_list[0].y = self.dest_y
+        
+    def update(self):
+        if self.prop_type == "door" and self.state == "closed":
+            print("Changing sprite")
+            self.sprite = constants.S_DOOR
+        elif self.prop_type == "door" and self.state == "open":
+            print("Changing sprite")
+            self.sprite = constants.S_DOOR_OPEN
+    
 class simple_ai():
     def take_turn(self):
         decision = random.randint(0,4)
@@ -149,16 +182,17 @@ class game_object():
         self.prop_list = []
         
         for p in self.scene_list[self.vars["current_scene"]]["props"]:
-            if p["type"] == "chest" and p["state"] == "closed":
-                p_sprite = constants.S_CHEST
-            elif p["type"] == "chest" and p["state"] == "open":
-                p_sprite = constants.S_CHEST_OPEN
-            elif p["type"] == "door" and p["state"] == "closed":
-                p_sprite = constants.S_DOOR
-            elif p["type"] == "door" and p["state"] == "open":
-                p_sprite = constants.S_DOOR_OPEN
+            if p["type"] == "chest":
+                self.prop_list.append(container(p["x"],p["y"],p["type"],p["state"]))
+
+            elif p["type"] == "door":
+                self.prop_list.append(portal(p["x"],p["y"],p["type"],p["state"],p["destination_scene"],p["destination_x"],p["destination_y"]))
                 
-            self.prop_list.append(prop(p["x"],p["y"],p["type"],p["state"],p_sprite))
+            else:
+                print("No data for that kind of prop!")
+
+        for p in self.prop_list:
+            p.update()
             
             
         
