@@ -162,12 +162,16 @@ class game_object():
 
     def load(self):
         print("Loading tile data...")
+        # Load the data which tells the game what art to render and what
+        # The properties of a tile are given a serial number; contains no
+        # map data.
         with open("data\\tiles.txt","r") as f:
             tile_data = json.load(f)
             num_tiles = len(tile_data)
         for i in range(num_tiles):
             self.tile_list.append(struct_tile(i))
 
+        # Load the map data, and append tile structures to a list of scenes
         print("Loading scene...")
         with open("scenes\\0.txt","r") as f:
             self.scene_list.append(json.load(f))

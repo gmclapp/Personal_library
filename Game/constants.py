@@ -30,18 +30,18 @@ CHEAT_TXT_BOX_BG = COLOR_BLACK
 DEBUG_TXT = COLOR_WHITE
 
 # Sprites
-S_PLAYER = pygame.image.load("data/character.png")
-S_ENEMY = pygame.image.load("data/enemy.png")
-S_CHEST = pygame.image.load("data/chest.png")
-S_CHEST_OPEN = pygame.image.load("data/chest_open.png")
-S_SELECTOR = pygame.image.load("data/selector.png")
-S_DOOR = pygame.image.load("data/door.png")
-S_DOOR_OPEN = pygame.image.load("data/door.png") # replace this art
+S_PLAYER = pygame.image.load("art/character.png")
+S_ENEMY = pygame.image.load("art/enemy.png")
+S_CHEST = pygame.image.load("art/chest.png")
+S_CHEST_OPEN = pygame.image.load("art/chest_open.png")
+S_SELECTOR = pygame.image.load("art/selector.png")
+S_DOOR = pygame.image.load("art/door.png")
+S_DOOR_OPEN = pygame.image.load("art/door.png") # replace this art
 
 #Menus
-MENU_FIRST_PAGE = pygame.image.load("data/Side bar menu first page.png")
-MENU_MIDDLE_PAGE = pygame.image.load("data/Side bar menu middle page.png")
-MENU_LAST_PAGE = pygame.image.load("data/Side bar menu last page.png")
-MENU_BACKGROUND = pygame.image.load("data/Side bar menu background.png")
+MENU_FIRST_PAGE = pygame.image.load("art/Side bar menu first page.png")
+MENU_MIDDLE_PAGE = pygame.image.load("art/Side bar menu middle page.png")
+MENU_LAST_PAGE = pygame.image.load("art/Side bar menu last page.png")
+MENU_BACKGROUND = pygame.image.load("art/Side bar menu background.png")
 SIDE_HEADER_HEIGHT = 64
 PAGE_TURN_HITBOX = 20 # Height and width of the page turn hitbox in pixels
