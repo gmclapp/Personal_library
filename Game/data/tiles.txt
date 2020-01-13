@@ -3,31 +3,31 @@
         "serial_no":0,
         "name":"cave floor",
         "block_path": false,
-        "art": "data\\cave_floor.png"
+        "art": "art\\cave_floor.png"
     },
     {
         "serial_no":1,
         "name":"cave wall",
         "block_path": true,
-        "art":"data\\cave_wall.png"
+        "art":"art\\cave_wall.png"
     },
     {
         "serial_no":2,
         "name":"cave wall",
         "block_path": true,
-        "art":"data\\cave_wall_1.png"
+        "art":"art\\cave_wall_1.png"
     },
     {
         "serial_no":3,
         "name":"cave wall",
         "block_path": true,
-        "art":"data\\cave_wall_2.png"
+        "art":"art\\cave_wall_2.png"
     },
     {
         "serial_no":4,
         "name":"cave wall",
         "block_path": true,
-        "art":"data\\cave_wall_3.png"
+        "art":"art\\cave_wall_3.png"
     }
     
 ]
