@@ -3,6 +3,29 @@ import constants
 import json
 import random
 
+class loot_table():
+    def __init__(self, table):
+        '''This class is initiated with a text file that has a list of
+        dictionaries where each list element is an item. Each item is defined
+        by a dictionary with keywords "name" and "rarity." from that data
+        the loot table is constructed.'''
+        self.table = table
+        with open(table,"r") as f:
+            self.loot_list = json.load(f)
+
+        self.rarity_sum = 0  
+        prev_max = -1
+        for item in self.loot_list:
+            self.rarity_sum += int(item["rarity"])
+            item["range_min"] = prev_max+1
+            item["range_max"] = prev_max+int(item["rarity"])
+
+    def roll(self):
+        result = random.randint(0,self.rarity_sum)
+        for item in self.loot_list:
+            if item["range_min"]<result<item["range_max"]:
+                return(item)
+            
 class struct_tile():
     def __init__(self, tile_number):
         self.serial_no = tile_number
@@ -176,8 +199,16 @@ class game_object():
         with open("scenes\\0.txt","r") as f:
             self.scene_list.append(json.load(f))
         with open("scenes\\1.txt","r") as f:
-            self.scene_list.append(json.load(f))   
+            self.scene_list.append(json.load(f))
 
+    def build_tables(self):
+        self.currency_table = loot_table(constants.TABLE_CURRENCY)
+        self.gear_table = loot_table(constants.TABLE_GEAR)
+
+    def roll_loot(self,loot_type):
+        if loot_type == 'currency':
+            item = self.currency_table.roll()
+            print(item)
             
     def save(self):
         pass
@@ -223,6 +254,15 @@ def handle_cheat_code():
     elif args[0] == 'help':
         print("tp <target> <x> <y> teleports a target to an x,y destination.")
         print("for example: \"tp me 0 0 \" teleports the player to the top left corner of the scene.")
+
+    elif args[0] == 'roll':
+        print("rolling and item")
+        if args[1] == 'currency':
+            print("rolling currency")
+            game_obj.roll_loot("currency")
+            
+        elif args[1] == 'gear':
+            print("rolling gear")
 
     else:
         print(args)
@@ -388,6 +428,7 @@ def game_initialize():
     game_obj.SURFACE_MAIN = pygame.display.set_mode((constants.GAME_WIDTH,
                                             constants.GAME_HEIGHT))
     game_obj.load()
+    game_obj.build_tables()
 
     game_obj.actor_list.append(actor(1,1,constants.S_PLAYER,player=True))
     game_obj.actor_list.append(actor(15,15,constants.S_ENEMY,player=False,ai=simple_ai()))

@@ -1,14 +1,14 @@
 [
     {
 	"item":"sword",
-	"rarity":10,
+	"rarity":"10"
     },
     {
 	"item":"helmet",
-	"rarity":10,
+	"rarity":"10"
     },
     {
 	"item":"nothing",
-	"rarity":20,
+	"rarity":"20"
     }
 ]

@@ -35,10 +35,7 @@
              "type":"chest",
              "x":8,
              "y":8,
-	     "state":"closed",
-	     "inventory":[{"type":"currency",
-			   "quantity":2,
-			  }]
+	     "state":"closed"
 
         },
 	{
@@ -48,7 +45,7 @@
 	     "state":"closed",
 	     "destination_scene":1,
 	     "destination_x":7,
-	     "destination_y":3
+	     "destination_y":4
 
         }
 

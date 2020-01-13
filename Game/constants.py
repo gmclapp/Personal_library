@@ -38,6 +38,10 @@ S_SELECTOR = pygame.image.load("art/selector.png")
 S_DOOR = pygame.image.load("art/door.png")
 S_DOOR_OPEN = pygame.image.load("art/door.png") # replace this art
 
+# Loot tables
+TABLE_CURRENCY = "data//currency_table.txt"
+TABLE_GEAR = "data//gear_table.txt"
+
 #Menus
 MENU_FIRST_PAGE = pygame.image.load("art/Side bar menu first page.png")
 MENU_MIDDLE_PAGE = pygame.image.load("art/Side bar menu middle page.png")

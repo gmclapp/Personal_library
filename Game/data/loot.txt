@@ -2,39 +2,39 @@
     {
 
 	"name":"gold coin",
-	"mass":0.03,
-	"volume":0.0000016,
+	"mass":"0.03",
+	"volume":"0.0000016",
 	"art": "art\\gold_coin.png"
 
     },
     {
 
 	"name":"silver coin",
-	"mass":0.03,
-	"volume":0.0000016,
+	"mass":"0.03",
+	"volume":"0.0000016",
 	"art": "art\\silver_coin.png"
 
     },
     {
 
 	"name":"bronze coin",
-	"mass":0.03,
-	"volume":0.0000016,
+	"mass":"0.03",
+	"volume":"0.0000016",
 	"art": "art\\bronze_coin.png"
 
     },
     {
 
 	"name":"sword",
-	"mass":1.5,
-	"volume":0.00025,
+	"mass":"1.5",
+	"volume":"0.00025",
 	"art": "art\\sword.png"
     },
     {
 
 	"name":"helmet",
-	"mass":1.5,
-	"volume":0.00025,
+	"mass":"1.5",
+	"volume":"0.00025",
 	"art": "art\\helmet.png"
     }
 ]
