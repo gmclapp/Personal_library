@@ -35,7 +35,10 @@
              "type":"chest",
              "x":8,
              "y":8,
-	     "state":"closed"
+	     "state":"closed",
+	     "inventory":[{"type":"currency",
+			   "quantity":2,
+			  }]
 
         },
 	{

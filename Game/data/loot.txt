@@ -1,0 +1,35 @@
+[
+    {
+
+	"name":"gold coin",
+	"mass":0.03,
+	"volume":0.0000016,
+
+    },
+    {
+
+	"name":"silver coin",
+	"mass":0.03,
+	"volume":0.0000016,
+
+    },
+    {
+
+	"name":"bronze coin",
+	"mass":0.03,
+	"volume":0.0000016,
+
+    },
+    {
+
+	"name":"sword",
+	"mass":1.5,
+	"volume":0.00025,
+    },
+    {
+
+	"name":"helmet",
+	"mass":1.5,
+	"volume":0.00025,
+    }
+]

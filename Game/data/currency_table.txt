@@ -1,0 +1,18 @@
+[
+    {
+	"item":"gold coin",
+	"rarity":1,
+    },
+    {
+	"item":"silver coin",
+	"rarity":10,
+    },
+    {
+	"item":"bronze coin",
+	"rarity":100,
+    },
+    {
+	"item":"nothing",
+	"rarity":100,
+    }
+]
