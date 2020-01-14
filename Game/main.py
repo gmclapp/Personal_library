@@ -291,6 +291,7 @@ class menu():
         self.button_list.append(button)
         
     def draw(self,surf):
+        # Draw background art
         surf.blit(constants.MENU_BACKGROUND,(constants.SCENE_WIDTH,constants.SIDE_HEADER_HEIGHT))
 
         if self.page == self.first_page:
@@ -304,6 +305,25 @@ class menu():
         else:
             surf.blit(constants.MENU_MIDDLE_PAGE,
                       (constants.SCENE_WIDTH,0))
+
+        # Render text on top
+        header_txt_surface = game_obj.font.render(constants.HEADER_1_STRING,True,constants.MENU_HEADER_TXT)
+        game_obj.SURFACE_MAIN.blit(header_txt_surface,(constants.SCENE_WIDTH+constants.PAGE_TURN_HITBOX,
+                                                       constants.PAGE_TURN_HITBOX))
+
+        name_text = ""
+        for a in game_obj.actor_list:
+            if a.clicked:
+                name_text = a.name
+                break
+        for p in game_obj.prop_list:
+            if p.clicked:
+                name_text = p.prop_type
+                break
+            
+        name_txt_surface = game_obj.font.render(name_text,True,constants.MENU_HEADER_TXT)
+        game_obj.SURFACE_MAIN.blit(name_txt_surface,(constants.SCENE_WIDTH+50,constants.SIDE_HEADER_HEIGHT+10))
+
             
 
     def advance_page(self):
@@ -368,23 +388,6 @@ def draw_game():
 
     # Draw the side bar menu
     game_obj.side_menu.draw(game_obj.SURFACE_MAIN)
-
-##        header_txt_surface = game_obj.font.render(constants.HEADER_1_STRING,True,constants.MENU_HEADER_TXT)
-##        game_obj.SURFACE_MAIN.blit(header_txt_surface,(constants.SCENE_WIDTH+constants.PAGE_TURN_HITBOX,
-##                                                       constants.PAGE_TURN_HITBOX))
-##
-##        name_text = ""
-##        for a in game_obj.actor_list:
-##            if a.clicked:
-##                name_text = a.name
-##                break
-##        for p in game_obj.prop_list:
-##            if p.clicked:
-##                name_text = p.prop_type
-##                break
-##            
-##        name_txt_surface = game_obj.font.render(name_text,True,constants.MENU_HEADER_TXT)
-##        game_obj.SURFACE_MAIN.blit(name_txt_surface,(constants.SCENE_WIDTH+50,constants.SIDE_HEADER_HEIGHT+10))
 
     # Draw props
     for p in game_obj.prop_list:
