@@ -233,12 +233,13 @@ class game_object():
             
             
 class button():
-    def __init__(self,x,y,width,height,art=None):
+    def __init__(self,x,y,width,height,art=None,action=None):
         self.x = x
         self.y = y
         self.width = width
         self.height = height
         self.art = art
+        self.action = action
 
     def draw(self,surf):
         if self.art:
@@ -251,6 +252,10 @@ class button():
         else:
             self.clicked = False
             return(False)
+
+    def update(self):
+        if self.action:
+            self.action()
 
         
 def quit_nicely():
@@ -365,7 +370,6 @@ def draw_game():
     # Flip the display to show the next frame
     pygame.display.flip()
 
-
 def game_main_loop():
     game_quit = False
     new_click = False
@@ -445,8 +449,10 @@ def game_main_loop():
 
             if page_forward.is_clicked(left_click_x,left_click_y):
                 game_obj.vars["page"] += 1
+                page_forward.update()
             elif page_backward.is_clicked(left_click_x,left_click_y):
                 game_obj.vars["page"] -= 1
+                page_backward.update()
             
             # Check scene area
             elif (0 < left_click_x < constants.SCENE_WIDTH
