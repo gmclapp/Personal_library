@@ -42,5 +42,55 @@
 	"tier1":"11-15",
 	"tier2":"6-10",
 	"tier3":"1-5"
+    },
+    {
+
+	"name":"boots",
+	"mass":"1.5",
+	"volume":"0.00025",
+	"art": "art\\boots.png",
+	"tier1":"11-15",
+	"tier2":"6-10",
+	"tier3":"1-5"
+    },
+    {
+
+	"name":"gloves",
+	"mass":"1.5",
+	"volume":"0.00025",
+	"art": "art\\gloves.png",
+	"tier1":"11-15",
+	"tier2":"6-10",
+	"tier3":"1-5"
+    },
+    {
+
+	"name":"bracers",
+	"mass":"1.5",
+	"volume":"0.00025",
+	"art": "art\\bracers.png",
+	"tier1":"11-15",
+	"tier2":"6-10",
+	"tier3":"1-5"
+    },
+    {
+
+	"name":"shoulders",
+	"mass":"1.5",
+	"volume":"0.00025",
+	"art": "art\\shoulders.png",
+	"tier1":"11-15",
+	"tier2":"6-10",
+	"tier3":"1-5"
+    },
+    {
+
+	"name":"belt",
+	"mass":"1.5",
+	"volume":"0.00025",
+	"art": "art\\belt.png",
+	"tier1":"11-15",
+	"tier2":"6-10",
+	"tier3":"1-5"
     }
 ]
