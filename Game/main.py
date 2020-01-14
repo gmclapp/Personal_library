@@ -19,9 +19,11 @@ class loot_table():
             self.rarity_sum += int(item["rarity"])
             item["range_min"] = prev_max+1
             item["range_max"] = prev_max+int(item["rarity"])
+            prev_max = item["range_max"]
 
     def roll(self):
         result = random.randint(0,self.rarity_sum)
+        print("roll: {}".format(result))
         for item in self.loot_list:
             if item["range_min"]<result<item["range_max"]:
                 return(item)
@@ -207,11 +209,21 @@ class game_object():
         self.currency_table = loot_table(constants.TABLE_CURRENCY)
         self.gear_table = loot_table(constants.TABLE_GEAR)
         self.tier_table = loot_table(constants.TABLE_TIER)
+        with open(constants.LOOT_PROPERTIES) as f:
+            self.loot_properties = json.load(f)
 
     def roll_loot(self,loot_type):
         if loot_type == 'currency':
             item = self.currency_table.roll()
             print(item)
+
+        elif loot_type == 'gear':
+            item = self.gear_table.roll()
+            tier = self.tier_table.roll()
+
+            print(item['base'])
+                
+            
             
     def save(self):
         pass
@@ -362,13 +374,13 @@ def handle_cheat_code():
         print("for example: \"tp me 0 0 \" teleports the player to the top left corner of the scene.")
 
     elif args[0] == 'roll':
-        print("rolling and item")
         if args[1] == 'currency':
             print("rolling currency")
             game_obj.roll_loot("currency")
             
         elif args[1] == 'gear':
             print("rolling gear")
+            game_obj.roll_loot("gear")
 
     else:
         print(args)

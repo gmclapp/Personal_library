@@ -1,18 +1,18 @@
 [
     {
-	"item":"gold coin",
-	"rarity":"1"
+	"name":"gold coin",
+	"rarity":"5"
     },
     {
-	"item":"silver coin",
-	"rarity":"10"
+	"name":"silver coin",
+	"rarity":"20"
     },
     {
-	"item":"bronze coin",
-	"rarity":"100"
+	"name":"bronze coin",
+	"rarity":"150"
     },
     {
-	"item":"nothing",
+	"name":"nothing",
 	"rarity":"100"
     }
 ]

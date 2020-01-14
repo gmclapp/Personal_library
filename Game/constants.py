@@ -44,6 +44,8 @@ TABLE_CURRENCY = "data//currency_table.txt"
 TABLE_GEAR = "data//gear_table.txt"
 TABLE_TIER = "data//tier_table.txt"
 
+LOOT_PROPERTIES = "data//loot.txt"
+
 #Menus
 MENU_FIRST_PAGE = pygame.image.load("art/Side bar menu first page.png")
 MENU_MIDDLE_PAGE = pygame.image.load("art/Side bar menu middle page.png")

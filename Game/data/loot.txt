@@ -28,13 +28,19 @@
 	"name":"sword",
 	"mass":"1.5",
 	"volume":"0.00025",
-	"art": "art\\sword.png"
+	"art": "art\\sword.png",
+	"tier1":"11-15",
+	"tier2":"6-10",
+	"tier3":"1-5"
     },
     {
 
 	"name":"helmet",
 	"mass":"1.5",
 	"volume":"0.00025",
-	"art": "art\\helmet.png"
+	"art": "art\\helmet.png",
+	"tier1":"11-15",
+	"tier2":"6-10",
+	"tier3":"1-5"
     }
 ]
