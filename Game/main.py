@@ -206,6 +206,7 @@ class game_object():
     def build_tables(self):
         self.currency_table = loot_table(constants.TABLE_CURRENCY)
         self.gear_table = loot_table(constants.TABLE_GEAR)
+        self.tier_table = loot_table(constants.TABLE_TIER)
 
     def roll_loot(self,loot_type):
         if loot_type == 'currency':
