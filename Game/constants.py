@@ -28,6 +28,7 @@ DEFAULT_BG = COLOR_GREY
 CHEAT_TXT = COLOR_WHITE
 CHEAT_TXT_BOX_BG = COLOR_BLACK
 DEBUG_TXT = COLOR_WHITE
+MENU_HEADER_TXT = COLOR_BLACK
 
 # Sprites
 S_PLAYER = pygame.image.load("art/character.png")
@@ -49,3 +50,4 @@ MENU_LAST_PAGE = pygame.image.load("art/Side bar menu last page.png")
 MENU_BACKGROUND = pygame.image.load("art/Side bar menu background.png")
 SIDE_HEADER_HEIGHT = 64
 PAGE_TURN_HITBOX = 20 # Height and width of the page turn hitbox in pixels
+HEADER_1_STRING = "SELECTED"

@@ -38,22 +38,23 @@ class struct_tile():
                     self.art = pygame.image.load(t["art"])
 
 class element():
-    def __init__(self,x,y,sprite=None,player=False,ai=None):
+    def __init__(self,x,y,sprite=None,player=False,ai=None,name=None):
         self.x = x
         self.y = y
         self.sprite = sprite
         self.clicked = False
 
+        self.player = player
         self.ai = ai
         if ai:
             ai.owner = self
+        self.name = name
             
-        self.player = player
-        
     def draw(self,surf):
         surf.blit(self.sprite, (self.x*constants.RES, self.y*constants.RES))
         if self.clicked:
             surf.blit(constants.S_SELECTOR, (self.x*constants.RES, self.y*constants.RES))
+            
 
     def is_clicked(self,x,y):
         dx = (self.x+0.5)*constants.RES - x
@@ -182,6 +183,7 @@ class game_object():
                      "debug": False,
                      "turn": 0,
                      "current_scene":0}
+        
 
     def load(self):
         print("Loading tile data...")
@@ -230,6 +232,26 @@ class game_object():
             p.update()
             
             
+class button():
+    def __init__(self,x,y,width,height,art=None):
+        self.x = x
+        self.y = y
+        self.width = width
+        self.height = height
+        self.art = art
+
+    def draw(self,surf):
+        if self.art:
+            surf.blit(self.art, (self.x, self.y))
+
+    def is_clicked(self,x,y):
+        if (self.x < x < self.x+self.width) and (self.y < y < self.y+self.height):
+            self.clicked = True
+            return(True)
+        else:
+            self.clicked = False
+            return(False)
+
         
 def quit_nicely():
     pygame.display.quit()
@@ -282,17 +304,32 @@ def draw_game():
                     game_obj.SURFACE_MAIN.blit(t.art,(x*constants.RES,y*constants.RES))
 
     # Draw the side bar menu
-    if game_obj.vars["page"] == 1:
+    game_obj.SURFACE_MAIN.blit(constants.MENU_BACKGROUND,
+                               (constants.SCENE_WIDTH,constants.SIDE_HEADER_HEIGHT))
+    
+    if game_obj.vars["page"] == 1: # Selected object information
         game_obj.SURFACE_MAIN.blit(constants.MENU_FIRST_PAGE,
                                    (constants.SCENE_WIDTH,0))
+        header_txt_surface = game_obj.font.render(constants.HEADER_1_STRING,True,constants.MENU_HEADER_TXT)
+        game_obj.SURFACE_MAIN.blit(header_txt_surface,(constants.SCENE_WIDTH+constants.PAGE_TURN_HITBOX,
+                                                       constants.PAGE_TURN_HITBOX))
+
+        name_text = ""
+        for a in game_obj.actor_list:
+            if a.clicked:
+                print("{} is selected.".format(a.name))
+                name_text = a.name
+                break
+        name_txt_surface = game_obj.font.render(name_text,True,constants.MENU_HEADER_TXT)
+        game_obj.SURFACE_MAIN.blit(name_txt_surface,(constants.SCENE_WIDTH+50,constants.SIDE_HEADER_HEIGHT+10))
+        
     elif game_obj.vars["page"] == 2:
         game_obj.SURFACE_MAIN.blit(constants.MENU_MIDDLE_PAGE,
                                    (constants.SCENE_WIDTH,0))
     elif game_obj.vars["page"] == 3:
         game_obj.SURFACE_MAIN.blit(constants.MENU_LAST_PAGE,
                                    (constants.SCENE_WIDTH,0))
-    game_obj.SURFACE_MAIN.blit(constants.MENU_BACKGROUND,
-                               (constants.SCENE_WIDTH,constants.SIDE_HEADER_HEIGHT))
+    
 
     # Draw props
     for p in game_obj.prop_list:
@@ -333,7 +370,11 @@ def game_main_loop():
     mx = 0
     my = 0
 
+    page_forward = button(constants.GAME_WIDTH-constants.PAGE_TURN_HITBOX,0,constants.PAGE_TURN_HITBOX,constants.PAGE_TURN_HITBOX)
+    page_backward = button(constants.SCENE_WIDTH,0,constants.PAGE_TURN_HITBOX,constants.PAGE_TURN_HITBOX)
+    
     game_obj.get_props()
+    
     
     while not game_quit:
         event_list = pygame.event.get()
@@ -397,21 +438,23 @@ def game_main_loop():
                                                                                  int(my/constants.RES),
                                                                                  game_obj.vars["turn"])
         if new_click:
-            # Check side menu page change hitboxes
-            if left_click_x > constants.GAME_WIDTH - constants.PAGE_TURN_HITBOX and left_click_y < constants.PAGE_TURN_HITBOX:
-                game_obj.vars["page"] += 1
-            elif constants.SCENE_WIDTH < left_click_x < constants.SCENE_WIDTH + constants.PAGE_TURN_HITBOX and left_click_y < constants.PAGE_TURN_HITBOX:
-                game_obj.vars["page"] -= 1
 
+            if page_forward.is_clicked(left_click_x,left_click_y):
+                game_obj.vars["page"] += 1
+            elif page_backward.is_clicked(left_click_x,left_click_y):
+                game_obj.vars["page"] -= 1
+            
             # Check scene area
-            if (0 < left_click_x < constants.SCENE_WIDTH
+            elif (0 < left_click_x < constants.SCENE_WIDTH
                 and 0 < left_click_y < constants.SCENE_HEIGHT):
 
                 for a in game_obj.actor_list:
                     a.is_clicked(left_click_x,left_click_y)
                     
+                    
                 for p in game_obj.prop_list:
                     p.is_clicked(left_click_x,left_click_y)
+                    
                 
             new_click = False
                 
@@ -430,8 +473,8 @@ def game_initialize():
     game_obj.load()
     game_obj.build_tables()
 
-    game_obj.actor_list.append(actor(1,1,constants.S_PLAYER,player=True))
-    game_obj.actor_list.append(actor(15,15,constants.S_ENEMY,player=False,ai=simple_ai()))
+    game_obj.actor_list.append(actor(1,1,constants.S_PLAYER,player=True,name="Player"))
+    game_obj.actor_list.append(actor(15,15,constants.S_ENEMY,player=False,ai=simple_ai(),name="Enemy"))
 
     return(game_obj)
 
