@@ -317,9 +317,13 @@ def draw_game():
         name_text = ""
         for a in game_obj.actor_list:
             if a.clicked:
-                print("{} is selected.".format(a.name))
                 name_text = a.name
                 break
+        for p in game_obj.prop_list:
+            if p.clicked:
+                name_text = p.prop_type
+                break
+            
         name_txt_surface = game_obj.font.render(name_text,True,constants.MENU_HEADER_TXT)
         game_obj.SURFACE_MAIN.blit(name_txt_surface,(constants.SCENE_WIDTH+50,constants.SIDE_HEADER_HEIGHT+10))
         
