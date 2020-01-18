@@ -2,6 +2,7 @@ import pygame
 import constants
 import json
 import random
+import component
 
 class loot_table():
     def __init__(self, table):
@@ -154,22 +155,6 @@ class portal(prop):
         elif self.prop_type == "door" and self.state == "open":
             print("Changing sprite")
             self.sprite = constants.S_DOOR_OPEN
-    
-class simple_ai():
-    def take_turn(self):
-        decision = random.randint(0,4)
-        if decision == 0: # Don't move
-            pass
-        elif decision == 1: # Move right
-            self.owner.move(1,0)
-        elif decision == 2: # Move left
-            self.owner.move(-1,0)
-        elif decision == 3: # Move up
-            self.owner.move(0,-1)
-        elif decision == 4: # Move down
-            self.owner.move(0,1)
-        else:
-            print("Indecision!")
         
 class game_object():
     def __init__(self):
@@ -553,7 +538,7 @@ def game_initialize():
     game_obj.build_tables()
 
     game_obj.actor_list.append(actor(1,1,constants.S_PLAYER,player=True,name="Player"))
-    game_obj.actor_list.append(actor(15,15,constants.S_ENEMY,player=False,ai=simple_ai(),name="Enemy"))
+    game_obj.actor_list.append(actor(15,15,constants.S_ENEMY,player=False,ai=component.simple_ai(),name="Enemy"))
 
     game_obj.side_menu = menu(constants.SCENE_WIDTH,0,constants.SIDE_BAR_WIDTH,constants.SIDE_HEADER_HEIGHT)
 
