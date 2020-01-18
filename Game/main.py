@@ -41,8 +41,8 @@ class struct_tile():
                     self.block_path = t["block_path"]
                     self.art = pygame.image.load(t["art"])
 
-class item():
-    def __init__(self, x,y, serial_nuum, inst_name,sprite):
+class obj_item():
+    def __init__(self, x,y, serial_num, inst_name,sprite):
         self.x = x
         self.y = y
         self.sn = serial_num
@@ -50,29 +50,12 @@ class item():
         self.base_atk = 0.0
         self.base_def = 0.0
         self.clicked = False
-        if sprite == "sword":
-            self.sprite = constants.S_SWORD
-        elif sprite == "shield":
-            self.sprite = constants.S_SHIELD
-        elif sprite == "boots":
-            self.sprite = constants.S_BOOTS
-        elif sprite == "gloves":
-            self.sprite = constants.S_GLOVES
-        elif sprite == "helmet":
-            self.sprite = constants.S_HELMET
-        elif sprite == "belt":
-            self.sprite = constants.S_BELT
-        elif sprite == "shoulders":
-            self.sprite == constants.S_SHOULDERS
-        elif sprite == "bracers":
-            self.sprite = constants.S_BRACERS
-        
 
     def set_implicit(self, affected_stat, stat_val):
-        if self.affected_stat == "attack":
-            self.base_atk += stat_val
-        elif self.affected_stat == "defense":
-            self.base_def += stat_val
+        if affected_stat == "attack":
+            self.base_atk += float(stat_val)
+        elif affected_stat == "defense":
+            self.base_def += float(stat_val)
         else:
             print("Invalid value for affected stat")
 
@@ -252,20 +235,33 @@ class game_object():
             gear = self.gear_table.roll()
             tier = self.tier_table.roll()
 
-##            print(tier.split("-"))
-            print(gear)
-            print(tier)
             if gear["base"] != "nothing":
                 for i in self.loot_properties:
                     if i["name"] == gear["base"]:
+                        if i["name"] == "sword":
+                            sprite = constants.S_SWORD
+                        elif i["name"] == "shield":
+                            sprite = constants.S_SHIELD
+                        elif i["name"] == "boots":
+                            sprite = constants.S_BOOTS
+                        elif i["name"] == "gloves":
+                            sprite = constants.S_GLOVES
+                        elif i["name"] == "helmet":
+                            sprite = constants.S_HELMET
+                        elif i["name"] == "belt":
+                            sprite = constants.S_BELT
+                        elif i["name"] == "shoulders":
+                            sprite = constants.S_SHOULDERS
+                        elif i["name"] == "bracers":
+                            sprite = constants.S_BRACERS
+                            
                         for t in i["tier"]:
                             if t == tier["tier"]:
                                 min_roll,max_roll = i["tier"][t].split("-")
-                                print(min_roll, max_roll)
                                 stat = random.randint(int(min_roll), int(max_roll))
-                                print(stat)
-                                new_item = item(1,0,0,i["art"], i["name"])
-                                new_item.set_implicit(i["implicit"],str(stat))
+                                
+                new_item = obj_item(1,0,0, i["name"],sprite)
+                new_item.set_implicit(i["implicit"],str(stat))
                 
             
             
