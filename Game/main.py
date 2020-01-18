@@ -82,9 +82,10 @@ class item():
             surf.blit(constants.S_SELECTOR, (self.x*constants.RES, self.y*constants.RES))
 
 class element():
-    def __init__(self,x,y,sprite=None,player=False,ai=None,name=None):
+    def __init__(self,x,y,scene,sprite=None,player=False,ai=None,name=None):
         self.x = x
         self.y = y
+        self.scene = scene
         self.sprite = sprite
         self.clicked = False
 
@@ -95,9 +96,10 @@ class element():
         self.name = name
             
     def draw(self,surf):
-        surf.blit(self.sprite, (self.x*constants.RES, self.y*constants.RES))
-        if self.clicked:
-            surf.blit(constants.S_SELECTOR, (self.x*constants.RES, self.y*constants.RES))
+        if self.scene == game_obj.vars["current_scene"]:
+            surf.blit(self.sprite, (self.x*constants.RES, self.y*constants.RES))
+            if self.clicked:
+                surf.blit(constants.S_SELECTOR, (self.x*constants.RES, self.y*constants.RES))
             
 
     def is_clicked(self,x,y):
@@ -135,8 +137,8 @@ class actor(element):
             
         
 class prop(element):
-    def __init__(self,x,y,prop_type,state,sprite=None,player=False,ai=None):
-        super().__init__(x,y,sprite,player=False,ai=None)
+    def __init__(self,x,y,scene,prop_type,state,sprite=None,player=False,ai=None):
+        super().__init__(x,y,scene,sprite,player=False,ai=None)
         self.state = state
         self.prop_type = prop_type
         
@@ -149,7 +151,7 @@ class prop(element):
         pass
 
 class container(prop):
-    def interact(self):
+    def interact(self,actor):
         if self.state == "closed":
             self.state = "open"
         elif self.state == "open":
@@ -167,27 +169,30 @@ class container(prop):
             self.sprite = constants.S_CHEST_OPEN
 
 class portal(prop):
-    def __init__(self,x,y,prop_type,state,dest_scene,dest_x,dest_y,sprite=None,player=False,ai=None):
+    def __init__(self,x,y,scene,prop_type,state,dest_scene,dest_x,dest_y,sprite=None,player=False,ai=None):
         
-        super().__init__(x,y,prop_type,state,sprite,player,ai)
+        super().__init__(x,y,scene,prop_type,state,sprite,player,ai)
         self.dest_scene = dest_scene
         self.dest_x = dest_x
         self.dest_y = dest_y
         
-    def interact(self):
+    def interact(self,actor):
         if self.state == "closed":
             self.state = "open"
         elif self.state == "open":
             self.state = "closed"
             
-        self.travel()
+        self.travel(actor)
         return(True)
 
-    def travel(self):
+    def travel(self,actor):
         game_obj.vars["current_scene"] = self.dest_scene
         game_obj.get_props()
-        game_obj.actor_list[0].x = self.dest_x
-        game_obj.actor_list[0].y = self.dest_y
+        actor.x = self.dest_x
+        actor.y = self.dest_y
+        actor.scene = self.dest_scene
+##        game_obj.actor_list[0].x = self.dest_x
+##        game_obj.actor_list[0].y = self.dest_y
         
     def update(self):
         if self.prop_type == "door" and self.state == "closed":
@@ -272,10 +277,21 @@ class game_object():
         
         for p in self.scene_list[self.vars["current_scene"]]["props"]:
             if p["type"] == "chest":
-                self.prop_list.append(container(p["x"],p["y"],p["type"],p["state"]))
+                self.prop_list.append(container(p["x"],
+                                                p["y"],
+                                                self.vars["current_scene"],
+                                                p["type"],
+                                                p["state"]))
 
             elif p["type"] == "door":
-                self.prop_list.append(portal(p["x"],p["y"],p["type"],p["state"],p["destination_scene"],p["destination_x"],p["destination_y"]))
+                self.prop_list.append(portal(p["x"],
+                                             p["y"],
+                                             self.vars["current_scene"],
+                                             p["type"],
+                                             p["state"],
+                                             p["destination_scene"],
+                                             p["destination_x"],
+                                             p["destination_y"]))
                 
             else:
                 print("No data for that kind of prop!")
@@ -534,7 +550,7 @@ def game_main_loop():
                             print("Attack!")
                     for p in game_obj.prop_list:
                         if p.clicked:
-                            move_successful = p.interact()
+                            move_successful = p.interact(game_obj.actor_list[0])
                             
 
             elif event.type == pygame.MOUSEMOTION:
@@ -591,8 +607,8 @@ def game_initialize():
     game_obj.load()
     game_obj.build_tables()
 
-    game_obj.actor_list.append(actor(1,1,constants.S_PLAYER,player=True,name="Player"))
-    game_obj.actor_list.append(actor(15,15,constants.S_ENEMY,player=False,ai=component.simple_ai(),name="Enemy"))
+    game_obj.actor_list.append(actor(1,1,0,constants.S_PLAYER,player=True,name="Player"))
+    game_obj.actor_list.append(actor(15,15,0,constants.S_ENEMY,player=False,ai=component.simple_ai(),name="Enemy"))
 
     game_obj.side_menu = menu(constants.SCENE_WIDTH,0,constants.SIDE_BAR_WIDTH,constants.SIDE_HEADER_HEIGHT)
 
