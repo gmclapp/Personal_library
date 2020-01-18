@@ -553,7 +553,7 @@ def game_main_loop():
             game_obj.vars["turn"] += 1
             move_successful = False
             for a in game_obj.actor_list:
-                if not a.player:
+                if not a.player and a.scene == game_obj.vars["current_scene"]:
                     a.ai.take_turn()
             
         game_obj.vars["debug_text"] = "X: {} Y: {} TILE: ({},{}) TURN: {}".format(mx,my,
