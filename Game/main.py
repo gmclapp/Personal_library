@@ -41,29 +41,6 @@ class struct_tile():
                     self.block_path = t["block_path"]
                     self.art = pygame.image.load(t["art"])
 
-class obj_item():
-    def __init__(self, x,y, serial_num, inst_name,sprite):
-        self.x = x
-        self.y = y
-        self.sn = serial_num
-        self.inst_name = inst_name
-        self.base_atk = 0.0
-        self.base_def = 0.0
-        self.clicked = False
-
-    def set_implicit(self, affected_stat, stat_val):
-        if affected_stat == "attack":
-            self.base_atk += float(stat_val)
-        elif affected_stat == "defense":
-            self.base_def += float(stat_val)
-        else:
-            print("Invalid value for affected stat")
-
-    def draw(self,surf):
-        surf.blit(self.sprite, (self.x*constants.RES, self.y*constants.RES))
-        if self.clicked:
-            surf.blit(constants.S_SELECTOR, (self.x*constants.RES, self.y*constants.RES))
-
 class element():
     def __init__(self,x,y,scene,sprite=None,player=False,ai=None,name=None):
         self.x = x
@@ -93,7 +70,23 @@ class element():
             self.clicked = True
         else:
             self.clicked = False
-        
+            
+class obj_item(element):
+    def __init__(self, x,y, scene,serial_num, inst_name,sprite):
+        super().__init__(x,y,scene,sprite,player=False,ai=None)
+        self.sn = serial_num
+        self.inst_name = inst_name
+        self.base_atk = 0.0
+        self.base_def = 0.0
+
+    def set_implicit(self, affected_stat, stat_val):
+        if affected_stat == "attack":
+            self.base_atk += float(stat_val)
+        elif affected_stat == "defense":
+            self.base_def += float(stat_val)
+        else:
+            print("Invalid value for affected stat")
+
 class actor(element):
     def move(self, dx, dy):
         try:
@@ -174,8 +167,6 @@ class portal(prop):
         actor.x = self.dest_x
         actor.y = self.dest_y
         actor.scene = self.dest_scene
-##        game_obj.actor_list[0].x = self.dest_x
-##        game_obj.actor_list[0].y = self.dest_y
         
     def update(self):
         if self.prop_type == "door" and self.state == "closed":
@@ -260,7 +251,7 @@ class game_object():
                                 min_roll,max_roll = i["tier"][t].split("-")
                                 stat = random.randint(int(min_roll), int(max_roll))
                                 
-                new_item = obj_item(1,0,0, i["name"],sprite)
+                new_item = obj_item(1,0,0,self.vars["current_scene"], i["name"],sprite)
                 new_item.set_implicit(i["implicit"],str(stat))
                 
             

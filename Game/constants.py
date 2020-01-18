@@ -44,7 +44,7 @@ S_GLOVES = pygame.image.load("art/gloves.png")
 S_BOOTS = pygame.image.load("art/boots.png")
 S_BELT = pygame.image.load("art/belt.png")
 S_HELMET = pygame.image.load("art/helmet.png")
-S_BRACER = pygame.image.load("art/bracers.png")
+S_BRACERS = pygame.image.load("art/bracers.png")
 S_SHOULDERS = pygame.image.load("art/shoulders.png")
 
 # Loot tables
