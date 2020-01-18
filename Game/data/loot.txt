@@ -10,7 +10,7 @@
     {
 
 	"name":"silver coin",
-	"mass":"0.03",
+	"mass":"0.015",
 	"volume":"0.0000016",
 	"art": "art\\silver_coin.png"
 
@@ -18,7 +18,7 @@
     {
 
 	"name":"bronze coin",
-	"mass":"0.03",
+	"mass":"0.012",
 	"volume":"0.0000016",
 	"art": "art\\bronze_coin.png"
 
