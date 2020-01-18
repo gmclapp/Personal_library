@@ -25,6 +25,15 @@ class container():
         else:
             self.inventory = []
 
-class body():
-    def __init__(self, hp = 10.0):
+class bipedal_body():
+    def __init__(self):
+        self.head = body_part(10)
+        self.torso = body_part(10)
+        self.left_arm = body_part(10)
+        self.right_arm = body_part(10)
+        self.left_leg = body_part(10)
+        self.right_leg = body_part(10)
+
+class body_part():
+    def __init__(self,hp):
         self.hp = hp
