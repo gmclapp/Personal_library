@@ -38,6 +38,7 @@ S_CHEST_OPEN = pygame.image.load("art/chest_open.png")
 S_SELECTOR = pygame.image.load("art/selector.png")
 S_DOOR = pygame.image.load("art/door.png")
 S_DOOR_OPEN = pygame.image.load("art/door.png") # replace this art
+
 S_SWORD = pygame.image.load("art/sword.png")
 S_SHIELD = pygame.image.load("art/shield.png")
 S_GLOVES = pygame.image.load("art/gloves.png")
@@ -46,6 +47,10 @@ S_BELT = pygame.image.load("art/belt.png")
 S_HELMET = pygame.image.load("art/helmet.png")
 S_BRACERS = pygame.image.load("art/bracers.png")
 S_SHOULDERS = pygame.image.load("art/shoulders.png")
+
+S_GOLD_COIN = pygame.image.load("art/gold_coin.png")
+S_SILVER_COIN = pygame.image.load("art/silver_coin.png")
+S_BRONZE_COIN = pygame.image.load("art/bronze_coin.png")
 
 # Loot tables
 TABLE_CURRENCY = "data//currency_table.txt"

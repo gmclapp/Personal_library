@@ -23,7 +23,7 @@ class loot_table():
             prev_max = item["range_max"]
 
     def roll(self):
-        result = random.randint(0,self.rarity_sum)
+        result = random.randint(0,self.rarity_sum-1)
         print("roll: {}".format(result))
         for item in self.loot_list:
             if item["range_min"]<=result<=item["range_max"]:
@@ -42,7 +42,16 @@ class struct_tile():
                     self.art = pygame.image.load(t["art"])
 
 class element():
-    def __init__(self,x,y,scene,sprite=None,player=False,ai=None,name=None):
+    def __init__(self,
+                 x,
+                 y,
+                 scene,
+                 sprite=None,
+                 player=False,
+                 ai=None,
+                 name=None,
+                 storage=None):
+        
         self.x = x
         self.y = y
         self.scene = scene
@@ -50,10 +59,17 @@ class element():
         self.clicked = False
 
         self.player = player
+        
         self.ai = ai
         if ai:
             ai.owner = self
         self.name = name
+
+        
+        self.storage = storage
+        if storage:
+            print("storage was passed to the element this time.")
+            storage.owner = self
             
     def draw(self,surf):
         if self.scene == game_obj.vars["current_scene"]:
@@ -73,7 +89,7 @@ class element():
             
 class obj_item(element):
     def __init__(self, x,y, scene,serial_num, inst_name,sprite):
-        super().__init__(x,y,scene,sprite,player=False,ai=None)
+        super().__init__(x,y,scene,sprite)
         self.sn = serial_num
         self.inst_name = inst_name
         self.base_atk = 0.0
@@ -87,6 +103,26 @@ class obj_item(element):
         else:
             print("Invalid value for affected stat")
 
+    def deposit(self,destination):
+        if len(destination.storage.inventory)<destination.storage.max_slots:
+            destination.storage.inventory.append(self)
+            self.container = destination
+            return(True)
+        else:
+            print("Inventory full!")
+            return(False)
+        
+    def move(self,source,destination):
+        if len(destination.storage.inventory)<destination.storage.max_slots:
+            destination.storage.inventory.append(item)
+            source.storage.inventory.remove(item)
+            self.container=destination
+            
+            return(True)
+        else:
+            print("Inventory full!")
+            return(False)
+        
 class actor(element):
     def move(self, dx, dy):
         try:
@@ -113,12 +149,16 @@ class actor(element):
             
         
 class prop(element):
-    def __init__(self,x,y,scene,prop_type,state,sprite=None,player=False,ai=None):
-        super().__init__(x,y,scene,sprite,player=False,ai=None)
+    def __init__(self,x,y,scene,prop_type,state,sprite=None,player=False,ai=None,storage=None):
+        if storage:
+            print("Is there a storage here?")
+            print(storage.inventory)
+        super().__init__(x,y,scene,sprite=sprite,player=player,ai=ai,storage=storage)
         self.state = state
         self.prop_type = prop_type
         
     def interact(self):
+        
         self.update()
         # This value is checked in order to determine if a player turn is complete
         return(True)
@@ -138,7 +178,8 @@ class container(prop):
 
     def update(self):
         if self.prop_type == "chest" and self.state == "closed":
-            print("Changing sprite")
+            for i in self.storage.inventory:
+                print(i)
             self.sprite = constants.S_CHEST
         elif self.prop_type == "chest" and self.state == "open":
             print("Changing sprite")
@@ -189,7 +230,8 @@ class game_object():
                      "page":1,
                      "debug": False,
                      "turn": 0,
-                     "current_scene":0}
+                     "current_scene":0,
+                     "serial_number_counter":0}
         
 
     def load(self):
@@ -219,8 +261,23 @@ class game_object():
 
     def roll_loot(self,loot_type):
         if loot_type == 'currency':
-            item = self.currency_table.roll()
-            print(item)
+            currency = self.currency_table.roll()
+            if currency["name"] != "nothing":
+                for i in self.loot_properties:
+                    if i["name"] == currency["name"]:
+                        if i["name"] == "gold coin":
+                            sprite = constants.S_GOLD_COIN
+                        elif i["name"] == "silver coin":
+                            sprite = constants.S_SILVER_COIN
+                        elif i["name"] == "bronze coin":
+                            sprite = constants.S_BRONZE_COIN
+                            
+                new_item = obj_item(0,0,
+                                    game_obj.vars["serial_number_counter"],
+                                    self.vars["current_scene"],
+                                    i["name"],sprite)
+                game_obj.vars["serial_number_counter"] += 1
+                return(new_item)
 
         elif loot_type == 'gear':
             gear = self.gear_table.roll()
@@ -251,8 +308,14 @@ class game_object():
                                 min_roll,max_roll = i["tier"][t].split("-")
                                 stat = random.randint(int(min_roll), int(max_roll))
                                 
-                new_item = obj_item(1,0,0,self.vars["current_scene"], i["name"],sprite)
+                new_item = obj_item(0,0,
+                                    game_obj.vars["serial_number_counter"],
+                                    self.vars["current_scene"],
+                                    i["name"],
+                                    sprite)
+                game_obj.vars["serial_number_counter"] += 1
                 new_item.set_implicit(i["implicit"],str(stat))
+                return(new_item)
                 
             
             
@@ -264,11 +327,23 @@ class game_object():
         
         for p in self.scene_list[self.vars["current_scene"]]["props"]:
             if p["type"] == "chest":
-                self.prop_list.append(container(p["x"],
-                                                p["y"],
-                                                self.vars["current_scene"],
-                                                p["type"],
-                                                p["state"]))
+                inventory = []
+                for entry in p["inventory"]:
+                    new_item = game_obj.roll_loot(entry)
+                    if new_item:
+                        inventory.append(new_item)
+                
+                new_container = container(p["x"],
+                                          p["y"],
+                                          self.vars["current_scene"],
+                                          p["type"],
+                                          p["state"],
+                                          storage=component.storage())
+                for i in inventory:
+                    if(i.deposit(new_container)):
+                        print("Successfully deposited {}".format(i.inst_name))
+                    
+                self.prop_list.append(new_container)
 
             elif p["type"] == "door":
                 self.prop_list.append(portal(p["x"],
@@ -603,4 +678,6 @@ def game_initialize():
 
 if __name__ == "__main__":
     game_obj = game_initialize()
+
+    
     game_main_loop()

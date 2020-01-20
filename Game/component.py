@@ -16,15 +16,16 @@ class simple_ai():
         else:
             print("Indecision!")
 
-class container():
-    def __init__(self, max_volume = 10.0, intentory = None):
-        self.inventory = inventory
-        self.max_volume = max_volume
+class storage():
+    def __init__(self, max_slots = 8, inventory = None):
+        self.max_slots = max_slots
         if inventory:
+            print("Does this run?")
             self.inventory = inventory
         else:
+            print("Or this?")
             self.inventory = []
-
+            
 class bipedal_body():
     def __init__(self):
         self.head = body_part(10)
