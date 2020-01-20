@@ -68,7 +68,6 @@ class element():
         
         self.storage = storage
         if storage:
-            print("storage was passed to the element this time.")
             storage.owner = self
             
     def draw(self,surf):
@@ -150,9 +149,6 @@ class actor(element):
         
 class prop(element):
     def __init__(self,x,y,scene,prop_type,state,sprite=None,player=False,ai=None,storage=None):
-        if storage:
-            print("Is there a storage here?")
-            print(storage.inventory)
         super().__init__(x,y,scene,sprite=sprite,player=player,ai=ai,storage=storage)
         self.state = state
         self.prop_type = prop_type
@@ -182,7 +178,6 @@ class container(prop):
                 print(i)
             self.sprite = constants.S_CHEST
         elif self.prop_type == "chest" and self.state == "open":
-            print("Changing sprite")
             self.sprite = constants.S_CHEST_OPEN
 
 class portal(prop):
@@ -211,10 +206,8 @@ class portal(prop):
         
     def update(self):
         if self.prop_type == "door" and self.state == "closed":
-            print("Changing sprite")
             self.sprite = constants.S_DOOR
         elif self.prop_type == "door" and self.state == "open":
-            print("Changing sprite")
             self.sprite = constants.S_DOOR_OPEN
         
 class game_object():
@@ -262,22 +255,33 @@ class game_object():
     def roll_loot(self,loot_type):
         if loot_type == 'currency':
             currency = self.currency_table.roll()
+            print("rolling currency")
             if currency["name"] != "nothing":
                 for i in self.loot_properties:
                     if i["name"] == currency["name"]:
                         if i["name"] == "gold coin":
+                            print("gold coin!")
                             sprite = constants.S_GOLD_COIN
+                            break
                         elif i["name"] == "silver coin":
+                            print("silver coin!")
                             sprite = constants.S_SILVER_COIN
+                            break
                         elif i["name"] == "bronze coin":
+                            print("bronze coin!")
                             sprite = constants.S_BRONZE_COIN
+                            break
                             
                 new_item = obj_item(0,0,
-                                    game_obj.vars["serial_number_counter"],
                                     self.vars["current_scene"],
-                                    i["name"],sprite)
+                                    game_obj.vars["serial_number_counter"],
+                                    i["name"],
+                                    sprite)
+                
                 game_obj.vars["serial_number_counter"] += 1
                 return(new_item)
+            else:
+                return(None)
 
         elif loot_type == 'gear':
             gear = self.gear_table.roll()
@@ -288,25 +292,34 @@ class game_object():
                     if i["name"] == gear["base"]:
                         if i["name"] == "sword":
                             sprite = constants.S_SWORD
+                            break
                         elif i["name"] == "shield":
                             sprite = constants.S_SHIELD
+                            break
                         elif i["name"] == "boots":
                             sprite = constants.S_BOOTS
+                            break
                         elif i["name"] == "gloves":
                             sprite = constants.S_GLOVES
+                            break
                         elif i["name"] == "helmet":
                             sprite = constants.S_HELMET
+                            break
                         elif i["name"] == "belt":
                             sprite = constants.S_BELT
+                            break
                         elif i["name"] == "shoulders":
                             sprite = constants.S_SHOULDERS
+                            break
                         elif i["name"] == "bracers":
                             sprite = constants.S_BRACERS
+                            break
                             
                         for t in i["tier"]:
                             if t == tier["tier"]:
                                 min_roll,max_roll = i["tier"][t].split("-")
                                 stat = random.randint(int(min_roll), int(max_roll))
+                                break
                                 
                 new_item = obj_item(0,0,
                                     game_obj.vars["serial_number_counter"],
@@ -330,7 +343,9 @@ class game_object():
                 inventory = []
                 for entry in p["inventory"]:
                     new_item = game_obj.roll_loot(entry)
+                    
                     if new_item:
+                        print("Rolled {}!".format(new_item.inst_name))
                         inventory.append(new_item)
                 
                 new_container = container(p["x"],

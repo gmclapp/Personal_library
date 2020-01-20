@@ -20,10 +20,8 @@ class storage():
     def __init__(self, max_slots = 8, inventory = None):
         self.max_slots = max_slots
         if inventory:
-            print("Does this run?")
             self.inventory = inventory
         else:
-            print("Or this?")
             self.inventory = []
             
 class bipedal_body():
