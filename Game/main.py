@@ -703,7 +703,7 @@ def game_initialize():
     game_obj.load()
     game_obj.build_tables()
 
-    game_obj.actor_list.append(actor(1,1,0,constants.S_PLAYER,player=True,name="Player"))
+    game_obj.actor_list.append(actor(1,1,0,constants.S_PLAYER,player=True,name="Player",storage=component.storage()))
     game_obj.actor_list.append(actor(15,15,0,constants.S_ENEMY,player=False,ai=component.simple_ai(),name="Enemy"))
 
     game_obj.side_menu = menu(constants.SCENE_WIDTH,0,constants.SIDE_BAR_WIDTH,constants.SIDE_HEADER_HEIGHT)
