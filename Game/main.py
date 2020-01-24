@@ -182,10 +182,10 @@ class container(prop):
 
     def draw(self,surf):
         super().draw(surf)
-
         if self.state == "open":
-            pass
-            # draw container inventory
+            surf.blit(self.storage.inv_art,((self.x)*constants.RES - 10, (self.y)*constants.RES - 75))
+            for i in self.storage.inventory:
+                surf.blit(i.sprite,(0,0))
         elif self.state == "closed":
             pass
         else:
@@ -372,6 +372,8 @@ class game_object():
                 for i in inventory:
                     if(i.deposit(new_container)):
                         print("Successfully deposited {}".format(i.inst_name))
+
+                new_container.storage.set_inv_art(constants.CHEST_INVENTORY)
                     
                 self.prop_list.append(new_container)
 
