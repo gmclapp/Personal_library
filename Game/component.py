@@ -1,4 +1,5 @@
 import random
+import constants
 
 class simple_ai():
     def take_turn(self):
@@ -26,6 +27,8 @@ class storage():
 
     def set_inv_art(self, inv_art):
         self.inv_art = inv_art
+        self.anchor_x = self.owner.x*constants.RES - 50
+        self.anchor_y = self.owner.y*constants.RES - 75
             
 class bipedal_body():
     def __init__(self):

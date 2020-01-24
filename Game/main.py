@@ -183,9 +183,11 @@ class container(prop):
     def draw(self,surf):
         super().draw(surf)
         if self.state == "open":
-            surf.blit(self.storage.inv_art,((self.x)*constants.RES - 10, (self.y)*constants.RES - 75))
-            for i in self.storage.inventory:
-                surf.blit(i.sprite,(0,0))
+            surf.blit(self.storage.inv_art,(self.storage.anchor_x,
+                                            self.storage.anchor_y))
+            for n, i in enumerate(self.storage.inventory):
+                surf.blit(i.sprite,(self.storage.anchor_x + (n%4)*(constants.RES + 3)+4,
+                                    int(n/4)*(constants.RES+3) + self.storage.anchor_y + 4))
         elif self.state == "closed":
             pass
         else:

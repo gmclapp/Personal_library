@@ -36,7 +36,7 @@
              "x":8,
              "y":8,
 	     "state":"closed",
-	     "inventory":["currency","currency"]
+	     "inventory":["currency","gear","currency","currency","currency","currency","gear","currency"]
 
         },
 	{

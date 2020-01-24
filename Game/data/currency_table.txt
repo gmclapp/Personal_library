@@ -13,6 +13,6 @@
     },
     {
 	"name":"nothing",
-	"rarity":"100"
+	"rarity":"0"
     }
 ]
