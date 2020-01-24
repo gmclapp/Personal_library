@@ -67,3 +67,4 @@ MENU_BACKGROUND = pygame.image.load("art/Side bar menu background.png")
 SIDE_HEADER_HEIGHT = 64
 PAGE_TURN_HITBOX = 20 # Height and width of the page turn hitbox in pixels
 HEADER_1_STRING = "SELECTED"
+CHEST_INVENTORY = pygame.image.load("art/chest_inventory.png")

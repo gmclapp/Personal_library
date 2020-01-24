@@ -17,7 +17,7 @@ class simple_ai():
             print("Indecision!")
 
 class storage():
-    def __init__(self, max_slots = 8, inventory = None):
+    def __init__(self, max_slots = 8, inventory = None, menu=None):
         self.max_slots = max_slots
         if inventory:
             self.inventory = inventory

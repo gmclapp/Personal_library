@@ -180,6 +180,17 @@ class container(prop):
         elif self.prop_type == "chest" and self.state == "open":
             self.sprite = constants.S_CHEST_OPEN
 
+    def draw(self,surf):
+        super().draw(surf)
+
+        if self.state == "open":
+            pass
+            # draw container inventory
+        elif self.state == "closed":
+            pass
+        else:
+            print("invalid container state")
+
 class portal(prop):
     def __init__(self,x,y,scene,prop_type,state,dest_scene,dest_x,dest_y,sprite=None,player=False,ai=None):
         
