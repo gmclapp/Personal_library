@@ -298,6 +298,9 @@ class game_object():
             gear = self.gear_table.roll()
             tier = self.tier_table.roll()
 
+            print("Rolled a {}!".format(gear["base"]))
+            print("It is tier {}!".format(tier["tier"]))
+            
             if gear["base"] != "nothing":
                 for i in self.loot_properties:
                     if i["name"] == gear["base"]:
@@ -326,12 +329,13 @@ class game_object():
                             sprite = constants.S_BRACERS
                             break
                             
-                        for t in i["tier"]:
-                            if t == tier["tier"]:
-                                min_roll,max_roll = i["tier"][t].split("-")
-                                stat = random.randint(int(min_roll), int(max_roll))
-                                break
-                                
+                for t in i["tier"]:
+                    if t == tier["tier"]:
+                        min_roll,max_roll = i["tier"][t].split("-")
+                        stat = random.randint(int(min_roll), int(max_roll))
+                        print("Rolled a stat of {}!".format(stat))
+                        break
+                            
                 new_item = obj_item(0,0,
                                     game_obj.vars["serial_number_counter"],
                                     self.vars["current_scene"],
