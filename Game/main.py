@@ -237,7 +237,8 @@ class game_object():
                      "debug": False,
                      "turn": 0,
                      "current_scene":0,
-                     "serial_number_counter":0}
+                     "serial_number_counter":0,
+                     "game_mode":"normal"}
         
 
     def load(self):
@@ -404,13 +405,14 @@ class button():
         self.height = height
         self.art = art
         self.action = action
+        self.active = True
 
     def draw(self,surf):
         if self.art:
             surf.blit(self.art, (self.x, self.y))
 
     def is_clicked(self,x,y):
-        if (self.x < x < self.x+self.width) and (self.y < y < self.y+self.height):
+        if (self.active and self.x < x < self.x+self.width) and (self.y < y < self.y+self.height):
             self.clicked = True
             return(True)
         else:
@@ -420,6 +422,12 @@ class button():
     def update(self):
         if self.action:
             self.action()
+
+    def activate(self):
+        self.active = True
+
+    def deactivate(self):
+        self.active = False
 
 class art():
     def __init__(self,art,x,y,active=True):
@@ -488,6 +496,9 @@ class menu():
         name_txt_surface = game_obj.font.render(name_text,True,constants.MENU_HEADER_TXT)
         game_obj.SURFACE_MAIN.blit(name_txt_surface,(constants.SCENE_WIDTH+50,constants.SIDE_HEADER_HEIGHT+10))
 
+        for b in self.button_list:
+            b.draw(surf)
+
             
 
     def advance_page(self):
@@ -532,6 +543,15 @@ def handle_cheat_code():
         elif args[1] == 'gear':
             print("rolling gear")
             game_obj.roll_loot("gear")
+
+    elif args[0] == 'set':
+        if args[1] == 'gamemode':
+            if args[2] == 'normal':
+                game_obj.vars["game_mode"] = 'normal'
+            elif args[2] == 'edit':
+                game_obj.vars["game_mode"] = 'edit'
+            else:
+                print("Invalid game mode.")
 
     else:
         print(args)
@@ -605,6 +625,19 @@ def game_main_loop():
 
     game_obj.side_menu.add_button(page_forward)
     game_obj.side_menu.add_button(page_backward)
+
+    cave_wall_button = button(constants.SCENE_WIDTH+10,
+                              constants.SIDE_HEADER_HEIGHT,
+                              32,32,art=pygame.image.load("art/cave_wall.png"))
+    with open("data\\tiles.txt","r") as f:
+        tile_list = json.load(f)
+        for i, t in enumerate(tile_list):
+            game_obj.side_menu.add_button(button(constants.SCENE_WIDTH+10+(42*i),
+                                                 constants.SIDE_HEADER_HEIGHT,
+                                                 32,32,
+                                                 art = pygame.image.load(t["art"])))
+        
+    game_obj.side_menu.add_button(cave_wall_button)
                                                                                                                 
     game_obj.get_props()
     
