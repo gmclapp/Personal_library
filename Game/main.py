@@ -238,7 +238,8 @@ class game_object():
                      "turn": 0,
                      "current_scene":0,
                      "serial_number_counter":0,
-                     "game_mode":"normal"}
+                     "game_mode":"normal",
+                     "mouse_attachment":None}
         
 
     def load(self):
@@ -421,7 +422,10 @@ class button():
 
     def update(self):
         if self.action:
+            print("This happens")
             self.action()
+        else:
+            print("This button has no action!!")
 
     def activate(self):
         self.active = True
@@ -638,7 +642,8 @@ def game_main_loop():
             new_button = button(constants.SCENE_WIDTH+10+(42*i),
                                 constants.SIDE_HEADER_HEIGHT,
                                 32,32,
-                                art = pygame.image.load(t["art"]))
+                                art = pygame.image.load(t["art"]),
+                                action = print(t["name"]))
 
             new_button.deactivate()
             game_obj.side_menu.add_button(new_button)
@@ -710,6 +715,10 @@ def game_main_loop():
                                                                                  game_obj.vars["turn"])
         if new_click:
 
+##            for b in game_obj.side_menu.button_list:
+##                if b.is_clicked(left_click_x,left_click_y):
+##                    b.update()
+                    
             if game_obj.side_menu.is_clicked(left_click_x,left_click_y):
                 pass
             
@@ -745,7 +754,7 @@ def game_initialize():
     game_obj.actor_list.append(actor(1,1,0,constants.S_PLAYER,player=True,name="Player",storage=component.storage()))
     game_obj.actor_list.append(actor(15,15,0,constants.S_ENEMY,player=False,ai=component.simple_ai(),name="Enemy"))
 
-    game_obj.side_menu = menu(constants.SCENE_WIDTH,0,constants.SIDE_BAR_WIDTH,constants.SIDE_HEADER_HEIGHT)
+    game_obj.side_menu = menu(constants.SCENE_WIDTH,0,constants.SIDE_BAR_WIDTH,constants.GAME_HEIGHT)
 
     return(game_obj)
 
