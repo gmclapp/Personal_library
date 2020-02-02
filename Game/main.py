@@ -11,48 +11,50 @@ def quit_nicely():
 
 def handle_cheat_code():
     args = game_obj.vars["cheat_text"].split()
-
-    if args[0] == 'tp':
-        print("Teleport an actor")
-        
-        x = args[2]
-        y = args[3]
-
-        if args[1] == 'me':
-            print("Teleport the character. X={}, Y={}".format(x,y))
-            game_obj.actor_list[0].x = int(x)
-            game_obj.actor_list[0].y = int(y)
+    try:
+        if args[0] == 'tp':
+            print("Teleport an actor")
             
-        elif args[1] == 'them':
-            print("Teleport someone else. X={}, Y={}".format(x,y))
-    elif args[0] == 'help':
-        print("tp <target> <x> <y> teleports a target to an x,y destination.")
-        print("for example: \"tp me 0 0 \" teleports the player to the top left corner of the scene.")
+            x = args[2]
+            y = args[3]
 
-    elif args[0] == 'roll':
-        if args[1] == 'currency':
-            print("rolling currency")
-            game_obj.roll_loot("currency")
-            
-        elif args[1] == 'gear':
-            print("rolling gear")
-            game_obj.roll_loot("gear")
+            if args[1] == 'me':
+                print("Teleport the character. X={}, Y={}".format(x,y))
+                game_obj.actor_list[0].x = int(x)
+                game_obj.actor_list[0].y = int(y)
+                
+            elif args[1] == 'them':
+                print("Teleport someone else. X={}, Y={}".format(x,y))
+        elif args[0] == 'help':
+            print("tp <target> <x> <y> teleports a target to an x,y destination.")
+            print("for example: \"tp me 0 0 \" teleports the player to the top left corner of the scene.")
 
-    elif args[0] == 'set':
-        if args[1] == 'gamemode':
-            if args[2] == 'normal':
-                game_obj.vars["game_mode"] = 'normal'
-                for b in game_obj.side_menu.edit_mode_buttons:
-                    b.deactivate()
-            elif args[2] == 'edit':
-                game_obj.vars["game_mode"] = 'edit'
-                for b in game_obj.side_menu.edit_mode_buttons:
-                    b.activate()
-            else:
-                print("Invalid game mode.")
+        elif args[0] == 'roll':
+            if args[1] == 'currency':
+                print("rolling currency")
+                game_obj.roll_loot("currency")
+                
+            elif args[1] == 'gear':
+                print("rolling gear")
+                game_obj.roll_loot("gear")
 
-    else:
-        print(args)
+        elif args[0] == 'set':
+            if args[1] == 'gamemode':
+                if args[2] == 'normal':
+                    game_obj.vars["game_mode"] = 'normal'
+                    for b in game_obj.side_menu.edit_mode_buttons:
+                        b.deactivate()
+                elif args[2] == 'edit':
+                    game_obj.vars["game_mode"] = 'edit'
+                    for b in game_obj.side_menu.edit_mode_buttons:
+                        b.activate()
+                else:
+                    print("Invalid game mode.")
+
+        else:
+            print(args)
+    except IndexError:
+        print("No cheat code entered.")
         
         
         
