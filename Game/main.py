@@ -408,7 +408,7 @@ class button():
         self.active = True
 
     def draw(self,surf):
-        if self.art:
+        if self.art and self.active:
             surf.blit(self.art, (self.x, self.y))
 
     def is_clicked(self,x,y):
@@ -548,8 +548,12 @@ def handle_cheat_code():
         if args[1] == 'gamemode':
             if args[2] == 'normal':
                 game_obj.vars["game_mode"] = 'normal'
+                for b in game_obj.side_menu.edit_mode_buttons:
+                    b.deactivate()
             elif args[2] == 'edit':
                 game_obj.vars["game_mode"] = 'edit'
+                for b in game_obj.side_menu.edit_mode_buttons:
+                    b.activate()
             else:
                 print("Invalid game mode.")
 
@@ -626,18 +630,20 @@ def game_main_loop():
     game_obj.side_menu.add_button(page_forward)
     game_obj.side_menu.add_button(page_backward)
 
-    cave_wall_button = button(constants.SCENE_WIDTH+10,
-                              constants.SIDE_HEADER_HEIGHT,
-                              32,32,art=pygame.image.load("art/cave_wall.png"))
+    game_obj.side_menu.edit_mode_buttons = []
+    
     with open("data\\tiles.txt","r") as f:
         tile_list = json.load(f)
         for i, t in enumerate(tile_list):
-            game_obj.side_menu.add_button(button(constants.SCENE_WIDTH+10+(42*i),
-                                                 constants.SIDE_HEADER_HEIGHT,
-                                                 32,32,
-                                                 art = pygame.image.load(t["art"])))
+            new_button = button(constants.SCENE_WIDTH+10+(42*i),
+                                constants.SIDE_HEADER_HEIGHT,
+                                32,32,
+                                art = pygame.image.load(t["art"]))
+
+            new_button.deactivate()
+            game_obj.side_menu.add_button(new_button)
+            game_obj.side_menu.edit_mode_buttons.append(new_button)
         
-    game_obj.side_menu.add_button(cave_wall_button)
                                                                                                                 
     game_obj.get_props()
     
