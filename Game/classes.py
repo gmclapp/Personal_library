@@ -265,6 +265,8 @@ class game_object():
             self.scene_list.append(json.load(f))
         with open("scenes\\1.txt","r") as f:
             self.scene_list.append(json.load(f))
+        with open("scenes\\2.txt","r") as f:
+            self.scene_list.append(json.load(f))
 
     def build_tables(self):
         self.currency_table = loot_table(constants.TABLE_CURRENCY)
