@@ -287,6 +287,10 @@ class game_object():
         with open("scenes\\2.txt","r") as f:
             self.scene_list.append(json.load(f))
 
+    def save(self):
+        with open("scenes\\2.txt","w") as f:
+            f.write(json.dumps(self.scene_list[2],indent=4))
+            
     def build_tables(self):
         self.currency_table = loot_table(constants.TABLE_CURRENCY)
         self.gear_table = loot_table(constants.TABLE_GEAR)
@@ -375,11 +379,6 @@ class game_object():
                 self.vars["serial_number_counter"] += 1
                 new_item.set_implicit(i["implicit"],str(stat))
                 return(new_item)
-                
-            
-            
-    def save(self):
-        pass
 
     def get_props(self):
         self.prop_list = []

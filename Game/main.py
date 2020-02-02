@@ -7,6 +7,7 @@ import component
 from classes import *
         
 def quit_nicely():
+    game_obj.save()
     pygame.display.quit()
     pygame.quit()
 
