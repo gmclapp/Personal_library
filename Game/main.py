@@ -129,8 +129,8 @@ def game_main_loop():
     with open("data\\tiles.txt","r") as f:
         tile_list = json.load(f)
         for i, t in enumerate(tile_list):
-            new_button = button(constants.SCENE_WIDTH+10+(42*i),
-                                constants.SIDE_HEADER_HEIGHT,
+            new_button = button(constants.SCENE_WIDTH+10+(42*(i%6)),
+                                constants.SIDE_HEADER_HEIGHT+42*int(i/6),
                                 32,32,
                                 art = pygame.image.load(t["art"]),
                                 action = print(t["name"]))
