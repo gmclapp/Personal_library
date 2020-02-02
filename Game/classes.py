@@ -51,6 +51,14 @@ class struct_tile():
         game_obj.vars["mouse_attachment"] = self
         print("Attached {} to mouse.".format(self.name))
 
+    def set_xy(self,x,y):
+        self.x = x
+        self.y = y
+        
+    def draw(self, surf):
+        surf.blit(self.art, (self.x, self.y))
+            
+
 class element():
     def __init__(self,
                  x,
@@ -166,6 +174,7 @@ class prop(element):
     def interact(self):
         
         self.update()
+        
         # This value is checked in order to determine if a player turn is complete
         return(True)
 
@@ -174,14 +183,17 @@ class prop(element):
 
 class container(prop):
     def interact(self,actor):
-        if self.state == "closed":
-            self.state = "open"
-        elif self.state == "open":
-            self.state = "closed"
+        if self.y == actor.y - 1 and self.x == actor.x:
+            if self.state == "closed":
+                self.state = "open"
+            elif self.state == "open":
+                self.state = "closed"
+            self.update()
+            return(True)
+        else:
+            print("You must stand in front of {} to interact with it.".format(self.prop_type))
+            return(False)
             
-        self.update()
-        return(True)
-
     def update(self):
         if self.prop_type == "chest" and self.state == "closed":
             for i in self.storage.inventory:
@@ -212,13 +224,16 @@ class portal(prop):
         self.dest_y = dest_y
         
     def interact(self,actor):
-        if self.state == "closed":
-            self.state = "open"
-        elif self.state == "open":
-            self.state = "closed"
-            
-        self.travel(actor)
-        return(True)
+        if self.y == actor.y - 1 and self.x == actor.x:
+            if self.state == "closed":
+                self.state = "open"
+            elif self.state == "open":
+                self.state = "closed"
+            self.travel(actor)
+            return(True)
+        else:
+            print("You must stand in front of {} to interact with it.".format(self.prop_type)) 
+            return(False)
 
     def travel(self,actor):
         game_obj.vars["current_scene"] = self.dest_scene

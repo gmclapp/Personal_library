@@ -40,6 +40,12 @@
         "name":"grass floor",
         "block_path": false,
         "art": "art\\grass_floor.png"
+    },
+    {
+        "serial_no":7,
+        "name":"lava floor",
+        "block_path": true,
+        "art": "art\\lava_floor.png"
     }
     
 ]

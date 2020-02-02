@@ -100,6 +100,9 @@ def draw_game():
     if game_obj.vars["debug"]:
         debug_text = game_obj.font.render(game_obj.vars["debug_text"],True,constants.DEBUG_TXT)
         game_obj.SURFACE_MAIN.blit(debug_text,(0,0))
+
+    if game_obj.vars["mouse_attachment"]:
+        game_obj.vars["mouse_attachment"].draw(game_obj.SURFACE_MAIN)
         
     # Flip the display to show the next frame
     pygame.display.flip()
@@ -133,8 +136,11 @@ def game_main_loop():
         tile_list = json.load(f)
         for i, t in enumerate(tile_list):
             tile = struct_tile(i)
-            new_button = button(constants.SCENE_WIDTH+10+(42*(i%6)),
-                                constants.SIDE_HEADER_HEIGHT+42*int(i/6),
+            temp_x = constants.SCENE_WIDTH+10+(42*(i%6))
+            temp_y = constants.SIDE_HEADER_HEIGHT+42*int(i/6)
+            tile.set_xy(temp_x,temp_y)
+            new_button = button(temp_x,
+                                temp_y,
                                 32,32,
                                 art = pygame.image.load(t["art"]),
                                 action = tile.attach_to_mouse)
@@ -186,10 +192,14 @@ def game_main_loop():
                     for p in game_obj.prop_list:
                         if p.clicked:
                             move_successful = p.interact(game_obj.actor_list[0])
+                if event.key == pygame.K_ESCAPE:
+                    game_obj.vars["mouse_attachment"] = None
                             
 
             elif event.type == pygame.MOUSEMOTION:
                 mx, my = event.pos
+                if game_obj.vars["mouse_attachment"]:
+                    game_obj.vars["mouse_attachment"].set_xy(mx,my)    
 
             elif event.type == pygame.MOUSEBUTTONUP:
                 if event.button == 1:
