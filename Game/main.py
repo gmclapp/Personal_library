@@ -213,10 +213,12 @@ def game_main_loop():
             for a in game_obj.actor_list:
                 if not a.player and a.scene == game_obj.vars["current_scene"]:
                     a.ai.take_turn()
-            
+
+        mouse_tile_x = int(mx/constants.RES)
+        mouse_tile_y = int(my/constants.RES)
         game_obj.vars["debug_text"] = "X: {} Y: {} TILE: ({},{}) TURN: {}".format(mx,my,
-                                                                                 int(mx/constants.RES),
-                                                                                 int(my/constants.RES),
+                                                                                 mouse_tile_x,
+                                                                                 mouse_tile_y,
                                                                                  game_obj.vars["turn"])
         if new_click:
 
@@ -227,12 +229,17 @@ def game_main_loop():
             elif (0 < left_click_x < constants.SCENE_WIDTH
                 and 0 < left_click_y < constants.SCENE_HEIGHT):
 
-                for a in game_obj.actor_list:
-                    a.is_clicked(left_click_x,left_click_y)
+                if game_obj.vars["mouse_attachment"]:
                     
-                    
-                for p in game_obj.prop_list:
-                    p.is_clicked(left_click_x,left_click_y)
+                    game_obj.scene_list[game_obj.vars["current_scene"]]["map"][mouse_tile_y][mouse_tile_x] = game_obj.vars["mouse_attachment"].serial_no
+                
+                else:
+                    for a in game_obj.actor_list:
+                        a.is_clicked(left_click_x,left_click_y)
+                        
+                        
+                    for p in game_obj.prop_list:
+                        p.is_clicked(left_click_x,left_click_y)
                     
                 
             new_click = False
