@@ -1,3 +1,4 @@
+import os
 import pygame
 import constants
 import json
@@ -131,11 +132,13 @@ def game_main_loop():
     with open("data\\tiles.txt","r") as f:
         tile_list = json.load(f)
         for i, t in enumerate(tile_list):
+            tile = struct_tile(i)
             new_button = button(constants.SCENE_WIDTH+10+(42*(i%6)),
                                 constants.SIDE_HEADER_HEIGHT+42*int(i/6),
                                 32,32,
                                 art = pygame.image.load(t["art"]),
-                                action = print(t["name"]))
+                                action = tile.attach_to_mouse)
+            
 
             new_button.deactivate()
             game_obj.side_menu.add_button(new_button)
@@ -231,6 +234,7 @@ def game_main_loop():
     quit_nicely()
                 
 def game_initialize():
+    os.environ['SDL_VIDEO_WINDOW_POS'] = "3,23"
     pygame.init()
     game_obj = game_object()
 

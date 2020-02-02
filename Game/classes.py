@@ -47,6 +47,10 @@ class struct_tile():
                     self.block_path = t["block_path"]
                     self.art = pygame.image.load(t["art"])
 
+    def attach_to_mouse(self):
+        game_obj.vars["mouse_attachment"] = self
+        print("Attached {} to mouse.".format(self.name))
+
 class element():
     def __init__(self,
                  x,
