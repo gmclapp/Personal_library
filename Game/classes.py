@@ -3,6 +3,7 @@ import json
 import constants
 import random
 import component
+import os
 
 game_obj = None
 
@@ -280,17 +281,20 @@ class game_object():
 
         # Load the map data, and append tile structures to a list of scenes
         print("Loading scene...")
-        with open("scenes\\0.txt","r") as f:
-            self.scene_list.append(json.load(f))
-        with open("scenes\\1.txt","r") as f:
-            self.scene_list.append(json.load(f))
-        with open("scenes\\2.txt","r") as f:
-            self.scene_list.append(json.load(f))
+        for i in range(len([f for f in os.listdir("scenes")])):
+            path = "scenes\\" + str(i) + ".txt"
+            with open(path,"r") as f:
+                self.scene_list.append(json.load(f))
 
     def save(self):
-        with open("scenes\\2.txt","w") as f:
-            f.write(json.dumps(self.scene_list[2],indent=4))
-            
+        for i in range(len([f for f in os.listdir("scenes")])):
+            path = "scenes\\" + str(i) + ".txt"
+            with open(path,"w") as f:
+                f.write(json.dumps(self.scene_list[i],indent=4))
+##                        
+##        with open("scenes\\2.txt","w") as f:
+##            f.write(json.dumps(self.scene_list[2],indent=4))
+##            
     def build_tables(self):
         self.currency_table = loot_table(constants.TABLE_CURRENCY)
         self.gear_table = loot_table(constants.TABLE_GEAR)
