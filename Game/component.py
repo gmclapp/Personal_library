@@ -1,6 +1,12 @@
 import random
 import constants
 
+game_obj = None
+
+def initialize(GO):
+    global game_obj
+    game_obj = GO
+    
 class simple_ai():
     def take_turn(self):
         decision = random.randint(0,4)
