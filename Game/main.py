@@ -252,7 +252,7 @@ def game_main_loop():
     quit_nicely()
                 
 def game_initialize():
-    os.environ['SDL_VIDEO_WINDOW_POS'] = "3,23"
+    os.environ['SDL_VIDEO_WINDOW_POS'] = "5,25"
     pygame.init()
     game_obj = game_object()
 

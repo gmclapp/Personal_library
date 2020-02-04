@@ -291,10 +291,7 @@ class game_object():
             path = "scenes\\" + str(i) + ".txt"
             with open(path,"w") as f:
                 f.write(json.dumps(self.scene_list[i],indent=4))
-##                        
-##        with open("scenes\\2.txt","w") as f:
-##            f.write(json.dumps(self.scene_list[2],indent=4))
-##            
+           
     def build_tables(self):
         self.currency_table = loot_table(constants.TABLE_CURRENCY)
         self.gear_table = loot_table(constants.TABLE_GEAR)
@@ -481,6 +478,25 @@ class menu():
         self.height = height
         self.first_page = 1
         self.last_page = 4
+
+        inventory_anchors = { 0:(774,658), 1:(809,658), 2:(844,658), 3:(880,658), 4:(915,658), 5:(949,658), 6:(984,658),
+                              7:(774,692), 8:(809,692), 9:(844,692),10:(880,692),11:(915,692),12:(949,692),13:(984,692),
+                             14:(774,727),15:(809,727),16:(844,727),17:(880,727),18:(915,727),19:(949,727),20:(984,727),
+                             21:(774,762),22:(809,762),23:(844,762),24:(880,762),25:(915,762),26:(949,762),27:(984,762)}
+        
+        helmet_anchor = (880,513)
+        shoulders_anchor = (915,513)
+        armor_anchor = (880,549)
+        belt_anchor = (880,584)
+        weapon1_anchor = (844,549)
+        weapon2_anchor = (915,549)
+        gloves_anchor = (844,584)
+        boots_anchor = (880,618)
+        bracers_anchor = (915,584)
+
+        gold_coin_anchor = (774,549)
+        silver_coin_anchor = (774,584)
+        bronze_coin_anchor = (774,618)
 
     def is_clicked(self,x,y):
         if (self.x < x < self.x+self.width) and (self.y < y < self.y+self.height):
