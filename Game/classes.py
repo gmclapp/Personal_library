@@ -127,7 +127,7 @@ class obj_item(element):
             self.container = destination
             return(True)
         else:
-            print("Inventory full!")
+            game_obj.log_message("Inventory full!")
             return(False)
         
     def move(self,source,destination):
@@ -138,7 +138,7 @@ class obj_item(element):
             
             return(True)
         else:
-            print("Inventory full!")
+            game_obj.log_message("Inventory full!")
             return(False)
         
 class actor(element):
@@ -156,7 +156,7 @@ class actor(element):
                 return(True)
                 
             else:
-                print("Can't walk there. It's a {}".format(t.name))
+                game_obj.log_message("Can't walk there. It's a {}.".format(t.name))
                 return(False)
                 
                 
@@ -192,7 +192,7 @@ class container(prop):
             self.update()
             return(True)
         else:
-            print("You must stand in front of {} to interact with it.".format(self.prop_type))
+            game_obj.log_message("You must stand in front of {} to interact with it.".format(self.prop_type))
             return(False)
             
     def update(self):
@@ -233,7 +233,7 @@ class portal(prop):
             self.travel(actor)
             return(True)
         else:
-            print("You must stand in front of {} to interact with it.".format(self.prop_type)) 
+            game_obj.log_message("You must stand in front of {} to interact with it.".format(self.prop_type))
             return(False)
 
     def travel(self,actor):
@@ -265,7 +265,8 @@ class game_object():
                      "current_scene":0,
                      "serial_number_counter":0,
                      "game_mode":"normal",
-                     "mouse_attachment":None}
+                     "mouse_attachment":None,
+                     "messages":["Hello world."]}
         
 
     def load(self):
@@ -302,20 +303,16 @@ class game_object():
     def roll_loot(self,loot_type):
         if loot_type == 'currency':
             currency = self.currency_table.roll()
-            print("rolling currency")
             if currency["name"] != "nothing":
                 for i in self.loot_properties:
                     if i["name"] == currency["name"]:
                         if i["name"] == "gold coin":
-                            print("gold coin!")
                             sprite = constants.S_GOLD_COIN
                             break
                         elif i["name"] == "silver coin":
-                            print("silver coin!")
                             sprite = constants.S_SILVER_COIN
                             break
                         elif i["name"] == "bronze coin":
-                            print("bronze coin!")
                             sprite = constants.S_BRONZE_COIN
                             break
                             
@@ -333,10 +330,8 @@ class game_object():
         elif loot_type == 'gear':
             gear = self.gear_table.roll()
             tier = self.tier_table.roll()
-
-            print("Rolled a {}!".format(gear["base"]))
-            print("It is tier {}!".format(tier["tier"]))
-            
+##            print("Rolled a {}!".format(gear["base"]))
+##            print("It is tier {}!".format(tier["tier"]))
             if gear["base"] != "nothing":
                 for i in self.loot_properties:
                     if i["name"] == gear["base"]:
@@ -369,7 +364,7 @@ class game_object():
                     if t == tier["tier"]:
                         min_roll,max_roll = i["tier"][t].split("-")
                         stat = random.randint(int(min_roll), int(max_roll))
-                        print("Rolled a stat of {}!".format(stat))
+##                        print("Rolled a stat of {}!".format(stat))
                         break
                             
                 new_item = obj_item(0,0,
@@ -391,7 +386,7 @@ class game_object():
                     new_item = self.roll_loot(entry)
                     
                     if new_item:
-                        print("Rolled {}!".format(new_item.inst_name))
+##                        print("Rolled {}!".format(new_item.inst_name))
                         inventory.append(new_item)
                 
                 new_container = container(p["x"],
@@ -423,8 +418,23 @@ class game_object():
 
         for p in self.prop_list:
             p.update()
-            
-            
+
+    def log_message(self,message):
+        self.vars["messages"].append(message)
+        
+    def print_to_screen(self,message, x, y):
+        txt_surface = self.font.render(message,True,constants.CHEAT_TXT)
+        self.SURFACE_MAIN.blit(txt_surface,(x,y))
+        
+    def draw_messages(self):
+        if len(self.vars["messages"]) > 0:
+            try:
+                for i in range(min(len(self.vars["messages"]),5)):
+                    message = self.vars["messages"][-(i+1)]
+                    self.print_to_screen(message, 0, constants.GAME_HEIGHT-constants.INPUT_BOX_HEIGHT-(32*(i+1)))
+            except IndexError:
+                print("Invalid index")
+                
 class button():
     def __init__(self,x,y,width,height,art=None,action=None):
         self.x = x

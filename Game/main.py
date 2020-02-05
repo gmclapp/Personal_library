@@ -12,18 +12,17 @@ def quit_nicely():
     pygame.quit()
 
 def handle_cheat_code():
+    game_obj.log_message(game_obj.vars["cheat_text"])
     args = game_obj.vars["cheat_text"].split()
     try:
         if args[0] == 'tp':
-            print("Teleport an actor")
-            
             x = args[2]
             y = args[3]
 
             if args[1] == 'me':
-                print("Teleport the character. X={}, Y={}".format(x,y))
                 game_obj.actor_list[0].x = int(x)
                 game_obj.actor_list[0].y = int(y)
+                game_obj.log_message("Teleported player to {},{}".format(x,y))
                 
             elif args[1] == 'them':
                 print("Teleport someone else. X={}, Y={}".format(x,y))
@@ -56,9 +55,8 @@ def handle_cheat_code():
         else:
             print(args)
     except IndexError:
-        print("No cheat code entered.")
-        
-        
+        game_obj.log_message("No cheat code entered.")
+##        print("No cheat code entered.")
         
 def draw_game():
 
@@ -87,15 +85,18 @@ def draw_game():
     # every frame.
     input_box_hgt = 32
     input_box = pygame.Rect(0,
-                            constants.GAME_HEIGHT-input_box_hgt,
+                            constants.GAME_HEIGHT-constants.INPUT_BOX_HEIGHT,
                             constants.GAME_WIDTH,
-                            input_box_hgt)
+                            constants.INPUT_BOX_HEIGHT)
 
     # Draw the cheat code box if cheat mode is active.
     if game_obj.vars["cheat_codes"]:
         pygame.draw.rect(game_obj.SURFACE_MAIN, constants.CHEAT_TXT_BOX_BG,input_box, 0)
         txt_surface = game_obj.font.render(game_obj.vars["cheat_text"],True,constants.CHEAT_TXT)
         game_obj.SURFACE_MAIN.blit(txt_surface,(input_box.x+5,input_box.y+5))
+
+    game_obj.draw_messages()
+                
 
     # Draw debug information if debug mode is active.
     if game_obj.vars["debug"]:
