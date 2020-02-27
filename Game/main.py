@@ -234,7 +234,7 @@ def game_main_loop():
                 if game_obj.vars["mouse_attachment"]:
                     
                     game_obj.scene_list[game_obj.vars["current_scene"]]["map"][mouse_tile_y][mouse_tile_x] = game_obj.vars["mouse_attachment"].serial_no
-                
+                    
                 else:
                     for a in game_obj.actor_list:
                         a.is_clicked(left_click_x,left_click_y)

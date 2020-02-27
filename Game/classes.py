@@ -216,6 +216,16 @@ class container(prop):
         else:
             print("invalid container state")
 
+    def is_clicked(self,x,y):
+        super().is_clicked(x,y)
+##        dx = (self.x+0.5)*constants.RES - x
+##        dy = (self.y+0.5)*constants.RES - y
+##
+##        if (dx**2 + dy**2 ) < (constants.RES/2)**2:
+##            self.clicked = True
+##        else:
+##            self.clicked = False
+
 class portal(prop):
     def __init__(self,x,y,scene,prop_type,state,dest_scene,dest_x,dest_y,sprite=None,player=False,ai=None):
         
