@@ -218,8 +218,10 @@ class container(prop):
 
     def is_clicked(self,x,y):
         super().is_clicked(x,y)
-##        dx = (self.x+0.5)*constants.RES - x
-##        dy = (self.y+0.5)*constants.RES - y
+        dx = x-self.storage.anchor_x
+        dy = y-self.storage.anchor_y
+        print("dx: {}\ndy: {}".format(dx,dy))
+        
 ##
 ##        if (dx**2 + dy**2 ) < (constants.RES/2)**2:
 ##            self.clicked = True

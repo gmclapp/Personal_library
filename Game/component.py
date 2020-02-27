@@ -23,18 +23,35 @@ class simple_ai():
         else:
             print("Indecision!")
 
+class slot():
+    def __init__(self,number,owner):
+        self.owner=owner
+        self.number=number
+
+    def set_anchor(self,x,y):
+        '''Takes an x and y argument denoting the offset from the storage
+        anchor to the slot anchor in pixels'''
+        self.anchor_x = x
+        self.anchor_y = y
+        
 class storage():
     def __init__(self, max_slots = 8, inventory = None):
         self.max_slots = max_slots
+        for i in range(self.max_slots):
+            self.slots=slot(i,self)
+            
         if inventory:
             self.inventory = inventory
         else:
             self.inventory = []
 
     def set_inv_art(self, inv_art):
+        '''Set the background art for the storage and its location releative
+        to the prop on screen'''
         self.inv_art = inv_art
         self.anchor_x = self.owner.x*constants.RES - 50
         self.anchor_y = self.owner.y*constants.RES - 75
+        
             
 class bipedal_body():
     def __init__(self):
