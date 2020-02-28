@@ -27,7 +27,9 @@ class slot():
     def __init__(self,number,owner):
         self.owner=owner
         self.number=number
-
+        self.width = constants.RES
+        self.height = constants.RES
+        
     def set_anchor(self,x,y):
         '''Takes an x and y argument denoting the offset from the storage
         anchor to the slot anchor in pixels'''
@@ -51,6 +53,8 @@ class storage():
         self.inv_art = inv_art
         self.anchor_x = self.owner.x*constants.RES - 50
         self.anchor_y = self.owner.y*constants.RES - 75
+        self.width = 145
+        self.height = 75
         
             
 class bipedal_body():

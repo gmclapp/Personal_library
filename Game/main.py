@@ -103,8 +103,10 @@ def draw_game():
         debug_text = game_obj.font.render(game_obj.vars["debug_text"],True,constants.DEBUG_TXT)
         game_obj.SURFACE_MAIN.blit(debug_text,(0,0))
 
+    # Draw the mouse attachment if there is one.
     if game_obj.vars["mouse_attachment"]:
-        game_obj.vars["mouse_attachment"].draw(game_obj.SURFACE_MAIN)
+        game_obj.SURFACE_MAIN.blit(game_obj.vars["mouse_attachment"].sprite,(game_obj.vars["mouse_attachment"].x,
+                                                                             game_obj.vars["mouse_attachment"].y))
         
     # Flip the display to show the next frame
     pygame.display.flip()
@@ -198,7 +200,7 @@ def game_main_loop():
                     game_obj.vars["mouse_attachment"] = None
                             
 
-            elif event.type == pygame.MOUSEMOTION:
+            if event.type == pygame.MOUSEMOTION:
                 mx, my = event.pos
                 if game_obj.vars["mouse_attachment"]:
                     game_obj.vars["mouse_attachment"].set_xy(mx,my)    
@@ -232,9 +234,7 @@ def game_main_loop():
                 and 0 < left_click_y < constants.SCENE_HEIGHT):
 
                 if game_obj.vars["mouse_attachment"]:
-                    
-                    game_obj.scene_list[game_obj.vars["current_scene"]]["map"][mouse_tile_y][mouse_tile_x] = game_obj.vars["mouse_attachment"].serial_no
-                    
+                    game_obj.log_message("{} is already attached to the mouse!".format(game_obj.vars["mouse_attachment"].inst_name))
                 else:
                     for a in game_obj.actor_list:
                         a.is_clicked(left_click_x,left_click_y)

@@ -140,6 +140,10 @@ class obj_item(element):
         else:
             game_obj.log_message("Inventory full!")
             return(False)
+
+    def set_xy(self,mx,my):
+        self.x = mx
+        self.y = my
         
 class actor(element):
     def move(self, dx, dy):
@@ -220,7 +224,15 @@ class container(prop):
         super().is_clicked(x,y)
         dx = x-self.storage.anchor_x
         dy = y-self.storage.anchor_y
-        print("dx: {}\ndy: {}".format(dx,dy))
+        if 0 < dx < self.storage.width and 0 < dy < self.storage.height:
+            print("dx: {}\ndy: {}".format(dx,dy))
+            slot_click = int(dx/constants.RES) + 4*int(dy/constants.RES)
+            print("Clicked slot {}".format(slot_click))
+            if game_obj.vars["mouse_attachment"]:
+                print("There's a thing on the mouse.")
+            else:
+                game_obj.vars["mouse_attachment"] = self.storage.inventory[slot_click]
+                self.storage.inventory.pop(slot_click)
         
 ##
 ##        if (dx**2 + dy**2 ) < (constants.RES/2)**2:
