@@ -181,15 +181,39 @@ def vlookup(rfile, index, search_col, result_col,skip_headers=False):
     # Return the x,y pairs of the search column and result column just
     # above and below the desired x value.
 
-def bernoulli_trial(n, k, p):
+def nCk(n,k):
+    '''Returns the number of combinations of n choose k. Returns a -1 if k is
+    larger than n.'''
+    if n>=k:
+        return(math.factorial(n)/(math.factorial(k)*math.factorial(n-k)))
+    else:
+        return(-1)
+    
+def bernoulli_trial(n, k, p, k_or_more=False):
     '''Returns the probability between 0 and 1 of exactly k successes given
     n trials where the probability of success is p. k and n must be integers
-    and p is a float between 0 and 1.'''
-    
+    and p is a float between 0 and 1. If k_or_more is set to True this
+    function returns the probability of at least k successes in n trials.'''
+
     q = 1-p
-    binomial_coeff = math.factorial(n)/(math.factorial(k)*math.factorial(n-k))
-    P = binomial_coeff*(p**k)*(q**(n-k))
+    P = 0
+    if k_or_more:
+        for i in range(k, n-1):
+            binomial_coeff = nCk(n,i)
+            P += binomial_coeff*(p**i)*(q**(n-i))
+
+    else:
+        binomial_coeff = nCk(n,k)
+        P = binomial_coeff*(p**k)*(q**(n-k))
     return(P)
+
+def bernoulli_trial_between(n,low_k,high_k,p):
+    '''Returns the probability between 0 and 1 of a number of successes between
+    low_k and high_k. given n trials and a p probability of success in a given
+    trial.'''
+    P_low = bernoulli_trial(n,low_k,p,True)
+    P_high = bernoulli_trial(n,high_k,p,True)
+    return(P_low-P_high)
 
 def bernoulli_trial_n(k, p, P=0.95):
     '''Returns the sample size required to observe at least k successes if
