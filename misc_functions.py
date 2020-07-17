@@ -184,8 +184,18 @@ def vlookup(rfile, index, search_col, result_col,skip_headers=False):
 def nCk(n,k):
     '''Returns the number of combinations of n choose k. Returns a -1 if k is
     larger than n.'''
+    
     if n>=k:
         return(math.factorial(n)/(math.factorial(k)*math.factorial(n-k)))
+    else:
+        return(-1)
+
+def nPk(n,k):
+    '''Returns the number of partial permutations, or sequences without
+    repetition, of n choose k. Returns a -1 if k is larger than n.'''
+    
+    if n>=k:
+        return(math.factorial(n)/math.factorial(n-k))
     else:
         return(-1)
     
