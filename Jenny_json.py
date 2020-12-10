@@ -1,11 +1,17 @@
 import json
 
-Jenny_dict = {"Name":"Hydrangeas",
+Jenny_dict = [{"Name":"Hydrangeas",
               "Diseases":[],
               "Pests":[],
               "Water requirement": 3.5,
               "Photos":["hydrangea picture.jpg","yellow variant.png"],
-              "Stock": 75}
+              "Stock": 75},
+              {"Name":"Daisies",
+              "Diseases":[],
+              "Pests":[],
+              "Water requirement": 7.5,
+              "Photos":["pushing up daisies.jpg"],
+              "Stock": 10}]
 
 ''' Dictionaries are specified with curly braces {} and with key:value pairs.
 keys can be floats or strings, typically strings as in the example above.
@@ -19,4 +25,4 @@ This is how I would approach references to photos stored in the same directory
 as the script. Finally, "Stock" is an integer.'''
 
 with open("Spring Meadow database.txt", "w") as f:
-    pass
+    json.dump(Jenny_dict,f,sort_keys=False,indent=4)

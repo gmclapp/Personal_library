@@ -1,0 +1,23 @@
+[
+    {
+        "Name": "Hydrangeas",
+        "Diseases": [],
+        "Pests": [],
+        "Water requirement": 3.5,
+        "Photos": [
+            "hydrangea picture.jpg",
+            "yellow variant.png"
+        ],
+        "Stock": 75
+    },
+    {
+        "Name": "Daisies",
+        "Diseases": [],
+        "Pests": [],
+        "Water requirement": 7.5,
+        "Photos": [
+            "pushing up daisies.jpg"
+        ],
+        "Stock": 10
+    }
+]
