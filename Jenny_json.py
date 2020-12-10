@@ -1,6 +1,6 @@
 import json
 
-Jenny_dict = [{"Name":"Hydrangeas",
+Jenny_db = [{"Name":"Hydrangeas",
               "Diseases":[],
               "Pests":[],
               "Water requirement": 3.5,
@@ -24,5 +24,30 @@ example. "Water requirement" is a float, maybe liters per day or something...
 This is how I would approach references to photos stored in the same directory
 as the script. Finally, "Stock" is an integer.'''
 
+#----- The following is how you will store/retrieve your database --- #
+
+# The following two lines will save a dictionary to a text file
 with open("Spring Meadow database.txt", "w") as f:
-    json.dump(Jenny_dict,f,sort_keys=False,indent=4)
+    json.dump(Jenny_db,f,sort_keys=False,indent=4)
+
+
+# The following two lines will load a dictionary from a text file
+with open("Spring Meadow database.txt", "r") as f:
+    Jenny_db = json.load(f)
+
+#--------------------------------------------------------------------#
+
+print("The following plants are in the database:")
+for plant in Jenny_db:
+    print(plant["Name"])
+print("\n",end="") # Add a line break in output
+
+for plant in Jenny_db:
+    if plant["Name"] == "Daisies":
+        print("{} require {} liters/day of water.".format(plant["Name"],
+                                                          plant["Water requirement"]))
+    else:
+        pass
+
+
+    
