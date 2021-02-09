@@ -134,8 +134,25 @@ Fpart = MSpart/MSpartxop
 Fop = MSop/MSpartxop
 Fpartxop = MSpartxop/MSrep
 
+# The following calculates the variance components of each factor
+VARrep = MSrep
+VARop = (MSop - MSpartxop)/(n*no_repetitions)
+VARpartxop = (MSpartxop-MSrep)/no_repetitions
+VARpart = (MSpart - MSpartxop)/(n_ops*no_repetitions)
+VARreproduce = VARop+VARpartxop
+VARGageRR = VARrep+VARreproduce
+VARtot = VARGageRR+VARpart
+
 print("SSpart      = {0:>4.3f} DFpart      = {1:>4.0f} MSpart      = {2:>4.3f} Fpart    = {3:4.3f}".format(SSpart, DOF_parts, MSpart,Fpart))
 print("SSop        = {0:>4.3f} DFop        = {1:>4.0f} MSop        = {2:>4.3f} Fop      = {3:4.3f}".format(SSop, DOF_ops, MSop,Fop))
 print("SSpartxop   = {0:>4.3f} DFpartxop   = {1:>4.0f} MSpartxop   = {2:>4.3f} Fpartxop = {3:4.3f}".format(SSpartxop, DOF_partxop,MSpartxop,Fpartxop))
 print("SSrep       = {0:>4.3f} DFrep       = {1:>4.0f} MSrep       = {2:>4.3f}".format(SSrep, DOF_rep, MSrep))
 print("SStotal     = {0:>4.3f} DFtotal     = {1:>4.0f}".format(SStot, DOF_total))
+
+print("\nVariance components\n")
+print("Source            VarComp       %Contribution")
+print("Gage R&R          {:4.4f}       {:4.2f}%".format(VARGageRR,100*VARGageRR/VARtot))
+print("  Repeatability   {:4.4f}       {:4.2f}%".format(VARrep,100*VARrep/VARtot))
+print("  Reproducibility {:4.4f}       {:4.2f}%".format(VARreproduce,100*VARreproduce/VARtot))
+print("Part-to-Part      {:4.4f}       {:4.2f}%".format(VARpart,100*VARpart/VARtot))
+print("Total variation   {:4.4f}       {:4.2f}%".format(VARtot,100*VARtot/VARtot))
