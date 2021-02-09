@@ -3,13 +3,22 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 random.seed(6168850734)
-n = 50
+n = 10 # Number of parts to be included in the study
+no_repetitions = 3 # Number of times each part is measured by each operator
 
 true_meas = []
 true_mean = 8.5
 true_variability = 1.3
 
+# This list will be populated with randomly generated data simulating
+# part measurements
 measurements = []
+upper_spec = 0
+lower_spec = 0
+
+# This list is populated manually to demonstrate the affects on the MSA of
+# hand picking data.
+handpicked_measurements = [6.5,7.0,8.3,10.1,9.2,7.1,8.4,11.5,5.9,6.0]
 
 Operator_1 = {"Name":"Andy","Offset":2.4,"Variability":0.05}
 Operator_2 = {"Name":"Susan","Offset":-0.3,"Variability":0.12}
@@ -19,12 +28,21 @@ operators = [Operator_1,Operator_2,Operator_3]
 
 machine = {"Offset":-0.25,"Variability":0.45}
 
-no_repetitions = 10
-
-# Create data that represents the actual state of hypothetical parts
-for i in range(n):
-    true_meas.append([i+1,
-                      random.normalvariate(true_mean,true_variability**0.5)])
+hand_picked = input("Do you want to use the hand picked data? (y/n)\n>>> ")
+if hand_picked.lower() == 'n':
+    # Create data that represents the actual state of hypothetical parts
+    for i in range(n):
+        true_meas.append([i+1,
+                          random.normalvariate(true_mean,true_variability**0.5)])
+elif hand_picked.lower() == 'y':
+    for i in range(n):
+        # Still calculate the random data so that the variance of other components follows seed regardless of hand pick choice
+        random.normalvariate(true_mean,true_variability**0.5)
+        # Append handpicked data
+        true_meas.append([i+1,
+                         handpicked_measurements[i]])
+else:
+    print("Invalid input")
 
 data = [["Part","Operator","Run","Observation"]]
 # Run the MSA procedure (crossed ANOVA with interaction)
@@ -116,8 +134,8 @@ Fpart = MSpart/MSpartxop
 Fop = MSop/MSpartxop
 Fpartxop = MSpartxop/MSrep
 
-print("SSpart      = {0:>4.3f} DFpart      = {1:>4.3f} MSpart      = {2:>4.3f} Fpart    = {3:4.3f}".format(SSpart, DOF_parts, MSpart,Fpart))
-print("SSop        = {0:>4.3f} DFop        = {1:>4.3f} MSop        = {2:>4.3f} Fop      = {3:4.3f}".format(SSop, DOF_ops, MSop,Fop))
-print("SSrep       = {0:>4.3f} DFrep       = {1:>4.3f} MSrep       = {2:>4.3f}".format(SSrep, DOF_rep, MSrep))
-print("SSpartxop   = {0:>4.3f} DFpartxop   = {1:>4.3f} MSpartxop   = {2:>4.3f} Fpartxop = {3:4.3f}".format(SSpartxop, DOF_partxop,MSpartxop,Fpartxop))
-print("SStotal     = {0:>4.3f} DFtotal     = {1:>4.3f}".format(SStot, DOF_total))
+print("SSpart      = {0:>4.3f} DFpart      = {1:>4.0f} MSpart      = {2:>4.3f} Fpart    = {3:4.3f}".format(SSpart, DOF_parts, MSpart,Fpart))
+print("SSop        = {0:>4.3f} DFop        = {1:>4.0f} MSop        = {2:>4.3f} Fop      = {3:4.3f}".format(SSop, DOF_ops, MSop,Fop))
+print("SSpartxop   = {0:>4.3f} DFpartxop   = {1:>4.0f} MSpartxop   = {2:>4.3f} Fpartxop = {3:4.3f}".format(SSpartxop, DOF_partxop,MSpartxop,Fpartxop))
+print("SSrep       = {0:>4.3f} DFrep       = {1:>4.0f} MSrep       = {2:>4.3f}".format(SSrep, DOF_rep, MSrep))
+print("SStotal     = {0:>4.3f} DFtotal     = {1:>4.0f}".format(SStot, DOF_total))
