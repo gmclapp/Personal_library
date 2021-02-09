@@ -143,6 +143,24 @@ VARreproduce = VARop+VARpartxop
 VARGageRR = VARrep+VARreproduce
 VARtot = VARGageRR+VARpart
 
+# Calculate the standard deviations for each component
+SDrep = VARrep**0.5
+SDop = VARop**0.5
+SDpartxop = VARop**0.5
+SDpart = VARpart**0.5
+SDreproduce = VARreproduce**0.5
+SDGageRR = VARGageRR*0.5
+SDtot = VARtot*0.5
+
+# Calculate study variations
+SD6rep = SDrep*6
+SD6op = SDop*6
+SD6partxop = SDpartxop*6
+SD6part = SDpart*6
+SD6reproduce = SDreproduce*6
+SD6GageRR = SDGageRR*6
+SD6tot = SDtot*6
+
 print("SSpart      = {0:>4.3f} DFpart      = {1:>4.0f} MSpart      = {2:>4.3f} Fpart    = {3:4.3f}".format(SSpart, DOF_parts, MSpart,Fpart))
 print("SSop        = {0:>4.3f} DFop        = {1:>4.0f} MSop        = {2:>4.3f} Fop      = {3:4.3f}".format(SSop, DOF_ops, MSop,Fop))
 print("SSpartxop   = {0:>4.3f} DFpartxop   = {1:>4.0f} MSpartxop   = {2:>4.3f} Fpartxop = {3:4.3f}".format(SSpartxop, DOF_partxop,MSpartxop,Fpartxop))
@@ -151,8 +169,16 @@ print("SStotal     = {0:>4.3f} DFtotal     = {1:>4.0f}".format(SStot, DOF_total)
 
 print("\nVariance components\n")
 print("Source            VarComp       %Contribution")
-print("Gage R&R          {:4.4f}       {:4.2f}%".format(VARGageRR,100*VARGageRR/VARtot))
-print("  Repeatability   {:4.4f}       {:4.2f}%".format(VARrep,100*VARrep/VARtot))
-print("  Reproducibility {:4.4f}       {:4.2f}%".format(VARreproduce,100*VARreproduce/VARtot))
-print("Part-to-Part      {:4.4f}       {:4.2f}%".format(VARpart,100*VARpart/VARtot))
-print("Total variation   {:4.4f}       {:4.2f}%".format(VARtot,100*VARtot/VARtot))
+print("Gage R&R          {:4.4f}        {:4.2f}%".format(VARGageRR,100*VARGageRR/VARtot))
+print("  Repeatability   {:4.4f}        {:4.2f}%".format(VARrep,100*VARrep/VARtot))
+print("  Reproducibility {:4.4f}        {:4.2f}%".format(VARreproduce,100*VARreproduce/VARtot))
+print("Part-to-Part      {:4.4f}        {:4.2f}%".format(VARpart,100*VARpart/VARtot))
+print("Total variation   {:4.4f}        {:4.2f}%".format(VARtot,100*VARtot/VARtot))
+
+print("\nGage Evaluation\n")
+print("Source            StdDev        Study Var (6*SD)       %Study")
+print("Gage R&R          {:4.4f}         {:4.2f}                  {:4.2f}%".format(SDGageRR,SD6GageRR,100*SD6GageRR/SD6tot))
+print("  Repeatability   {:4.4f}         {:4.2f}                  {:4.2f}%".format(SDrep,SD6rep,100*SD6rep/SD6tot))
+print("  Reproducibility {:4.4f}         {:4.2f}                  {:4.2f}%".format(SDreproduce,SD6reproduce,100*SD6reproduce/SD6tot))
+print("Part-to-Part      {:4.4f}         {:4.2f}                  {:4.2f}%".format(SDpart,SD6part,100*SD6part/SD6tot))
+print("Total variation   {:4.4f}         {:4.2f}                 {:4.2f}%".format(SDtot,SD6tot,100*SD6tot/SD6tot))
