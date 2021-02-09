@@ -13,8 +13,8 @@ true_variability = 1.3
 # This list will be populated with randomly generated data simulating
 # part measurements
 measurements = []
-upper_spec = 0
-lower_spec = 0
+upper_spec = 11.5
+lower_spec = 4.8
 
 # This list is populated manually to demonstrate the affects on the MSA of
 # hand picking data.
@@ -176,9 +176,9 @@ print("Part-to-Part      {:4.4f}        {:4.2f}%".format(VARpart,100*VARpart/VAR
 print("Total variation   {:4.4f}        {:4.2f}%".format(VARtot,100*VARtot/VARtot))
 
 print("\nGage Evaluation\n")
-print("Source            StdDev        Study Var (6*SD)       %Study")
-print("Gage R&R          {:4.4f}         {:4.2f}                  {:4.2f}%".format(SDGageRR,SD6GageRR,100*SD6GageRR/SD6tot))
-print("  Repeatability   {:4.4f}         {:4.2f}                  {:4.2f}%".format(SDrep,SD6rep,100*SD6rep/SD6tot))
-print("  Reproducibility {:4.4f}         {:4.2f}                  {:4.2f}%".format(SDreproduce,SD6reproduce,100*SD6reproduce/SD6tot))
-print("Part-to-Part      {:4.4f}         {:4.2f}                  {:4.2f}%".format(SDpart,SD6part,100*SD6part/SD6tot))
-print("Total variation   {:4.4f}         {:4.2f}                 {:4.2f}%".format(SDtot,SD6tot,100*SD6tot/SD6tot))
+print("Source            StdDev        Study Var (6*SD)       %Study        %Tolerance")
+print("Gage R&R          {:4.4f}         {:4.2f}                  {:4.2f}%         {:4.2f}%".format(SDGageRR,SD6GageRR,100*SD6GageRR/SD6tot,SD6GageRR/(upper_spec-lower_spec)))
+print("  Repeatability   {:4.4f}         {:4.2f}                  {:4.2f}%         {:4.2f}%".format(SDrep,SD6rep,100*SD6rep/SD6tot,SD6rep/(upper_spec-lower_spec)))
+print("  Reproducibility {:4.4f}         {:4.2f}                  {:4.2f}%         {:4.2f}%".format(SDreproduce,SD6reproduce,100*SD6reproduce/SD6tot,SD6reproduce/(upper_spec-lower_spec)))
+print("Part-to-Part      {:4.4f}         {:4.2f}                  {:4.2f}%         {:4.2f}%".format(SDpart,SD6part,100*SD6part/SD6tot,SD6part/(upper_spec-lower_spec)))
+print("Total variation   {:4.4f}         {:4.2f}                 {:4.2f}%         {:4.2f}%".format(SDtot,SD6tot,100*SD6tot/SD6tot,SD6tot/(upper_spec-lower_spec)))
