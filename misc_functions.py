@@ -37,6 +37,11 @@ def deactivate(x, k, epsilon=1):
     y=math.tanh((x-k)/epsilon)/-2+0.5
     return(y)
 
+def linear(x,m,b=0):
+    '''This function takes a value x, a slope m, and a y-intercept b, and returns
+    a number y where y = m*x + b.'''
+    return(m*x + b)
+
 def timestamp():
     now = dt.datetime.fromtimestamp(time.time())
     sep=":"
