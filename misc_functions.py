@@ -85,6 +85,18 @@ def is_norm(data, alpha=0.05):
             return(False)
     except TypeError:
         print("alpha must be 0.15,0.10,0.05,0.025,0.01")
+
+def IQR(data):
+    return(data.quantile(0.75)-data.quantile(0.25))
+
+def get_center_spread(data):
+    '''takes an array-like and returns either parametric or non-parametric
+    measures of center and spread depending on whether the data pass the
+    Anderson-Darling test.'''
+    if is_norm(data):
+        return(data.mean(),data.std())
+    else:
+        return(data.quantile(0.5),IQR(data))
         
 def timestamp():
     now = dt.datetime.fromtimestamp(time.time())
