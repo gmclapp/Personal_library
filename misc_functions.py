@@ -1,11 +1,12 @@
 '''It is recommended to use this package with the sanitize_inputs package.\n
 The functions contained herein do not check for erroneous inputs.'''
 
-__version__ = "0.2.7"
+__version__ = "0.2.8"
 
 import math
 import csv
 import pandas as pd
+import numpy as np
 import pdb
 import os
 from difflib import SequenceMatcher
@@ -41,6 +42,30 @@ def linear(x,m,b=0):
     '''This function takes a value x, a slope m, and a y-intercept b, and returns
     a number y where y = m*x + b.'''
     return(m*x + b)
+
+def lin_reg(x,y):
+    '''Takes two lists x and y and returns m, b, and r^2, the slope, y intercept,
+    and squared regression using the least squares regression'''
+    try:
+        N = len(x)
+        xsum = sum(x)
+        ysum = sum(y)
+        ybar = np.average(y)
+        xsqrsum = sum([i**2 for i in x ])
+        xysum = sum([x[i]*y[i] for i in range(N)])
+
+        m = (N*xysum - xsum*ysum)/(N*xsqrsum - xsum**2)
+        b = (ysum - m*xsum)/N
+
+        SS_res = sum([(y[i] - (m*x[i]+b))**2 for i in range(N)])
+        SS_tot = sum([(yi - ybar)**2 for yi in y])
+        rsqr = 1 - (SS_res/SS_tot)
+    
+        return(m,b,rsqr)
+    
+    except IndexError:
+        print("Lists must have the same length")
+        return(None)
 
 def timestamp():
     now = dt.datetime.fromtimestamp(time.time())
