@@ -7,6 +7,7 @@ import math
 import csv
 import pandas as pd
 import numpy as np
+import scipy.stats as ss
 import pdb
 import os
 from difflib import SequenceMatcher
@@ -67,6 +68,24 @@ def lin_reg(x,y):
         print("Lists must have the same length")
         return(None)
 
+def is_norm(data, alpha=0.05):
+    '''takes an array-like data series, and a desired confidence level, returns
+    True if there is insufficient evidence to show data are non-normal, False
+    otherwise.'''
+    A2,crt,sig = ss.anderson(data)
+    critical_value = None
+    for i, s in enumerate(sig):
+        if s == alpha*100:
+            critical_value = crt[i]
+
+    try:
+        if A2 < critical_value:
+            return(True)
+        else:
+            return(False)
+    except TypeError:
+        print("alpha must be 0.15,0.10,0.05,0.025,0.01")
+        
 def timestamp():
     now = dt.datetime.fromtimestamp(time.time())
     sep=":"
