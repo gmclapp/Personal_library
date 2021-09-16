@@ -1,6 +1,8 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.lines as mlines
+from matplotlib.ticker import (FixedLocator,MultipleLocator, AutoMinorLocator,FormatStrFormatter)
+
 import datetime as dt
 
 def parse_time(timestring):
@@ -35,6 +37,11 @@ def hist_helper(ax,data,col,title=None,xlabel=None,ylabel=None):
     data = data.loc[(data[[col]] <= maximum).all(axis=1)]
     
     ax.hist(data[col],bins=binlist,rwidth=0.95)
+##    ax.xaxis.set_major_locator(MultipleLocator(step))
+    ax.xaxis.set_major_locator(FixedLocator(binlist))
+    ax.set_xticklabels(ax.get_xticks(),rotation = 45)
+    ax.xaxis.set_major_formatter(FormatStrFormatter('%.2f'))
+    
     if title:
         ax.set_title(title)
     if xlabel:
@@ -66,10 +73,10 @@ def main():
         DF[c] = DF[c].apply(parse_time)
 
     Elite = {"Name":"Elite",
-             "Swim":1200,
-             "T1":45,
-             "Cycle":2100,
-             "T2":45,
+             "Swim":980,
+             "T1":150,
+             "Cycle":2440,
+             "T2":50,
              "Run":1410}
     for i, row in DF.iterrows():
         if row["Name"].lower() == "glenn clapp":
