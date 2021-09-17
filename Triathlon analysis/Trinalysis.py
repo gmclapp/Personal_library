@@ -69,6 +69,8 @@ def characterizeElite(DF):
     has_swim = EliteDF["Swim"]!=0
     EliteDF = EliteDF[has_swim]
 
+    EliteDF = EliteDF[EliteDF.Name != "TEAM LEGION OF ZOOM"]
+
     Elite = {"Name":"Elite",
              "Swim":EliteDF["Swim"].mean(),
              "T1":EliteDF["T1"].mean(),
@@ -197,7 +199,7 @@ def comboPlot(DF,Glenn,Matt,Elite):
                       text_rot=90)
     
 def bigSwim(DF,Glenn,Matt,Elite,EliteMin,EliteMax):
-    bigfig, ax = plt.subplots(1,1,figsize=(6,10),dpi=100)
+    bigfig, ax = plt.subplots(1,1,figsize=(10,10),dpi=100)
     hist_helper(ax,DF,"Swim",title="Swim",xlabel="Time(seconds)",ylabel="# of Competitors",color=(0.9,0.9,0.9,0.75))
     individual_helper(ax,Glenn["Swim"],
                       'r',
@@ -226,9 +228,14 @@ def bigSwim(DF,Glenn,Matt,Elite,EliteMin,EliteMax):
                       text_x_offset=5,
                       text_y_offset=50,
                       text_rot=90)
+    Glenn_legend = mlines.Line2D([],[],color='r',markersize=15,label="Glenn")
+    Matt_legend = mlines.Line2D([],[],color='b',markersize=15,label="Matt")
+    Elite_legend = mlines.Line2D([],[],color='g',markersize=15,label="Elite")
+    
+    ax.legend(handles=[Glenn_legend,Matt_legend,Elite_legend])
     
 def bigCycle(DF,Glenn,Matt,Elite,EliteMin,EliteMax):
-    bigfig, ax = plt.subplots(1,1,figsize=(6,10),dpi=100)
+    bigfig, ax = plt.subplots(1,1,figsize=(10,10),dpi=100)
     hist_helper(ax,DF,"Cycle",title="Cycle",xlabel="Time(seconds)",ylabel="# of Competitors",color=(0.9,0.9,0.9,0.75))
     individual_helper(ax,Glenn["Cycle"],
                       'r',
@@ -244,22 +251,27 @@ def bigCycle(DF,Glenn,Matt,Elite,EliteMin,EliteMax):
     
     individual_helper(ax,Elite["Cycle"],
                       'g',
-                      text_x_offset=-120,
+                      text_x_offset=-150,
                       text_y_offset=50,
                       text_rot=90)
     individual_helper(ax,EliteMin["Cycle"],
                       'g',
-                      text_x_offset=-120,
+                      text_x_offset=-150,
                       text_y_offset=50,
                       text_rot=90)
     individual_helper(ax,EliteMax["Cycle"],
                       'g',
-                      text_x_offset=-120,
+                      text_x_offset=-150,
                       text_y_offset=50,
                       text_rot=90)
+    Glenn_legend = mlines.Line2D([],[],color='r',markersize=15,label="Glenn")
+    Matt_legend = mlines.Line2D([],[],color='b',markersize=15,label="Matt")
+    Elite_legend = mlines.Line2D([],[],color='g',markersize=15,label="Elite")
+    
+    ax.legend(handles=[Glenn_legend,Matt_legend,Elite_legend])
     
 def bigRun(DF,Glenn,Matt,Elite,EliteMin,EliteMax):
-    bigfig, ax = plt.subplots(1,1,figsize=(6,10),dpi=100)
+    bigfig, ax = plt.subplots(1,1,figsize=(10,10),dpi=100)
     hist_helper(ax,DF,"Run",title="Run",xlabel="Time(seconds)",ylabel="# of Competitors",color=(0.9,0.9,0.9,0.75))
     individual_helper(ax,Glenn["Run"],
                       'r',
@@ -288,6 +300,12 @@ def bigRun(DF,Glenn,Matt,Elite,EliteMin,EliteMax):
                       text_x_offset=-120,
                       text_y_offset=50,
                       text_rot=90)
+
+    Glenn_legend = mlines.Line2D([],[],color='r',markersize=15,label="Glenn")
+    Matt_legend = mlines.Line2D([],[],color='b',markersize=15,label="Matt")
+    Elite_legend = mlines.Line2D([],[],color='g',markersize=15,label="Elite")
+    
+    ax.legend(handles=[Glenn_legend,Matt_legend,Elite_legend])
     
 def main():
     pd.set_option('display.max_columns',None)
