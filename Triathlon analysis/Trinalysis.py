@@ -59,14 +59,16 @@ def individual_helper(ax,data,color,text_x_offset=0,text_y_offset=0,text_rot=0):
 def characterizeElite(DF):
     is_elite = DF['Time']<=4800
     EliteDF = DF[is_elite]
-    print(EliteDF.head(76))
-    
-##    Elite = {"Name":"Elite",
-##             "Swim":980,
-##             "T1":150,
-##             "Cycle":2440,
-##             "T2":50,
-##             "Run":1410}
+
+    has_run = EliteDF["Run"]!=0
+    EliteDF = EliteDF[has_run]
+
+    has_cycle = EliteDF["Cycle"]!=0
+    EliteDF = EliteDF[has_cycle]
+
+    has_swim = EliteDF["Swim"]!=0
+    EliteDF = EliteDF[has_swim]
+
     Elite = {"Name":"Elite",
              "Swim":EliteDF["Swim"].mean(),
              "T1":EliteDF["T1"].mean(),
@@ -74,7 +76,21 @@ def characterizeElite(DF):
              "T2":EliteDF["T2"].mean(),
              "Run":EliteDF["Run"].mean()}
     
-    return(Elite)
+    EliteMin = {"Name":"EliteMin",
+             "Swim":EliteDF["Swim"].min(),
+             "T1":EliteDF["T1"].min(),
+             "Cycle":EliteDF["Cycle"].min(),
+             "T2":EliteDF["T2"].min(),
+             "Run":EliteDF["Run"].min()}
+
+    EliteMax = {"Name":"EliteMax",
+             "Swim":EliteDF["Swim"].max(),
+             "T1":EliteDF["T1"].max(),
+             "Cycle":EliteDF["Cycle"].max(),
+             "T2":EliteDF["T2"].max(),
+             "Run":EliteDF["Run"].max()}
+    
+    return(EliteMin,EliteMax,Elite)
 
 def transitionPlot(DF,Glenn,Matt,Elite):
     fig2, axes2 = plt.subplots(1,2,sharey=True,figsize=(12,10),dpi=100)
@@ -180,7 +196,7 @@ def comboPlot(DF,Glenn,Matt,Elite):
                       text_y_offset=180,
                       text_rot=90)
     
-def bigSwim(DF,Glenn,Matt,Elite):
+def bigSwim(DF,Glenn,Matt,Elite,EliteMin,EliteMax):
     bigfig, ax = plt.subplots(1,1,figsize=(6,10),dpi=100)
     hist_helper(ax,DF,"Swim",title="Swim",xlabel="Time(seconds)",ylabel="# of Competitors",color=(0.9,0.9,0.9,0.75))
     individual_helper(ax,Glenn["Swim"],
@@ -198,9 +214,20 @@ def bigSwim(DF,Glenn,Matt,Elite):
     individual_helper(ax,Elite["Swim"],
                       'g',
                       text_x_offset=5,
-                      text_y_offset=160,
+                      text_y_offset=50,
                       text_rot=90)
-def bigCycle(DF,Glenn,Matt,Elite):
+    individual_helper(ax,EliteMin["Swim"],
+                      'g',
+                      text_x_offset=5,
+                      text_y_offset=50,
+                      text_rot=90)
+    individual_helper(ax,EliteMax["Swim"],
+                      'g',
+                      text_x_offset=5,
+                      text_y_offset=50,
+                      text_rot=90)
+    
+def bigCycle(DF,Glenn,Matt,Elite,EliteMin,EliteMax):
     bigfig, ax = plt.subplots(1,1,figsize=(6,10),dpi=100)
     hist_helper(ax,DF,"Cycle",title="Cycle",xlabel="Time(seconds)",ylabel="# of Competitors",color=(0.9,0.9,0.9,0.75))
     individual_helper(ax,Glenn["Cycle"],
@@ -218,10 +245,20 @@ def bigCycle(DF,Glenn,Matt,Elite):
     individual_helper(ax,Elite["Cycle"],
                       'g',
                       text_x_offset=-120,
-                      text_y_offset=160,
+                      text_y_offset=50,
+                      text_rot=90)
+    individual_helper(ax,EliteMin["Cycle"],
+                      'g',
+                      text_x_offset=-120,
+                      text_y_offset=50,
+                      text_rot=90)
+    individual_helper(ax,EliteMax["Cycle"],
+                      'g',
+                      text_x_offset=-120,
+                      text_y_offset=50,
                       text_rot=90)
     
-def bigRun(DF,Glenn,Matt,Elite):
+def bigRun(DF,Glenn,Matt,Elite,EliteMin,EliteMax):
     bigfig, ax = plt.subplots(1,1,figsize=(6,10),dpi=100)
     hist_helper(ax,DF,"Run",title="Run",xlabel="Time(seconds)",ylabel="# of Competitors",color=(0.9,0.9,0.9,0.75))
     individual_helper(ax,Glenn["Run"],
@@ -239,7 +276,17 @@ def bigRun(DF,Glenn,Matt,Elite):
     individual_helper(ax,Elite["Run"],
                       'g',
                       text_x_offset=-120,
-                      text_y_offset=160,
+                      text_y_offset=50,
+                      text_rot=90)
+    individual_helper(ax,EliteMin["Run"],
+                      'g',
+                      text_x_offset=-120,
+                      text_y_offset=50,
+                      text_rot=90)
+    individual_helper(ax,EliteMax["Run"],
+                      'g',
+                      text_x_offset=-120,
+                      text_y_offset=50,
                       text_rot=90)
     
 def main():
@@ -259,13 +306,15 @@ def main():
 
     DFs = [TriDF,DuaDF,AquaDF]
     DF = pd.concat(DFs,ignore_index=True,sort=False)
+    EliteDF = pd.concat([TriDF,DuaDF],ignore_index=True,sort=False)
     ##print(DF.head(10))
 
     cols = ["Swim","T1","CycleLap1","CycleLap2","Cycle","T2","Run","Run1","Run2","Time"]
     for c in cols:
-        DF[c] = DF[c].apply(parse_time)
-
-    Elite = characterizeElite(DF)
+        DF[c] = DF[c].apply(parse_time)    
+        EliteDF[c] = EliteDF[c].apply(parse_time)
+    
+    EliteMin,EliteMax,Elite = characterizeElite(EliteDF)
     
     for i, row in DF.iterrows():
         if row["Name"].lower() == "glenn clapp":
@@ -284,9 +333,9 @@ def main():
                      "T2":row["T2"],
                      "Run":row["Run"]}
     
-    bigSwim(DF,Glenn,Matt,Elite)
-    bigCycle(DF,Glenn,Matt,Elite)
-    bigRun(DF,Glenn,Matt,Elite)
+    bigSwim(DF,Glenn,Matt,Elite,EliteMin,EliteMax)
+    bigCycle(DF,Glenn,Matt,Elite,EliteMin,EliteMax)
+    bigRun(DF,Glenn,Matt,Elite,EliteMin,EliteMax)
     comboPlot(DF,Glenn,Matt,Elite)
     transitionPlot(DF,Glenn,Matt,Elite)
 
