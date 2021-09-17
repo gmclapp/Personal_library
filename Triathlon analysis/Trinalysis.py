@@ -18,7 +18,7 @@ def parse_time(timestring):
         # Catches "DNF"
         return(0)
 
-def hist_helper(ax,data,col,title=None,xlabel=None,ylabel=None):
+def hist_helper(ax,data,col,title=None,xlabel=None,ylabel=None,color='b'):
     '''takes a matplotlib axis, data, and labels and plots the data on the axis after
     some cleanup operations'''
     data = data.loc[(data[[col]] != 0).all(axis=1)]
@@ -36,7 +36,7 @@ def hist_helper(ax,data,col,title=None,xlabel=None,ylabel=None):
     
     data = data.loc[(data[[col]] <= maximum).all(axis=1)]
     
-    ax.hist(data[col],bins=binlist,rwidth=0.95)
+    ax.hist(data[col],bins=binlist,rwidth=0.95,color=color)
 ##    ax.xaxis.set_major_locator(MultipleLocator(step))
     ax.xaxis.set_major_locator(FixedLocator(binlist))
     ax.set_xticklabels(ax.get_xticks(),rotation = 45)
@@ -48,6 +48,13 @@ def hist_helper(ax,data,col,title=None,xlabel=None,ylabel=None):
         ax.set_xlabel(xlabel)
     if ylabel:
         ax.set_ylabel(ylabel)
+
+def individual_helper(ax,data,color,text_x_offset=0,text_y_offset=0,text_rot=0):
+    ax.axvline(data,color=color)
+    minutes = int(data/60)
+    seconds = int(data - minutes*60)
+    txt = "{:02d}:{:02d}".format(minutes,seconds)
+    ax.text(data+text_x_offset,1+text_y_offset,txt,color=color,rotation=text_rot)
     
 def main():
     pd.set_option('display.max_columns',None)
@@ -97,32 +104,126 @@ def main():
 
     fig, axes = plt.subplots(1,3,sharey=True,figsize=(18,10),dpi=100)
     fig2, axes2 = plt.subplots(1,2,sharey=True,figsize=(12,10),dpi=100)
+    bigfig, ax = plt.subplots(1,1,figsize=(6,10),dpi=100)
+
+    hist_helper(ax,DF,"Swim",title="Swim",xlabel="Time(seconds)",ylabel="# of Competitors",color=(0.9,0.9,0.9,0.75))
+    individual_helper(ax,Glenn["Swim"],
+                      'r',
+                      text_x_offset=5,
+                      text_y_offset=160,
+                      text_rot=90)
     
-    hist_helper(axes[0],DF,"Swim",title="Swim",ylabel="# of Competitors")
-    axes[0].axvline(Glenn["Swim"],color='r')
-    axes[0].axvline(Matt["Swim"],color='b')
-    axes[0].axvline(Elite["Swim"],color='g')
+    individual_helper(ax,Matt["Swim"],
+                      'b',
+                      text_x_offset=5,
+                      text_y_offset=160,
+                      text_rot=90)
+    
+    individual_helper(ax,Elite["Swim"],
+                      'g',
+                      text_x_offset=5,
+                      text_y_offset=160,
+                      text_rot=90)
+    
+    hist_helper(axes[0],DF,"Swim",title="Swim",ylabel="# of Competitors",color=(0.9,0.9,0.9,0.75))
+    individual_helper(axes[0],Glenn["Swim"],
+                      'r',
+                      text_x_offset=5,
+                      text_y_offset=200,
+                      text_rot=90)
+    
+    individual_helper(axes[0],Matt["Swim"],
+                      'b',
+                      text_x_offset=5,
+                      text_y_offset=200,
+                      text_rot=90)
+    
+    individual_helper(axes[0],Elite["Swim"],
+                      'g',
+                      text_x_offset=5,
+                      text_y_offset=200,
+                      text_rot=90)
 
-    hist_helper(axes[1],DF,"Cycle",title="Cycle",xlabel="Time(seconds)")
-    axes[1].axvline(Glenn["Cycle"],color='r')
-    axes[1].axvline(Matt["Cycle"],color='b')
-    axes[1].axvline(Elite["Cycle"],color='g')
+    hist_helper(axes[1],DF,"Cycle",title="Cycle",xlabel="Time(seconds)",color=(0.9,0.9,0.9,0.75))
+    individual_helper(axes[1],Glenn["Cycle"],
+                      'r',
+                      text_x_offset=5,
+                      text_y_offset=200,
+                      text_rot=90)
+    
+    individual_helper(axes[1],Matt["Cycle"],
+                      'b',
+                      text_x_offset=5,
+                      text_y_offset=190,
+                      text_rot=90)
+    
+    individual_helper(axes[1],Elite["Cycle"],
+                      'g',
+                      text_x_offset=5,
+                      text_y_offset=180,
+                      text_rot=90)
 
     
-    hist_helper(axes[2],DF,"Run",title="Run")
-    axes[2].axvline(Glenn["Run"],color='r')
-    axes[2].axvline(Matt["Run"],color='b')
-    axes[2].axvline(Elite["Run"],color='g')
+    hist_helper(axes[2],DF,"Run",title="Run",color=(0.9,0.9,0.9,0.75))
+    individual_helper(axes[2],Glenn["Run"],
+                      'r',
+                      text_x_offset=5,
+                      text_y_offset=200,
+                      text_rot=90)
+    
+    individual_helper(axes[2],Matt["Run"],
+                      'b',
+                      text_x_offset=5,
+                      text_y_offset=200,
+                      text_rot=90)
+    
+    individual_helper(axes[2],Elite["Run"],
+                      'g',
+                      text_x_offset=5,
+                      text_y_offset=180,
+                      text_rot=90)
 
-    hist_helper(axes2[0],DF,"T1",title="Transition 1",xlabel="Time(seconds)",ylabel="# of Competitors")
+    hist_helper(axes2[0],DF,"T1",title="Transition 1",xlabel="Time(seconds)",ylabel="# of Competitors",color=(0.9,0.9,0.9,0.75))
     axes2[0].axvline(Glenn["T1"],color='r')
     axes2[0].axvline(Matt["T1"],color='b')
     axes2[0].axvline(Elite["T1"],color='g')
+    individual_helper(axes2[0],Glenn["T1"],
+                      'r',
+                      text_x_offset=5,
+                      text_y_offset=140,
+                      text_rot=90)
+    
+    individual_helper(axes2[0],Matt["T1"],
+                      'b',
+                      text_x_offset=5,
+                      text_y_offset=130,
+                      text_rot=90)
+    
+    individual_helper(axes2[0],Elite["T1"],
+                      'g',
+                      text_x_offset=5,
+                      text_y_offset=120,
+                      text_rot=90)
+    
 
-    hist_helper(axes2[1],DF,"T2",title="Transition 2",xlabel="Time(seconds)")
-    axes2[1].axvline(Glenn["T2"],color='r')
-    axes2[1].axvline(Matt["T2"],color='b')
-    axes2[1].axvline(Elite["T2"],color='g')
+    hist_helper(axes2[1],DF,"T2",title="Transition 2",xlabel="Time(seconds)",color=(0.9,0.9,0.9,0.75))
+    individual_helper(axes2[1],Glenn["T2"],
+                      'r',
+                      text_x_offset=5,
+                      text_y_offset=140,
+                      text_rot=90)
+    
+    individual_helper(axes2[1],Matt["T2"],
+                      'b',
+                      text_x_offset=5,
+                      text_y_offset=130,
+                      text_rot=90)
+    
+    individual_helper(axes2[1],Elite["T2"],
+                      'g',
+                      text_x_offset=5,
+                      text_y_offset=120,
+                      text_rot=90)
 
     Glenn_legend = mlines.Line2D([],[],color='r',markersize=15,label="Glenn")
     Matt_legend = mlines.Line2D([],[],color='b',markersize=15,label="Matt")
