@@ -67,6 +67,9 @@ def lin_reg(x,y):
     except IndexError:
         print("Lists must have the same length")
         return(None)
+    except TypeError:
+        print(x,"Is not a supported type.")
+        return(None)
 
 def is_norm(data, alpha=0.05):
     '''takes an array-like data series, and a desired confidence level, returns
