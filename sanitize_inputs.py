@@ -1,7 +1,7 @@
 '''This package allows the user to request input from the user and handles
 most error checking and input rules.'''
 
-__version__ = "0.3.0"
+__version__ = "0.3.1"
 
 import numpy as np
 import readchar
@@ -42,7 +42,12 @@ def select(
                 selected_index = 0
             else:
                 selected_index += 1
+        elif keypress == None:
+            print("Keypress = None type.")
+            
         else:
+            '''this will execute when ANY button is pressed other than the up
+            or down arrow.'''
             break
     return selected_index
 
