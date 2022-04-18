@@ -1,0 +1,34 @@
+0.0.1 (21-July-2015):
+ - Improved character movement
+ - Added character walking animation
+ - Added frame rate and 1/4s clock to debug header
+ - Added tile class
+ - Added area class
+ - Generated area 'A1' *likely to change.
+ - Fixed fps issue where tiles were being drawn to area every frame.
+ - squashed some preliminary bugs.
+ - Downloaded some sprite sheets from here: http://s444.photobucket.com/user/grandmadeb_rmvx/library/?sort=3&page=61
+
+0.0.2 (28-July-2015):
+ - Added CommonGUIElements module.
+ - Improved code readability.
+ - Change default font.
+ - Added sheep.
+ - Improved flexibility of code.
+ - Added method to unit class to draw sprites to the screen as opposed to drawing
+   individual sprites.
+ - Added Sheep and Player subclasses
+ - Squashed more bugs.
+ - Improved character movement and heading code significantly
+ - Added RMB movement
+ - Made sheep react to player position when player is nearby by moving away.
+
+0.0.3 (29-July-2015):
+ - Added Selection circle art and code to select sprites.
+ - Selected sheep stats now print in the side menu.
+ - Initialized all sheep stats 
+ - Initialized all player stats
+
+0.0.4 (23-September-2015):
+ - Decluttered game loop by creating functions.
+

@@ -1,0 +1,43 @@
+Short term features
+-Animated player character
+-Sheep with attributes
+ -Age
+ -Health
+ -Wool
+ -Hunger
+ -Thirst
+ -Meat
+ -Poop
+ -Pee
+-Save/Load game
+-Record keeping
+
+Long term features
+-Generations of player character. Player's character attributes can be made
+ better or worse by mate.
+ selection.
+
+-Animals
+ -Sheep
+ -Dogs
+ -Cows
+ -Chickens
+ -Goats
+ -farm animals also have genetic traits that get passed from one generation to
+  the next
+ -Player can influence mating of animals
+
+-Market
+ -Player can buy and sell animals feed etc on an NPC market
+
+-Farming
+ -Player will be able to run a completely self-sufficient farm
+ -There will be several kinds of crops. Some that are made into animal feed and
+  others that are sold for a profit.
+ -Player should be able to use a dog to herd animals
+
+-Land
+ -Market: Player will be able to buy and sell land from NPCs. The value will
+  depend on % of land currently occupied, land quality and reputation factors.
+ -Generation: Areas will be generated from text files. This way they can be
+  procedurally generated, or customized with a secondary program.
