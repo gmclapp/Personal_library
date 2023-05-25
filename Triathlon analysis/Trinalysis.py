@@ -311,26 +311,27 @@ def main():
     pd.set_option('display.max_columns',None)
     pd.set_option('display.max_rows',None)
 
-    with open("Triathlon Data.csv") as f:
+    with open("Reeds lake/Triathlon Data.csv") as f:
         TriDF = pd.read_csv(f)
 
-    with open("Duathlon data.csv") as f:
+    with open("Reeds lake/Duathlon data.csv") as f:
         DuaDF = pd.read_csv(f)
 
-    with open("Aquabike data.csv") as f:
+    with open("Reeds lake/Aquabike data.csv") as f:
         AquaDF = pd.read_csv(f)
 
-    ##DuaDF = DuaDF.rename(columns={"Run2":"Run"})
+    with open("Reeds lake/Reeds 2022.xlsx") as f:
+        TriDF22 = pd.read_csv(f)
 
     DFs = [TriDF,DuaDF,AquaDF]
     DF = pd.concat(DFs,ignore_index=True,sort=False)
     EliteDF = pd.concat([TriDF,DuaDF],ignore_index=True,sort=False)
-    ##print(DF.head(10))
 
     cols = ["Swim","T1","CycleLap1","CycleLap2","Cycle","T2","Run","Run1","Run2","Time"]
     for c in cols:
         DF[c] = DF[c].apply(parse_time)    
         EliteDF[c] = EliteDF[c].apply(parse_time)
+        TriDF22[c] = TriDF22[c].apply(parse_time)
     
     EliteMin,EliteMax,Elite = characterizeElite(EliteDF)
     
@@ -350,6 +351,21 @@ def main():
                      "Cycle":row["Cycle"],
                      "T2":row["T2"],
                      "Run":row["Run"]}
+
+    for i, row in TriDF22.iterrows():
+        if row["Name"].lower() == "glenn clapp":
+            Glenn = {"Swim22":row["Swim"],
+                     "T122":row["T1"],
+                     "Cycle22":row["Cycle"],
+                     "T222":row["T2"],
+                     "Run22":row["Run"]}
+            
+        elif row["Name"].lower() == "matthew clapp":
+            Matt = {"Swim22":row["Swim"],
+                     "T122":row["T1"],
+                     "Cycle22":row["Cycle"],
+                     "T222":row["T2"],
+                     "Run22":row["Run"]}
     
     bigSwim(DF,Glenn,Matt,Elite,EliteMin,EliteMax)
     bigCycle(DF,Glenn,Matt,Elite,EliteMin,EliteMax)
