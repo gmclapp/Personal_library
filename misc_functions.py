@@ -301,11 +301,9 @@ def bernoulli_trial_n(k, p, P=0.95):
     n = k # Sample size must be at least k in order to observe k successes.
     test_P = 0
     while test_P < P:
-        test_P = 0
-        for test_k in range(k, n-1):
-            test_P += bernoulli_trial(n, test_k, p)
+        test_P = bernoulli_trial(n, k, p,True)
         n+= 1
-        print("One can be {0:4.2f} confident that at least {1} successes will occur if {2} parts are tested.".format(test_P, k, n))
+        print("One can be {0:4.2f} confident that at least {1} successes will occur if at least {2} trials are conducted.".format(test_P, k, n))
     return(n)
             
 def favstats(rfile, column):
