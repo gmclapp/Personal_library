@@ -250,11 +250,16 @@ def nCk(n,k):
     larger than n.'''
     
     if n>=k:
-        if n>=k:
-            if k<=n/2:
+        if k<=n/2:
+            try:
                 return(n**k/math.factorial(k))
-            else:
+            except OverflowError:
+                return(n**k//math.factorial(k))
+        else:
+            try:
                 return(n**(n-k)/math.factorial(n-k))
+            except OverflowError:
+                return(n**(n-k)//math.factorial(n-k))
 ##        return(math.factorial(n)/(math.factorial(k)*math.factorial(n-k)))
     else:
         return(-1)
@@ -279,7 +284,10 @@ def bernoulli_trial(n, k, p, k_or_more=False):
     if k_or_more:
         for i in range(k, n-1):
             binomial_coeff = nCk(n,i)
-            P += binomial_coeff*(p**i)*(q**(n-i))
+            try:
+                P += (binomial_coeff)*(p**i)*(q**(n-i))
+            except OverflowError:
+                break
 
     else:
         binomial_coeff = nCk(n,k)
